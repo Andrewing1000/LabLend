@@ -23,5 +23,32 @@ doc/api/
 *.js.deps
 *.js.map
 
+# Flutter related
 .flutter-plugins
 .flutter-plugins-dependencies
+.flutter-versions
+.flutter/
+
+# Obsolete configuration
+.ios/.generated/
+android/.gradle/
+android/.idea/
+android/.settings/
+android/captures/
+android/app.iml
+android/local.properties
+android/gradle/
+android/build/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Mac related
+.DS_Store
+
+# Windows related
+Thumbs.db
+
+# VS Code related
+.vscode/
