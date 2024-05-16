@@ -1,57 +1,63 @@
 import 'package:flutter/material.dart';
 
-class VerticalNavbar extends StatelessWidget {
+class VerticalNavbar extends StatefulWidget {
   final List<NavItem> items;
   final Function(int) onItemSelected;
-  final int selectedIndex;
 
   const VerticalNavbar({
     Key? key,
     required this.items,
     required this.onItemSelected,
-    this.selectedIndex = 0,
   }) : super(key: key);
+
+  @override
+  _VerticalNavbarState createState() => _VerticalNavbarState();
+}
+
+class _VerticalNavbarState extends State<VerticalNavbar> {
+  int _selectedIndex = 0;
+
+  void _onItemTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    widget.onItemSelected(index);
+  }
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(150.0), // Increased roundness
+      borderRadius: BorderRadius.circular(50.0),
       child: Container(
         color: Colors.black,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Enhance spacing
-            children: items.map((item) {
-              int index = items.indexOf(item);
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: widget.items.map((item) {
+              int index = widget.items.indexOf(item);
               return GestureDetector(
-                onTap: () => onItemSelected(index),
+                onTap: () => _onItemTap(index),
                 child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300), // Animacion
+                  duration: Duration(milliseconds: 300),
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   decoration: BoxDecoration(
-                    color: selectedIndex == index
-                        ? Color.fromARGB(255, 255, 202, 87)
-                        : Colors.transparent, // Seleccion de color naranja
-                    borderRadius:
-                        BorderRadius.circular(30), // Rounded edges inside
+                    color: _selectedIndex == index ? Color.fromARGB(255, 255, 164, 89) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         item.icon,
-                        color:
-                            selectedIndex == index ? Colors.white : Colors.grey,
+                        color: _selectedIndex == index ? Colors.white : Colors.grey,
                         size: 30,
                       ),
                       const SizedBox(height: 10),
                       Text(
                         item.title,
                         style: TextStyle(
-                          color: selectedIndex == index
-                              ? Colors.white
-                              : Colors.white,
+                          color: _selectedIndex == index ? Colors.white : Colors.grey,
                           fontSize: 16,
                         ),
                       ),
