@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 import 'models/navbar.dart';
-import 'models/widgets.dart'; // Asegúrate de que los widgets de tarjetas están aquí
+import 'models/widgets.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
   final List<NavItem> items = [
-    NavItem(icon: Icons.home, title: "Inicio"),
-    NavItem(icon: Icons.search, title: "Busqueda"),
-    NavItem(icon: Icons.notifications, title: "Contactanos"),
-    NavItem(icon: Icons.account_circle, title: "Ayuda"),
+    NavItem(icon: Icons.home, title: "Home"),
+    NavItem(icon: Icons.search, title: "Search"),
+    NavItem(icon: Icons.notifications, title: "Notifications"),
+    NavItem(icon: Icons.account_circle, title: "Profile"),
   ];
 
   void _onItemSelected(int index) {
-    // Manejar selección de ítems
-    print("Ítem seleccionado: $index");
+    double targetPosition = index * 500.0; 
+    _scrollController.animateTo(
+      targetPosition,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Navbar con Tarjetas")),
+      appBar: AppBar(title: Text("Navbar e Items")),
       body: Row(
         children: [
           Expanded(
@@ -29,36 +39,34 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 8,
+            flex: 9,
             child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    CustomCardWidget(),
-                    SizedBox(height: 10),
-                    CustomHorizontalCardWidget(),
-                    SizedBox(height: 20),
-                    CustomCardWidget(), 
-                    SizedBox(height: 20),
-                    CustomHorizontalCardWidget(),
-                    CustomCardWidget(),
-                    SizedBox(height: 10),
-                    CustomHorizontalCardWidget(),
-                    SizedBox(height: 20),
-                    CustomCardWidget(), 
-                    SizedBox(height: 20),
-                    CustomHorizontalCardWidget(),
-                                        CustomCardWidget(),
-                    SizedBox(height: 10),
-                    CustomHorizontalCardWidget(),
-                    SizedBox(height: 20),
-                    CustomCardWidget(), 
-                    SizedBox(height: 20),
-                    CustomHorizontalCardWidget(),
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  Container(child: CustomCardWidget()), 
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()),
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()), 
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()),
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()), 
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()),
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()), 
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()),
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()), 
+                  CustomHorizontalCardWidget(),
+                  Container(child: CustomCardWidget()),
+                  CustomHorizontalCardWidget(),
 
-                  ],
-                ),
+                  
+                ],
               ),
             ),
           ),
