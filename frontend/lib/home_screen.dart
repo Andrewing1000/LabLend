@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'models/navbar.dart';
-import 'models/widgets.dart';
+import 'package:frontend/widgets/card.dart';
+import 'package:frontend/widgets/card_section.dart';
+import 'package:frontend/widgets/horizontal_card.dart';
+import 'widgets/navbar.dart';
+import 'widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -10,67 +14,94 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<NavItem> items = [
-    NavItem(icon: Icons.home, title: "Home"),
-    NavItem(icon: Icons.search, title: "Search"),
-    NavItem(icon: Icons.notifications, title: "Notifications"),
-    NavItem(icon: Icons.account_circle, title: "Profile"),
+
+    NavItem(
+        iconNormal: Icons.home_outlined,
+        iconSelected: Icons.home,
+        onPressed: (){
+          print("Opcion1");
+        },
+        title: "Home"),
+
+    NavItem(
+        iconNormal : Icons.search_sharp,
+        iconSelected: Icons.search,
+        onPressed: (){
+          print("Opcion2");
+        },
+        title: "Search"),
+
+    NavItem(
+        iconNormal : Icons.notifications_none_outlined,
+        iconSelected: Icons.notifications,
+        onPressed: (){
+          print("Opcion3");
+        },
+        title: "Notifications"),
+
+    NavItem(
+        iconNormal : Icons.person_2_outlined,
+        iconSelected: Icons.person_2,
+        onPressed: (){
+          print("Opcion4");
+        },
+        title: "Profile"),
   ];
 
-  void _onItemSelected(int index) {
-    double targetPosition = index * 500.0; 
-    _scrollController.animateTo(
-      targetPosition,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
+  List<HorizontalCard> hcItems = [
+    HorizontalCard(title: "Opcion1"),
+    HorizontalCard(title: "Opcion2"),
+    HorizontalCard(title: "Opcion3"),
+    HorizontalCard(title: "Opcion4"),
+    HorizontalCard(title: "Opcion1"),
+    HorizontalCard(title: "Opcion2"),
+    HorizontalCard(title: "Opcion3"),
+    HorizontalCard(title: "Opcion4"),
+  ];
+
+
+  List<CustomCard> cItems = [
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
+
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Navbar e Items")),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: VerticalNavbar(
-              items: items,
-              onItemSelected: _onItemSelected,
-            ),
-          ),
-          Expanded(
-            flex: 9,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                children: [
-                  Container(child: CustomCardWidget()), 
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()),
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()), 
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()),
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()), 
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()),
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()), 
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()),
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()), 
-                  CustomHorizontalCardWidget(),
-                  Container(child: CustomCardWidget()),
-                  CustomHorizontalCardWidget(),
-
-                  
-                ],
+      body: Container(
+        color: Colors.black,
+        child: Row(
+          children: [
+              VerticalNavbar(
+                items: items,
+                iconSize: 40,
+              ),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  children: [
+                    HorizontalCardSection(items: hcItems,), // Sección nueva
+                    CardSection(items : cItems),
+                    CardSection(items : cItems),
+                    CardSection(items : cItems),
+                    CardSection(items : cItems),
+                    CardSection(items : cItems),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
