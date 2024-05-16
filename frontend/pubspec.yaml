@@ -39,7 +39,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  provider : ^6.1.2
+  http : ^1.2.1
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -54,12 +55,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
-    - assets/fonts
 
-  fonts:
-    - family: MainFont
-      fonts:
-        -asset: assets/fonts/Metropolis-ExtraBold
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
