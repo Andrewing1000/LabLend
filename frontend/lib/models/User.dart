@@ -19,6 +19,4 @@ class User extends ChangeNotifier{
         required this.name,
         this.role = Role.ASSISTANT_ROLE});
 
-
-
 }
