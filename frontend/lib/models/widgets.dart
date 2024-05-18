@@ -4,6 +4,7 @@ class CustomCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.grey[850], // Fondo gris oscuro para contrastar con el fondo negro
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
       ),
@@ -28,13 +29,13 @@ class CustomCardWidget extends StatelessWidget {
             ),
             const Text(
               "Titulo",
-              style: TextStyle(fontSize: 24, color: Colors.black),
+              style: TextStyle(fontSize: 24, color: Colors.white), // Texto blanco para mejor contraste
             ),
             const Padding(
               padding: EdgeInsets.all(12.0),
               child: Text(
                 "Informacion Instrumento lorem ipsum me ca welsdj liadln lin ta bev",
-                style: TextStyle(fontSize: 14, color: Colors.black54),
+                style: TextStyle(fontSize: 14, color: Colors.white70), // Texto gris claro
               ),
             )
           ],
@@ -44,13 +45,14 @@ class CustomCardWidget extends StatelessWidget {
   }
 }
 
+
 class CustomHorizontalCardWidget extends StatelessWidget {
   const CustomHorizontalCardWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      //color: Color(Theme.of(context).cardColor.blue),
+      color: Colors.grey[850], // Fondo gris oscuro para contrastar con el fondo negro
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: SizedBox(
         height: 80,
@@ -72,7 +74,7 @@ class CustomHorizontalCardWidget extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
                       "Titulo",
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: TextStyle(color: Colors.white), // Texto blanco para mejor contraste
                     ),
                   ),
                 ),
@@ -80,7 +82,10 @@ class CustomHorizontalCardWidget extends StatelessWidget {
                   width: 160,
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 5),
-                    child: Text("Informacion del para fisica "),
+                    child: Text(
+                      "Informacion del para fisica ",
+                      style: TextStyle(color: Colors.white70), // Texto gris claro
+                    ),
                   ),
                 )
               ],
@@ -91,4 +96,3 @@ class CustomHorizontalCardWidget extends StatelessWidget {
     );
   }
 }
-
