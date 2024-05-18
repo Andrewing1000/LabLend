@@ -5,7 +5,7 @@ class CustomCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(25),
       ),
       child: SizedBox(
         height: 300,
@@ -22,15 +22,15 @@ class CustomCardWidget extends StatelessWidget {
                 color: Colors.grey,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 10,
               height: 30,
             ),
-            Text(
+            const Text(
               "Titulo",
               style: TextStyle(fontSize: 24, color: Colors.black),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(12.0),
               child: Text(
                 "Informacion Instrumento lorem ipsum me ca welsdj liadln lin ta bev",

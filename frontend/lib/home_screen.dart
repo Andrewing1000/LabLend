@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/footer.dart';
+import 'package:frontend/lista-provisional.dart';
 import 'models/navbar.dart';
 import 'models/secciones.dart'; // Asegúrate de que los widgets de tarjetas están aquí
 import 'models/widgets.dart'; // Importa el nuevo widget
@@ -9,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  //Size size;
   final ScrollController _scrollController = ScrollController();
   final List<NavItem> items = [
     NavItem(icon: Icons.home, title: "Home"),
@@ -29,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Spotify-Style Navbar con SPA")),
+      //appBar: AppBar(title: Text("Spotify-Style Navbar con SPA")),
       body: Row(
         children: [
           Expanded(
@@ -50,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: CustomHorizontalCardSection()), // Sección nueva
                   Container(child: CustomCardWidget()),
                   Container(child: CustomHorizontalCardSection()),
+                  Footer()
                 ],
               ),
             ),
