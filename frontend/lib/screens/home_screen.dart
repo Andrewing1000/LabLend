@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/card_section.dart';
 import 'package:frontend/widgets/horizontal_card.dart';
-import 'widgets/navbar.dart';
-import 'widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
+import '../widgets/navbar.dart';
+import '../widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
 
 
 class HomeScreen extends StatefulWidget {
