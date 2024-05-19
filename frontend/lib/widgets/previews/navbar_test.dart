@@ -39,6 +39,14 @@ void main(){
           print("Opcion4");
         },
       title: "Profile"),
+    
+    NavItem(
+      iconNormal : Icons.person_2_outlined,
+      iconSelected: Icons.abc,
+        onPressed: (){
+          print("hola");
+        },
+      title: "Profile"),
   ];
 
   return runApp(MaterialApp(

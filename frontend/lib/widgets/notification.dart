@@ -18,10 +18,10 @@ class NotificationWidget extends StatelessWidget {
           elevation: 10,
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.6, // Ajuste de ancho
+            width: MediaQuery.of(context).size.width * 0.5, // Ajuste de ancho
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
             decoration: BoxDecoration(
-              color: Colors.grey[900],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -37,7 +37,7 @@ class NotificationWidget extends StatelessWidget {
                   child: Text(
                     message,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 16,
                     ),
                   ),

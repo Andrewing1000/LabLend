@@ -6,6 +6,7 @@ import '../widgets/navbar.dart';
 import '../widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
 import '../widgets/accion_boton.dart'; // Importa el widget de acción del botón
 import '../widgets/notification.dart'; // Importa el widget de notificación
+import '../widgets/barra_busqueda.dart'; // Importa el widget de barra de búsqueda
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -78,11 +79,19 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     CustomCard(
       title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnflksflk sdjnflksdjf',
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
     ),
     CustomCard(
       title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnflksflk sdjnflksdjf',
     ),
     CustomCard(
       title: "Opcion1",
@@ -109,6 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Método de búsqueda (actualmente imprime el término de búsqueda en la consola)
+  void _onSearch(String query) {
+    print("Buscando: $query");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,20 +143,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(20.0),
+                          child: BarraBusqueda(
+                            onSearch: _onSearch, // Integrar la barra de búsqueda
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               // Botón de acción con icono de "+"
                               AccionBoton(
                                 onNotification: _toggleNotification,
-                                message: "¡agregado!",
+                                message: "¡Agregado correctamente!",
                                 icon: Icons.add,
                               ),
                               SizedBox(width: 20),
                               // Botón de acción con icono de "-"
                               AccionBoton(
                                 onNotification: _toggleNotification,
-                                message: "¡eliminado!",
+                                message: "¡Eliminado Correctamente!",
                                 icon: Icons.remove,
                               ),
                             ],
