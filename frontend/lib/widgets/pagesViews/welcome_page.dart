@@ -5,14 +5,20 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
             '¡Bienvenido!',
-            style: TextStyle(fontSize: 70),
+            style: TextStyle(
+                fontSize: 95, color: Colors.white, fontWeight: FontWeight.bold),
           ),
+          SizedBox(height: 20),
+          Text(
+              "Nos alegra que estés aquí. En [Nombre de tu Página Web], nos esforzamos por ofrecerte la mejor experiencia posible, con contenido de calidad y recursos que te ayudarán a alcanzar tus objetivos."),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

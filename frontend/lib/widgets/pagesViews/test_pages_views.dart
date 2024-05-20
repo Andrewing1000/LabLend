@@ -21,8 +21,12 @@ class MyApp extends StatelessWidget {
               decoration: BoxDecoration(
                 image: DecorationImage(image: AssetImage('assets/images/place_holder.png'),
                 fit: BoxFit.cover
+
                 )
               ),
+            ),
+            Container(
+              color: Colors.black.withOpacity(0.2),
             ),
             WelcomePage()
           ],
