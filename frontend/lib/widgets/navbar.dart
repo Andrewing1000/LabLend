@@ -42,6 +42,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.min,
             children: widget.items.map((item) {
               return CustomIconButton(iconNormal: item.iconNormal,
                                         iconSelected: item.iconSelected,
