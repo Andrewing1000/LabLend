@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/pagesViews/search_page.dart';
-import 'package:frontend/widgets/pagesViews/welcome_page.dart';
+//import 'package:frontend/widgets/pagesViews/welcome_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,17 +19,15 @@ class MyApp extends StatelessWidget {
         body: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(image: AssetImage('assets/images/place_holder.png'),
-                fit: BoxFit.cover
-
-                )
-              ),
+              decoration: const BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('assets/images/place_holder.png'),
+                      fit: BoxFit.cover)),
             ),
             Container(
               color: Colors.black.withOpacity(0.2),
             ),
-            SearchPage()
+            const SearchPage()
           ],
         ),
       ),
