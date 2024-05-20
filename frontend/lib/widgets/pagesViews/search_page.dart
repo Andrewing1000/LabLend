@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/barra_buesqueda.dart';
+import 'package:frontend/widgets/card.dart';
+import 'package:frontend/widgets/pagesViews/search_container_list.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -9,6 +11,44 @@ class SearchPage extends StatefulWidget {
 }
 
 class SearchPageState extends State<SearchPage> {
+  List<CustomCard> cItems = [
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnflksflk sdjnflksdjf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle:
+          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle:
+          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle:
+          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -33,10 +73,11 @@ class SearchPageState extends State<SearchPage> {
                 BarraBusqueda(
                   onSearch: (p0) => "",
                 ),
-                Text(
-                  "Contenedor con la lista de los objetos",
-                  style: TextStyle(color: Colors.white, fontSize: 45),
-                )
+                // Text(
+                //   "Contenedor con la lista de los objetos",
+                //   style: TextStyle(color: Colors.white, fontSize: 45),
+                // )
+                SearchResults(cItems),
               ],
             ),
           ),
