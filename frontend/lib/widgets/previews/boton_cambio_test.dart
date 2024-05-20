@@ -10,6 +10,7 @@ void main() {
   ));
 }
 
+// Clase principal que contiene la lógica y los widgets para la prueba de BotonCambio
 class BotonCambioTest extends StatefulWidget {
   @override
   _BotonCambioTestState createState() => _BotonCambioTestState();
@@ -20,38 +21,38 @@ class _BotonCambioTestState extends State<BotonCambioTest> {
 
   // Lista de textos para los botones
   final List<String> textosBotones = [
-    "Play",
-    "Pause",
-    "Stop",
-    "Rewind",
-    "Forward"
+    "All",
+    "Prueba",
+    "Prueba2",
+
   ];
 
   // Método que se llama cuando un botón se selecciona
   void _onBotonPressed(int index) {
     setState(() {
-      _seleccionadoIndex = index;
+      _seleccionadoIndex = index; // Actualiza el índice del botón seleccionado
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(textosBotones.length, (index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10), // Espaciado vertical entre botones
             child: BotonCambio(
               texto: textosBotones[index], // Texto único para cada botón
-              colorNormal: Colors.grey,
-              colorSeleccionado: Colors.green,
-              borde: true,
-              seleccionado: _seleccionadoIndex == index,
+              colorNormal: Colors.grey, // Color del botón cuando no está seleccionado
+              colorSeleccionado: Colors.green, // Color del botón cuando está seleccionado
+              borde: false, // Determina si el botón tiene borde o no
+              seleccionado: _seleccionadoIndex == index, // Determina si el botón está seleccionado
               onPressed: () {
+                // Acción cuando el botón es presionado
                 print("Botón ${textosBotones[index]} presionado");
               },
-              onSelected: () => _onBotonPressed(index),
+              onSelected: () => _onBotonPressed(index), // Acción cuando el botón es seleccionado
             ),
           );
         }),
