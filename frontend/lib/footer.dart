@@ -81,7 +81,7 @@ class Footer extends StatelessWidget {
               ),
               Container(
                 height: 250,
-                width: 350,
+                width: 350gti go,
                 color: Colors.grey,
                 child: Text(" "),
               ),

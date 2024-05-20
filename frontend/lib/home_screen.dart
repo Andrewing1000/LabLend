@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/footer.dart';
 import 'package:frontend/lista-provisional.dart';
+import 'package:frontend/models/widgets.dart';
 import 'models/navbar.dart';
 import 'models/customcardsection.dart'; // Asegúrate de que los widgets de tarjetas están aquí
 import 'models/secciones.dart';
