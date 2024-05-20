@@ -14,8 +14,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool _showNotification = false; // Estado para controlar la visibilidad de la notificación
-  String _notificationMessage = ''; // Estado para almacenar el mensaje de la notificación
+  bool _showNotification =
+      false; // Estado para controlar la visibilidad de la notificación
+  String _notificationMessage =
+      ''; // Estado para almacenar el mensaje de la notificación
 
   final List<NavItem> items = [
     NavItem(
@@ -82,22 +84,26 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     CustomCard(
       title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      subtitle:
+          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
     ),
     CustomCard(
       title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      subtitle:
+          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
     ),
     CustomCard(
       title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      subtitle:
+          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
     ),
   ];
 
   // Método para alternar la visibilidad de la notificación y establecer el mensaje
   void _toggleNotification(String message) {
     setState(() {
-      _notificationMessage = message; // Establecer el mensaje de la notificación
+      _notificationMessage =
+          message; // Establecer el mensaje de la notificación
       _showNotification = true; // Mostrar la notificación
     });
 
@@ -148,7 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        HorizontalCardSection(items: hcItems,), // Sección nueva
+                        HorizontalCardSection(
+                          items: hcItems,
+                        ), // Sección nueva
                         CardSection(items: cItems),
                         CardSection(items: cItems),
                         CardSection(items: cItems),
