@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/pagesViews/search_page.dart';
 import 'package:frontend/widgets/pagesViews/welcome_page.dart';
 
 void main() {
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
             Container(
               color: Colors.black.withOpacity(0.2),
             ),
-            WelcomePage()
+            SearchPage()
           ],
         ),
       ),
