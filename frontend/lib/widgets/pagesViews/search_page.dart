@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/barra_buesqueda.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -25,9 +26,12 @@ class SearchPageState extends State<SearchPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  "Coso de Navegacion",
-                  style: TextStyle(color: Colors.white, fontSize: 45),
+                // Text(
+                //   "Coso de Navegacion",
+                //   style: TextStyle(color: Colors.white, fontSize: 45),
+                // ),
+                BarraBusqueda(
+                  onSearch: (p0) => "",
                 ),
                 Text(
                   "Contenedor con la lista de los objetos",
