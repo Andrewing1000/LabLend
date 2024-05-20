@@ -1,67 +1,92 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:frontend/settings.dart';
+import 'package:dio/dio.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class RequestHandler extends http.BaseClient{
+import 'package:frontend/settings.dart'; // Make sure to replace with your actual settings file
 
-    http.Client client = http.Client();
+class RequestHandler {
+  final Dio _dio;
+  final CookieJar _cookieJar = CookieJar();
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
-    Uri getUri(String path){
-        return Uri.http(serverURL, path);
-    }
+  RequestHandler()
+      : _dio = Dio(BaseOptions(
+    baseUrl: serverURL, // Replace with your server URL
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  )) {
+    _dio.interceptors.add(CookieManager(_cookieJar));
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        // Fetch CSRF token from cookies
+        var cookies = await _cookieJar.loadForRequest(Uri.parse(serverURL));
+        var csrfToken = cookies.firstWhere(
+              (cookie) => cookie.name == 'csrftoken',
+          orElse: () => Cookie('csrftoken', ''),
+        ).value;
 
-    Map<String, String> getHeaders({Map<String, dynamic> extra = const {}}){
+        // Add CSRF token to headers if available
+        if (csrfToken.isNotEmpty) {
+          options.headers['X-CSRFToken'] = csrfToken;
+        }
 
-      Map<String, String> headers = {};
-      headers['Content-Type'] =  'application/json';
+        handler.next(options);
+      },
+      onError: (error, handler) async {
+        // Handle errors if necessary
+        handler.next(error);
+      },
+      onResponse: (response, handler) {
+        handler.next(response);
+      },
+    ));
+  }
 
-      return {...headers, ...extra};
-    }
+  Uri getUri(String path) {
+    return Uri.http(serverURL+path);
+  }
 
+  Future<Response> getRequest(String path,
+      {Map<String, dynamic> query = const {},
+        Map<String, dynamic> extraH = const {}}) async {
+    return _dio.get(
+      path,
+      queryParameters: query,
+      options: Options(headers: extraH),
+    );
+  }
 
-    Future<http.Response> getRequest(String path,
-        {Map<String, dynamic> query = const {},
-         Map<String, dynamic> extraH = const {}}) async {
+  Future<Response> postRequest(String path,
+      {Map<String, dynamic> body = const {},
+        Map<String, dynamic> extraH = const {}}) async {
+    return _dio.post(
+      path,
+      data: json.encode(body),
+      options: Options(headers: extraH),
+    );
+  }
 
-      Uri url = getUri(path);
-      Uri queryUri = Uri.http(url.authority, url.path, query);
-      
-      final response = await client.get(queryUri,
-                                        headers: getHeaders(extra: extraH));
-        
-      return response;
-    }
+  Future<Response> putRequest(String path,
+      {Map<String, dynamic> body = const {},
+        Map<String, dynamic> extraH = const {}}) async {
+    return _dio.put(
+      path,
+      data: json.encode(body),
+      options: Options(headers: extraH),
+    );
+  }
 
-    Future<http.Response> postRequest(String path,
-        {Map<String, dynamic> body = const {},
-         Map<String, dynamic> extraH = const {}}) async{
-        final response = await client.post(getUri(path),
-                                           headers: getHeaders(extra: extraH),
-                                           body: json.encode(body));
-        return response;
-    }
-
-    Future<http.Response> putRequest(String path,
-        {Map<String, dynamic> body = const {},
-          Map<String, dynamic> extraH = const {}}) async{
-      final response = await client.put(getUri(path),
-          headers: getHeaders(extra: extraH),
-          body: json.encode(body));
-      return response;
-    }
-
-    Future<http.Response> patchRequest(String path,
-        {Map<String, dynamic> body = const {},
-          Map<String, dynamic> extraH = const {}}) async{
-      final response = await client.patch(getUri(path),
-          headers: getHeaders(extra: extraH),
-          body: json.encode(body));
-      return response;
-    }
-
-    @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
-    return client.send(request);
+  Future<Response> patchRequest(String path,
+      {Map<String, dynamic> body = const {},
+        Map<String, dynamic> extraH = const {}}) async {
+    return _dio.patch(
+      path,
+      data: json.encode(body),
+      options: Options(headers: extraH),
+    );
   }
 }

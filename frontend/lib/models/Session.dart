@@ -1,3 +1,4 @@
+import 'package:frontend/models/Request.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'User.dart';
@@ -12,7 +13,10 @@ class Session {
 
 
 class SessionManager with ChangeNotifier {
-  List<Session> _sessions = [];
+  Session? session;
+  RequestHandler httpHandler = RequestHandler();
+  Session? get sessiona => session;
 
-  List<Session> get sessions => _sessions;
+
+
 }
