@@ -3,7 +3,8 @@ import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/card_section.dart';
 import 'package:frontend/widgets/horizontal_card.dart';
 import '../widgets/navbar.dart';
-import '../widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
+import '../widgets/horizontal_section.dart';
+import '../widgets/tool_bar.dart'; // Asegúrate de que los widgets de tarjetas están aquí
 
 
 class HomeScreen extends StatefulWidget {
@@ -32,20 +33,13 @@ class _HomeScreenState extends State<HomeScreen> {
         title: "Search"),
 
     NavItem(
-        iconNormal : Icons.notifications_none_outlined,
-        iconSelected: Icons.notifications,
+        iconNormal : Icons.info_outline,
+        iconSelected: Icons.info,
         onPressed: (){
-          print("Opcion3");
+          print("Opcion2");
         },
-        title: "Notifications"),
+        title: "Search"),
 
-    NavItem(
-        iconNormal : Icons.person_2_outlined,
-        iconSelected: Icons.person_2,
-        onPressed: (){
-          print("Opcion4");
-        },
-        title: "Profile"),
   ];
 
   List<HorizontalCard> hcItems = [
@@ -79,24 +73,49 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Container(
         color: Colors.black,
+        padding: EdgeInsets.all(10),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
               VerticalNavbar(
                 items: items,
                 iconSize: 40,
               ),
             Expanded(
-              child: SingleChildScrollView(
-                controller: _scrollController,
+              child: Container(
+                margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Color.fromRGBO(21, 21, 21, 1.0),
+                ),
+
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    HorizontalCardSection(items: hcItems,), // Sección nueva
-                    CardSection(items : cItems),
-                    CardSection(items : cItems),
-                    CardSection(items : cItems),
-                    CardSection(items : cItems),
-                    CardSection(items : cItems),
-                  ],
+
+                    ToolBar(),
+
+                    Container(
+                      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      height: 550,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        child: Column(
+                          children: [
+                            HorizontalCardSection(items: hcItems,), // Sección nueva
+                            CardSection(items : cItems),
+                            CardSection(items : cItems),
+                            CardSection(items : cItems),
+                            CardSection(items : cItems),
+                            CardSection(items : cItems),
+                          ],
+                        ),
+                      ),
+                    ),
+
+
+
+                  ]
                 ),
               ),
             ),
