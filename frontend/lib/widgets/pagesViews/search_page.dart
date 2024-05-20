@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/barra_buesqueda.dart';
 import 'package:frontend/widgets/card.dart';
+import 'package:frontend/widgets/pagesViews/mi_barra_busqueda.dart';
 import 'package:frontend/widgets/pagesViews/search_container_list.dart';
 
 class SearchPage extends StatefulWidget {
@@ -73,11 +74,17 @@ class SearchPageState extends State<SearchPage> {
                 BarraBusqueda(
                   onSearch: (p0) => "",
                 ),
+                MyBarraBusqueda(
+                  hintText: 'Buscar...',
+                  onChanged: (value) {
+                    print('Texto de búsqueda: $value');
+                  },
+                ),
                 // Text(
                 //   "Contenedor con la lista de los objetos",
                 //   style: TextStyle(color: Colors.white, fontSize: 45),
                 // )
-                SearchResults(cItems),
+                //SearchResults(cItems)
               ],
             ),
           ),
