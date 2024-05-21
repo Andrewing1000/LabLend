@@ -4,7 +4,6 @@ import 'package:frontend/widgets/card_section.dart';
 import 'package:frontend/widgets/horizontal_card.dart';
 import '../widgets/navbar.dart';
 import '../widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
-import '../widgets/accion_boton.dart'; // Importa el widget de acción del botón
 import '../widgets/notification.dart'; // Importa el widget de notificación
 import '../widgets/barra_busqueda.dart'; // Importa el widget de barra de búsqueda
 
@@ -190,4 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+class AccionBoton {
 }
