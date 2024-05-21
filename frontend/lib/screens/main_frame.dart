@@ -3,6 +3,8 @@ import "package:frontend/screens/home_screen.dart";
 import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
+import "../widgets/tool_bar.dart";
+
 class MainFrame extends StatefulWidget{
   MainFrame({super.key});
 
@@ -176,7 +178,13 @@ class MainFrameState extends State<MainFrame>{
                     child: ResizablePanel(
                       width: double.infinity,
                       child: Container(
-                        child: HomeScreen(),
+                        child: Stack(
+                          children: [
+
+                            HomeScreen(),
+                            ToolBar(),
+                          ],
+                        ),
                         decoration: BoxDecoration(
                           color: const Color.fromRGBO(21, 21, 21, 1.0),
                           borderRadius: BorderRadius.circular(10),

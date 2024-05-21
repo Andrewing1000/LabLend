@@ -4,6 +4,8 @@ import 'package:frontend/screens/main_frame.dart';
 
 void main(){
   return runApp(MaterialApp(
-    home: MainFrame(),
+    home: Scaffold(
+      body: MainFrame(),
+    ) ,
   ));
 }

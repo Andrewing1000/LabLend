@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/barra_busqueda.dart';
 import 'package:frontend/widgets/cicular_button.dart';
 
 class ToolBar extends StatefulWidget{
@@ -18,15 +19,16 @@ class ToolBarState extends State<ToolBar>{
   Widget build(BuildContext context){
     return Container(
       padding: EdgeInsets.all(20),
-      height: ToolBar.height,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
         color: Colors.indigo,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: [
               CircularButton.static(
@@ -50,7 +52,13 @@ class ToolBarState extends State<ToolBar>{
                   });
                 },
               ),
+              Container(width: 10,),
 
+              Expanded(
+                  child: BarraBusqueda(onSearch: (e){})
+              ),
+
+              Container(width: 10,),
               Spacer(),
 
               CircularButton.animated(
