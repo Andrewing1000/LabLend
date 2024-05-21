@@ -93,7 +93,10 @@ class SearchPageState extends State<SearchPage> {
                 //   "Contenedor con la lista de los objetos",
                 //   style: TextStyle(color: Colors.white, fontSize: 45),
                 // )
-                SearchResultsContent(cItems)
+                Expanded(
+                    child: SearchResultsContent(misItems: cItems),
+                ),
+
               ],
             ),
           ),
