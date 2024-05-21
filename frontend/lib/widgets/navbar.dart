@@ -22,7 +22,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
   @override
   void initState() {
     super.initState();
-    if(widget.items.length == 0){
+    if(widget.items.isEmpty){
       selected = null;
     }
     else{
@@ -34,7 +34,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color.fromRGBO(21, 21, 21, 1.0),
+        color: const Color.fromRGBO(21, 21, 21, 1.0),
         borderRadius: BorderRadius.circular(widget.iconSize/4),
       ),
       width: 2*widget.iconSize,
@@ -43,6 +43,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: widget.items.map((item) {
               return CustomIconButton(iconNormal: item.iconNormal,
                                         iconSelected: item.iconSelected,
@@ -50,7 +51,8 @@ class VerticalNavbarState extends State<VerticalNavbar> {
                                         onPressed: (){  setSelectedIndex(item);
                                                         if(item.onPressed!=null){
                                                           item.onPressed!();
-                                                        }},
+                                                        }
+                                                        print(selected?.iconNormal);},
                                         size: widget.iconSize);
             }).toList(),
           ),
