@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/card.dart';
 
-class SearchResults extends StatelessWidget {
-  // List<CustomCard> itemsResult;
+class SearchResultsContent extends StatelessWidget {
+  List<CustomCard> misItems = [];
+
   // SearchResults({super.key, required this.itemsResult});
-  const SearchResults({super.key});
+  SearchResultsContent(List<CustomCard> misItems, {super.key});
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      // children: itemsResult,
-      children: [
-        Container(
-          height: 100,
-          width: 120,
-        )
-      ],
-      scrollDirection: Axis.vertical,
+    return Container(
+      width: 900,
+      height: 900,
+      child: ListView(
+        // children: itemsResult,
+        children: misItems,
+        scrollDirection: Axis.vertical,
+      ),
     );
   }
 }

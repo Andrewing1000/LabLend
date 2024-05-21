@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/barra_buesqueda.dart';
+//import 'package:frontend/widgets/barra_buesqueda.dart';
 import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/pagesViews/mi_barra_busqueda.dart';
 import 'package:frontend/widgets/pagesViews/search_container_list.dart';
@@ -12,6 +13,8 @@ class SearchPage extends StatefulWidget {
 }
 
 class SearchPageState extends State<SearchPage> {
+  InputFillResponse input = InputFillResponse();
+
   List<CustomCard> cItems = [
     CustomCard(
       title: "Opcion1",
@@ -72,19 +75,25 @@ class SearchPageState extends State<SearchPage> {
                 //   style: TextStyle(color: Colors.white, fontSize: 45),
                 // ),
                 BarraBusqueda(
-                  onSearch: (p0) => "",
-                ),
-                MyBarraBusqueda(
-                  hintText: 'Buscar...',
-                  onChanged: (value) {
-                    print('Texto de búsqueda: $value');
+                  onSearch: (p0) => print(p0),
+                  onChange: (value) {
+                    setState(() {
+                      input.input = value;
+                      print(input.input);
+                    });
                   },
                 ),
+                // MyBarraBusqueda(
+                //   hintText: 'Buscar...',
+                //   onChanged: (value) {
+                //     print('Texto de búsqueda: $value');
+                //   },
+                // ),
                 // Text(
                 //   "Contenedor con la lista de los objetos",
                 //   style: TextStyle(color: Colors.white, fontSize: 45),
                 // )
-                //SearchResults(cItems)
+                SearchResultsContent(cItems)
               ],
             ),
           ),
