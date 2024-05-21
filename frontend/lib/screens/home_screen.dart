@@ -3,9 +3,10 @@ import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/card_section.dart';
 import 'package:frontend/widgets/horizontal_card.dart';
 import '../widgets/navbar.dart';
-import '../widgets/horizontal_section.dart';
-import '../widgets/tool_bar.dart'; // Asegúrate de que los widgets de tarjetas están aquí
-
+import '../widgets/horizontal_section.dart'; // Asegúrate de que los widgets de tarjetas están aquí
+import '../widgets/accion_boton.dart'; // Importa el widget de acción del botón
+import '../widgets/notification.dart'; // Importa el widget de notificación
+import '../widgets/barra_busqueda.dart'; // Importa el widget de barra de búsqueda
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -14,32 +15,38 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  final List<NavItem> items = [
+  bool _showNotification = false; // Estado para controlar la visibilidad de la notificación
+  String _notificationMessage = ''; // Estado para almacenar el mensaje de la notificación
 
+  final List<NavItem> items = [
     NavItem(
         iconNormal: Icons.home_outlined,
         iconSelected: Icons.home,
-        onPressed: (){
+        onPressed: () {
           print("Opcion1");
         },
         title: "Home"),
-
     NavItem(
-        iconNormal : Icons.search_sharp,
+        iconNormal: Icons.search_sharp,
         iconSelected: Icons.search,
-        onPressed: (){
+        onPressed: () {
           print("Opcion2");
         },
         title: "Search"),
-
     NavItem(
-        iconNormal : Icons.info_outline,
-        iconSelected: Icons.info,
-        onPressed: (){
-          print("Opcion2");
+        iconNormal: Icons.notifications_none_outlined,
+        iconSelected: Icons.notifications,
+        onPressed: () {
+          print("Opcion3");
         },
-        title: "Search"),
-
+        title: "Notifications"),
+    NavItem(
+        iconNormal: Icons.person_2_outlined,
+        iconSelected: Icons.person_2,
+        onPressed: () {
+          print("Opcion4");
+        },
+        title: "Profile"),
   ];
 
   List<HorizontalCard> hcItems = [
@@ -53,83 +60,131 @@ class _HomeScreenState extends State<HomeScreen> {
     HorizontalCard(title: "Opcion4"),
   ];
 
-
   List<CustomCard> cItems = [
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-    CustomCard(title: "Opcion1", subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',),
-
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnflksflk sdjnflksdjf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+    ),
+    CustomCard(
+      title: "Opcion1",
+      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+    ),
   ];
+
+  // Método para alternar la visibilidad de la notificación y establecer el mensaje
+  void _toggleNotification(String message) {
+    setState(() {
+      _notificationMessage = message; // Establecer el mensaje de la notificación
+      _showNotification = true; // Mostrar la notificación
+    });
+
+    // Ocultar la notificación automáticamente después de 3 segundos
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _showNotification = false; // Ocultar la notificación
+      });
+    });
+  }
+
+  // Método de búsqueda (actualmente imprime el término de búsqueda en la consola)
+  void _onSearch(String query) {
+    print("Buscando: $query");
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         color: Colors.black,
-        padding: EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            VerticalNavbar(
-              items: items,
-              iconSize: 40,
-            ),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Color.fromRGBO(21, 21, 21, 1.0),
+            Row(
+              children: [
+                VerticalNavbar(
+                  items: items,
+                  iconSize: 40,
                 ),
-
-
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: constraints.maxHeight),
-                      child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-
-                            ToolBar(),
-
-                            Container(
-                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                              height: constraints.maxHeight - ToolBar.height,
-                              child: SingleChildScrollView(
-                                controller: _scrollController,
-
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-
-                                  children: [
-                                    HorizontalCardSection(items: hcItems,), // Sección nueva
-                                    CardSection(items : cItems),
-                                    CardSection(items : cItems),
-                                    CardSection(items : cItems),
-                                    CardSection(items : cItems),
-                                    CardSection(items : cItems),
-                                  ],
-                                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: BarraBusqueda(
+                            onSearch: _onSearch, // Integrar la barra de búsqueda
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Botón de acción con icono de "+"
+                              AccionBoton(
+                                onNotification: _toggleNotification,
+                                message: "¡Agregado correctamente!",
+                                icon: Icons.add,
                               ),
-                            ),
-
-
-
-                          ]
-                      ),
-                    );
-                  }
+                              SizedBox(width: 20),
+                              // Botón de acción con icono de "-"
+                              AccionBoton(
+                                onNotification: _toggleNotification,
+                                message: "¡Eliminado Correctamente!",
+                                icon: Icons.remove,
+                              ),
+                            ],
+                          ),
+                        ),
+                        HorizontalCardSection(items: hcItems,), // Sección nueva
+                        CardSection(items: cItems),
+                        CardSection(items: cItems),
+                        CardSection(items: cItems),
+                        CardSection(items: cItems),
+                        CardSection(items: cItems),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
+            // Mostrar la notificación si _showNotification es verdadero
+            if (_showNotification)
+              NotificationWidget(
+                message: _notificationMessage,
+              ),
           ],
         ),
       ),
