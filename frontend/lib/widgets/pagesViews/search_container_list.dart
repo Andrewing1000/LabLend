@@ -4,6 +4,8 @@ import 'package:frontend/widgets/card.dart';
 class SearchResultsContent extends StatelessWidget {
   List<CustomCard> misItems = [];
 
+  
+
   // SearchResults({super.key, required this.itemsResult});
   SearchResultsContent(List<CustomCard> misItems, {super.key});
   @override
