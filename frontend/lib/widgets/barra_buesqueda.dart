@@ -17,7 +17,7 @@ class BarraBusqueda extends StatelessWidget {
         ),
         child: TextField(
           style: TextStyle(color: Colors.white),
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             prefixIcon: Icon(Icons.search, color: Colors.white),
             hintText: 'Buscar',
             hintStyle: TextStyle(color: Colors.white54),
