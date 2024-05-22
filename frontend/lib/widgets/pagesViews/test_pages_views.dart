@@ -29,9 +29,9 @@ class MyApp extends StatelessWidget {
             // Container(
             //   color: Colors.black.withOpacity(0.45),
             // ),
-            Expanded(child: SearchPage()),
+            //Expanded(child: SearchPage()),
 
-            //const Footer()
+            const Footer()
             // const WelcomePage()
           ],
         ),

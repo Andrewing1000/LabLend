@@ -26,6 +26,7 @@ class BarraBusqueda extends StatelessWidget {
           ),
           onSubmitted: onSearch,
           onChanged: onChange,
+          
         ),
       ),
     );

@@ -1,8 +1,6 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/barra_buesqueda.dart';
-//import 'package:frontend/widgets/barra_buesqueda.dart';
+import 'package:frontend/widgets/barra_buesqueda.dart';
 import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/pagesViews/mi_barra_busqueda.dart';
 import 'package:frontend/widgets/pagesViews/search_container_list.dart';
@@ -19,37 +17,37 @@ class SearchPageState extends State<SearchPage> {
 
   List<CustomCard> cItems = [
     CustomCard(
-      title: "Opcion1",
+      title: "America",
       subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Bolivia",
       subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Centro America",
       subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Panama",
       subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Urion",
       subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnflksflk sdjnflksdjf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Caligula",
       subtitle:
           'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Nation",
       subtitle:
           'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
     ),
     CustomCard(
-      title: "Opcion1",
+      title: "Monterey",
       subtitle:
           'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
     ),
@@ -57,6 +55,7 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    String busqueda;
     final Size size = MediaQuery.of(context).size;
     return Stack(
       children: [
@@ -81,7 +80,9 @@ class SearchPageState extends State<SearchPage> {
                   onChange: (value) {
                     setState(() {
                       input.input = value;
-                      print(input.input);
+                      busqueda = value;
+
+                      //print(input.input);
                     });
                   },
                 ),
@@ -96,10 +97,11 @@ class SearchPageState extends State<SearchPage> {
                 //   style: TextStyle(color: Colors.white, fontSize: 45),
                 // )
                 Expanded(
-                  
-                    child: SearchResultsContent(misItems: cItems),
+                  child: SearchResultsContent(
+                    misItems: cItems,
+                    query: "America",
+                  ),
                 ),
-
               ],
             ),
           ),
