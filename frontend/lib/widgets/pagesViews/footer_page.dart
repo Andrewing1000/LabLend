@@ -25,7 +25,7 @@ class Footer extends StatelessWidget {
           ),
         ),
         Container(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black87,
         ),
         Padding(
           padding: const EdgeInsets.all(25),
@@ -38,7 +38,7 @@ class Footer extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Colors.black87,
                       borderRadius: BorderRadius.circular(35)),
-                  height: 500,
+                  height: 610,
                   width: size.width * 0.3,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
