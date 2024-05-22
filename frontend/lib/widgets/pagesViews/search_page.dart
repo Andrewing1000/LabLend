@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/barra_buesqueda.dart';
 //import 'package:frontend/widgets/barra_buesqueda.dart';
@@ -94,6 +96,7 @@ class SearchPageState extends State<SearchPage> {
                 //   style: TextStyle(color: Colors.white, fontSize: 45),
                 // )
                 Expanded(
+                  
                     child: SearchResultsContent(misItems: cItems),
                 ),
 
