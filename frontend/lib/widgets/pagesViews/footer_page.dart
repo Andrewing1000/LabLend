@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/widgets/pagesViews/LinkText.dart';
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
@@ -64,11 +65,10 @@ class Footer extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             textDirection: TextDirection.rtl,
                             children: [
-                              Text(
-                                ' Comentanos en Facebook ',
-                                style: TextStyle(
-                                    fontSize: 19, color: Colors.amber),
-                              ),
+                              Linktext(
+                                  text: "   Únete a Facebook",
+                                  url:
+                                      'https://www.facebook.com/pages/Universidad-Cat%C3%B3lica/377175925675553'),
                               Icon(
                                 Icons.facebook,
                                 color: Colors.blue,
@@ -80,13 +80,11 @@ class Footer extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             textDirection: TextDirection.rtl,
                             children: [
-                              Text(
-                                ' Encuentranos en Instagram ',
-                                style: TextStyle(
-                                    fontSize: 19, color: Colors.amber),
-                              ),
+                              Linktext(
+                                  text: "   Ir a Instagram",
+                                  url: 'https://www.instagram.com/'),
                               Icon(
-                                Icons.camera,
+                                FontAwesomeIcons.squareInstagram,
                                 color: Colors.pink,
                                 size: 45,
                               ),
@@ -96,11 +94,9 @@ class Footer extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             textDirection: TextDirection.rtl,
                             children: [
-                              Text(
-                                ' Siguenos en X ',
-                                style: TextStyle(
-                                    fontSize: 19, color: Colors.amber),
-                              ),
+                              Linktext(
+                                  text: "   Siguenos en X",
+                                  url: 'https://x.com/?lang=es'),
                               Icon(
                                 FontAwesomeIcons.xTwitter,
                                 color: Colors.white,
@@ -112,11 +108,9 @@ class Footer extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             textDirection: TextDirection.rtl,
                             children: [
-                              Text(
-                                ' Siguenos en GitHub ',
-                                style: TextStyle(
-                                    fontSize: 19, color: Colors.amber),
-                              ),
+                              Linktext(
+                                  text: "   Entra a Github",
+                                  url: 'https://github.com/'),
                               FaIcon(
                                 FontAwesomeIcons.github,
                                 color: Colors.blueGrey,
@@ -128,11 +122,9 @@ class Footer extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             textDirection: TextDirection.rtl,
                             children: [
-                              Text(
-                                ' Escribenos al WhatsApp ',
-                                style: TextStyle(
-                                    fontSize: 19, color: Colors.amber),
-                              ),
+                              Linktext(
+                                  text: "  Enviar Whatsapp",
+                                  url: 'https://web.whatsapp.com/'),
                               FaIcon(
                                 FontAwesomeIcons.whatsapp,
                                 color: Colors.green,
