@@ -32,31 +32,43 @@ class VerticalNavbarState extends State<VerticalNavbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color.fromRGBO(21, 21, 21, 1.0),
-        borderRadius: BorderRadius.circular(widget.iconSize/4),
-      ),
-      width: 2*widget.iconSize,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
+
+    List<CustomIconButton> iconList = [];
+    for(NavItem item in widget.items){
+      iconList.add(CustomIconButton(
+          iconNormal: item.iconNormal,
+          iconSelected: item.iconSelected,
+          isSelected: selected == item,
+          size: widget.iconSize,
+          onPressed: (){
+            setSelectedIndex(item);
+            if(item.onPressed!=null){
+              item.onPressed!();
+            }
+            print(selected?.iconNormal);},
+        )
+      );
+    }
+
+
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(21, 21, 21, 1.0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.all(5),
+        constraints: BoxConstraints(
+          minWidth: widget.iconSize,
+        ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: widget.items.map((item) {
-              return CustomIconButton(iconNormal: item.iconNormal,
-                                        iconSelected: item.iconSelected,
-                                        isSelected: selected == item,
-                                        onPressed: (){  setSelectedIndex(item);
-                                                        if(item.onPressed!=null){
-                                                          item.onPressed!();
-                                                        }
-                                                        print(selected?.iconNormal);},
-                                        size: widget.iconSize);
-            }).toList(),
+            children:iconList,
           ),
-        ),
+      ),
     );
   }
 

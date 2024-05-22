@@ -108,12 +108,6 @@ class MainFrameState extends State<MainFrame>{
           padding: const EdgeInsets.all(10),
           child: GestureDetector(
 
-            onTapUp: (e){
-              setState(() {
-
-              });
-            },
-
             onPanStart: (event){
               if(onFrontier1){
                 setState(() {
@@ -134,10 +128,12 @@ class MainFrameState extends State<MainFrame>{
             },
 
             onPanCancel: (){
-              setState(() {
+
                 grabbing1 = false;
                 grabbing2 = false;
-              });
+                setState(() {
+
+                });
             },
 
             onPanEnd: (event){
@@ -178,16 +174,16 @@ class MainFrameState extends State<MainFrame>{
                     child: ResizablePanel(
                       width: double.infinity,
                       child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(21, 21, 21, 1.0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Stack(
                           children: [
 
                             HomeScreen(),
                             ToolBar(),
                           ],
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 21, 21, 1.0),
-                          borderRadius: BorderRadius.circular(10),
                         ),
                       )
                     ),
@@ -209,7 +205,7 @@ class MainFrameState extends State<MainFrame>{
 
                   ResizablePanel(
                       width: width2,
-                      stops: [200, 210, 3050, 400, 600],
+                      stops: [200, 210, 305, 400, 600],
                       child: Container(
                         decoration: BoxDecoration(
                           color: const Color.fromRGBO(21, 21, 21, 1.0),

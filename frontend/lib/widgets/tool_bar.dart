@@ -15,6 +15,8 @@ class ToolBar extends StatefulWidget{
 
 class ToolBarState extends State<ToolBar>{
 
+
+  TextEditingController searchBarController = TextEditingController();
   @override
   Widget build(BuildContext context){
     return Container(
@@ -55,7 +57,9 @@ class ToolBarState extends State<ToolBar>{
               Container(width: 10,),
 
               Expanded(
-                  child: BarraBusqueda(onSearch: (e){})
+                  child: BarraBusqueda(
+                      controller: searchBarController,
+                      onSearch: (e){})
               ),
 
               Container(width: 10,),

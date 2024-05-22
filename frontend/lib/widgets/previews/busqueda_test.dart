@@ -7,6 +7,6 @@ void main() {
           body: Container(
             height: double.infinity,
               width: double.infinity,
-              child: BarraBusqueda(onSearch: (var a) {}),
-              color: Color.fromARGB(255, 110, 0, 0)))));
+              color: const Color.fromARGB(255, 110, 0, 0),
+              child: BarraBusqueda(controller: TextEditingController(), onSearch: (var a) {})))));
 }
