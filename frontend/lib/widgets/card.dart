@@ -4,9 +4,16 @@ class CustomCard extends StatefulWidget {
   static double width = 200;
   static double height = (9.5 / 7) * width;
 
-  String title;
-  String subtitle;
-  CustomCard({super.key, required this.title, required this.subtitle});
+  final String title;
+  final String subtitle;
+  final Function(String, String) onTap; // Añadimos el callback
+
+  CustomCard({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.onTap, // Añadimos el callback
+  }) : super(key: key);
 
   @override
   State<CustomCard> createState() {
@@ -18,7 +25,10 @@ class CustomCardState extends State<CustomCard> {
   @override
   Widget build(BuildContext context) {
     return Align(
-        alignment: Alignment.center,
+      alignment: Alignment.center,
+      child: GestureDetector(
+        onTap: () =>
+            widget.onTap(widget.title, widget.subtitle), // Llamamos al callback
         child: SizedBox(
           width: CustomCard.width,
           height: CustomCard.height,
@@ -37,17 +47,18 @@ class CustomCardState extends State<CustomCard> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Container(
-                      height: CustomCard.height * 5.8 / 9,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
+                    height: CustomCard.height * 5.8 / 9,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image.network(
+                        "/assets/images/place_holder.png",
+                        fit: BoxFit.cover,
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.network(
-                          "/assets/images/place_holder.png",
-                          fit: BoxFit.cover,
-                        ),
-                      )),
+                    ),
+                  ),
                   const SizedBox(
                     height: 5,
                   ),
@@ -77,6 +88,8 @@ class CustomCardState extends State<CustomCard> {
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

@@ -9,14 +9,20 @@ import '../widgets/notification.dart'; // Importa el widget de notificación
 import '../widgets/barra_busqueda.dart'; // Importa el widget de barra de búsqueda
 
 class HomeScreen extends StatefulWidget {
+  final Function(String, String) onCardTap; // Añadir el callback
+
+  HomeScreen({required this.onCardTap});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool _showNotification = false; // Estado para controlar la visibilidad de la notificación
-  String _notificationMessage = ''; // Estado para almacenar el mensaje de la notificación
+  bool _showNotification =
+      false; // Estado para controlar la visibilidad de la notificación
+  String _notificationMessage =
+      ''; // Estado para almacenar el mensaje de la notificación
 
   final List<NavItem> items = [
     NavItem(
@@ -60,53 +66,73 @@ class _HomeScreenState extends State<HomeScreen> {
     HorizontalCard(title: "Opcion4"),
   ];
 
-  List<CustomCard> cItems = [
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnflksflk sdjnflksdjf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
-    ),
-    CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
-    ),
-  ];
+  List<CustomCard> cItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    cItems = [
+      CustomCard(
+        title: "Opcion2",
+        subtitle: 'HOlaa',
+        onTap: widget.onCardTap, // Añadir el callback
+      ),
+      CustomCard(
+        title: "Opcion3",
+        subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle:
+            'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnflksflk sdjnflksdjf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle:
+            'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+        onTap: widget.onCardTap,
+      ),
+      CustomCard(
+        title: "Opcion1",
+        subtitle:
+            'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+        onTap: widget.onCardTap,
+      ),
+    ];
+  }
 
   // Método para alternar la visibilidad de la notificación y establecer el mensaje
   void _toggleNotification(String message) {
     setState(() {
-      _notificationMessage = message; // Establecer el mensaje de la notificación
+      _notificationMessage =
+          message; // Establecer el mensaje de la notificación
       _showNotification = true; // Mostrar la notificación
     });
 
@@ -144,7 +170,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: BarraBusqueda(
-                            onSearch: _onSearch, // Integrar la barra de búsqueda
+                            onSearch:
+                                _onSearch, // Integrar la barra de búsqueda
                           ),
                         ),
                         Padding(
@@ -168,7 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        HorizontalCardSection(items: hcItems,), // Sección nueva
+                        HorizontalCardSection(
+                          items: hcItems,
+                        ), // Sección nueva
                         CardSection(items: cItems),
                         CardSection(items: cItems),
                         CardSection(items: cItems),
