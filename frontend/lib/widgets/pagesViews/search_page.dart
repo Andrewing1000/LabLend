@@ -14,7 +14,7 @@ class SearchPage extends StatefulWidget {
 
 class SearchPageState extends State<SearchPage> {
   InputFillResponse input = InputFillResponse();
-
+  String busqueda = "";
   List<CustomCard> cItems = [
     CustomCard(
       title: "America",
@@ -55,7 +55,6 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    String busqueda;
     final Size size = MediaQuery.of(context).size;
     return Stack(
       children: [
@@ -71,10 +70,6 @@ class SearchPageState extends State<SearchPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Text(
-                //   "Coso de Navegacion",
-                //   style: TextStyle(color: Colors.white, fontSize: 45),
-                // ),
                 BarraBusqueda(
                   onSearch: (p0) => print(p0),
                   onChange: (value) {
@@ -82,24 +77,14 @@ class SearchPageState extends State<SearchPage> {
                       input.input = value;
                       busqueda = value;
 
-                      //print(input.input);
+                      print(busqueda);
                     });
                   },
                 ),
-                // MyBarraBusqueda(
-                //   hintText: 'Buscar...',
-                //   onChanged: (value) {
-                //     print('Texto de búsqueda: $value');
-                //   },
-                // ),
-                // Text(
-                //   "Contenedor con la lista de los objetos",
-                //   style: TextStyle(color: Colors.white, fontSize: 45),
-                // )
                 Expanded(
                   child: SearchResultsContent(
                     misItems: cItems,
-                    query: "America",
+                    query: busqueda,
                   ),
                 ),
               ],

@@ -35,11 +35,12 @@ class _SearchResultsContentState extends State<SearchResultsContent> {
     //print("Entrada a al fucnion");
     setState(() {
       items
-          .where((item) => item.title.toLowerCase() == query.toLowerCase())
+          .where(
+              (item) => item.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
     return items
-        .where((item) => item.title.toLowerCase() == query.toLowerCase())
+        .where((item) => item.title.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 }
