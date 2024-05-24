@@ -23,13 +23,14 @@ class MainFrameState extends State<MainFrame>{
   bool grabbing1 = false;
   bool grabbing2 = false;
 
-  double width1 = 0;
-  double width2 = 0;
-
   double maxWidth = double.infinity;
   double maxHeight = double.infinity;
 
+
+  ResizeController sizeLeft = ResizeController();
+  ResizeController sizeRight = ResizeController();
   VerticalNavbar navBar;
+  Widget page = HomeScreen();
 
   MainFrameState():
         navBar = VerticalNavbar(
@@ -74,45 +75,36 @@ class MainFrameState extends State<MainFrame>{
 
   }
 
-  @override
-  void initState() {
-
-    setState(() {
-      width1 = 70;
-      width2 = 100;
-    });
-  }
 
 
 
 
   void performResize(double dx){
     if(grabbing1){
-      if(width1 + dx >= 0){
-        setState(() {
-          width1 += dx;
-        });
-      }
+      sizeLeft.widthUpdate(delta: dx);
       return;
     }
 
     if(grabbing2){
-      if(width2 + dx >= 0){
-        setState(() {
-          width2 -= dx;
-        });
-      }
+      sizeRight.widthUpdate(delta: -dx);
       return;
     }
+  }
+
+  void endResize(){
+    setState(() {
+      grabbing1 = false;
+      grabbing2 = false;
+      sizeLeft.commitUpdate();
+      sizeRight.commitUpdate();
+    });
+
   }
 
 
 
   @override
   Widget build(BuildContext context){
-
-    Widget page = HomeScreen();
-
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -122,81 +114,133 @@ class MainFrameState extends State<MainFrame>{
         maxHeight = constraints.maxHeight;
 
 
-        return Container(
-          height: double.infinity,
-          width: double.infinity,
-          color: Colors.black,
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ResizablePanel(
-                  width: width1,
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: navBar,
-                  )),
-              MouseRegion(
-                cursor:  SystemMouseCursors.grab,
-                onEnter: (event){
-                  setState(() {onFrontier1 = true;});
-                },
-                onExit: (event){
-                  setState((){onFrontier1 = false;});
-                },
-                child: const SizedBox(
-                  height: double.infinity,
-                  width: 10,
-                ),
-              ),
+        return GestureDetector(
 
 
-              Expanded(
-                child: ResizablePanel(
-                  width: double.infinity,
+          onPanStart: (event){
+            if(onFrontier1){
+              setState(() {
+                grabbing1 = true;
+              });
+
+              return;
+            }
+
+            if(onFrontier2){
+              setState(() {
+                grabbing2 = true;
+              });
+              return;
+            }
+          },
+
+          onPanUpdate: (event){
+            performResize(event.delta.dx);
+          },
+
+          onPanEnd: (event){
+            endResize();
+          },
+
+          onPanCancel: (){
+            setState(() {
+              grabbing1 = false;
+              grabbing2 = false;
+            });
+
+          },
+
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Colors.black,
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ResizablePanel(
+                    stops: [ResizeRange(start: 70, end: double.infinity)],
+                    controller: sizeLeft,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: navBar,
+                    )),
+                MouseRegion(
+                  cursor:  SystemMouseCursors.grab,
+                  onEnter: (event){
+                    setState(() {onFrontier1 = true;});
+                  },
+                  onExit: (event){
+                    setState((){onFrontier1 = false;});
+                  },
                   child: Container(
+                    height: double.infinity,
+                    width: 10,
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(21, 21, 21, 1.0),
                       borderRadius: BorderRadius.circular(10),
+                      color: grabbing1? Colors.white.withAlpha(70): onFrontier1? Colors.white.withAlpha(40): Colors.transparent,
                     ),
-                    child: Stack(
-                      children: [
-
-                        HomeScreen(),
-                        ToolBar(),
-                      ],
-                    ),
-                  )
+                  ),
                 ),
-              ),
-              MouseRegion(
-                cursor:  SystemMouseCursors.grab,
-                onEnter: (event){
-                  setState(() {onFrontier2 = true;});
-                },
-                onExit: (event){
-                  setState((){onFrontier2 = false;});
-                },
-                child: const SizedBox(
-                  height: double.infinity,
-                  width: 10,
+
+
+                Expanded(
+                  child: ResizablePanel(
+                    //controller: sizeRight,
+                    stops: [ResizeRange(start: 0, end: double.infinity)],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(21, 21, 21, 1.0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Stack(
+                        children: [
+
+                          HomeScreen(),
+                          ToolBar(),
+                        ],
+                      ),
+                    )
+                  ),
                 ),
-              ),
-
-
-              ResizablePanel(
-                  width: width2,
-                  stops: [200, 210, 305, 400, 600],
+                MouseRegion(
+                  cursor:  SystemMouseCursors.grab,
+                  onEnter: (event){
+                    setState(() {onFrontier2 = true;});
+                  },
+                  onExit: (event){
+                    setState((){onFrontier2 = false;});
+                  },
                   child: Container(
+                    height: double.infinity,
+                    width: 10,
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(21, 21, 21, 1.0),
                       borderRadius: BorderRadius.circular(10),
+                      color: grabbing2? Colors.white.withAlpha(70): onFrontier2? Colors.white.withAlpha(40): Colors.transparent,
                     ),
-                  )
-              ),
+                  ),
+                ),
 
-            ],
+
+                ResizablePanel(
+                    controller: sizeRight,
+                    stops: [
+                      ResizeRange(start: 100, end: 200),
+                      ResizeRange.point(300),
+                      ResizeRange.point(400),
+                      //ResizeRange(start: 700, end: double.infinity),
+                    ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(21, 21, 21, 1.0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    )
+                ),
+
+              ],
+            ),
           ),
         );
       }
