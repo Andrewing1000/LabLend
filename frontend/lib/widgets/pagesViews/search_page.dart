@@ -10,7 +10,6 @@ class SearchPage extends StatefulWidget {
 
   SearchPage({super.key, required this.query});
 
-
   @override
   State<SearchPage> createState() => SearchPageState();
 }
@@ -20,39 +19,52 @@ class SearchPageState extends State<SearchPage> {
 
   List<CustomCard> cItems = [
     CustomCard(
-      title: "America",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Maquina 1",
+      subtitle: 'Maquina',
     ),
     CustomCard(
-      title: "Bolivia",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Pizarra",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Centro America",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Marron",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Panama",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "MAquina 2",
+      subtitle: 'Maquina 2',
     ),
     CustomCard(
-      title: "Urion",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnflksflk sdjnflksdjf',
+      title: "Maquina 1",
+      subtitle: 'Maquina',
     ),
     CustomCard(
-      title: "Caligula",
-      subtitle:
-          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      title: "Pizarra",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Nation",
-      subtitle:
-          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      title: "Marron",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Monterey",
-      subtitle:
-          'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      title: "MAquina 2",
+      subtitle: 'Maquina 2',
+    ),
+    CustomCard(
+      title: "Maquina 1",
+      subtitle: 'Maquina',
+    ),
+    CustomCard(
+      title: "Pizarra",
+      subtitle: 'Pizarra',
+    ),
+    CustomCard(
+      title: "Marron",
+      subtitle: 'Pizarra',
+    ),
+    CustomCard(
+      title: "MAquina 2",
+      subtitle: 'Maquina 2',
     ),
   ];
 

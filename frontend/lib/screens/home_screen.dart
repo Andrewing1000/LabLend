@@ -16,11 +16,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   bool _showNotification = false;
   String _notificationMessage = '';
-
-
 
   List<HorizontalCard> hcItems = [
     HorizontalCard(title: "Opcion1"),
@@ -35,47 +32,54 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<CustomCard> cItems = [
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Maquina 1",
+      subtitle: 'Maquina',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Pizarra",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Marron",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "MAquina 2",
+      subtitle: 'Maquina 2',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Maquina 1",
+      subtitle: 'Maquina',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Pizarra",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf',
+      title: "Marron",
+      subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnflksflk sdjnflksdjf',
+      title: "MAquina 2",
+      subtitle: 'Maquina 2',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      title: "Maquina 1",
+      subtitle: 'Maquina',
     ),
     CustomCard(
-      title: "Opcion1",
-      subtitle: 'dskjafnsdlkjfnlsdj dsfslakdjnflsajdnf lksflksdjnf lksflk sdjnflksdjf',
+      title: "Pizarra",
+      subtitle: 'Pizarra',
+    ),
+    CustomCard(
+      title: "Marron",
+      subtitle: 'Pizarra',
+    ),
+    CustomCard(
+      title: "MAquina 2",
+      subtitle: 'Maquina 2',
     ),
   ];
-  
 
   void _toggleNotification(String message) {
     setState(() {
@@ -102,21 +106,22 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
         child: Stack(
           children: [
-              SingleChildScrollView(
-                controller: widget.scrollController,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 200,),
-                    HorizontalCardSection(items: hcItems,), // Sección nueva
-                    CardSection(items: cItems),
-                    CardSection(items: cItems),
-                    CardSection(items: cItems),
-                    CardSection(items: cItems),
-                    CardSection(items: cItems),
-                    const Footer(),
-                  ],
-                ),
+            SingleChildScrollView(
+              controller: widget.scrollController,
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 200,
+                  ),
+                  HorizontalCardSection(
+                    items: hcItems,
+                  ), // Sección nueva
+                  CardSection(items: cItems),
+                  CardSection(items: cItems),
+                  const Footer(),
+                ],
               ),
+            ),
             // Mostrar la notificación si _showNotification es verdadero
             if (_showNotification)
               NotificationWidget(
@@ -128,4 +133,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
