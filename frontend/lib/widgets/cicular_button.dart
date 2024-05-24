@@ -96,9 +96,11 @@ class CircularButtonState extends State<CircularButton>{
 
                 child: Material(
                   color: Colors.transparent,
-                  child: InkResponse(
-                    radius: 0.7*widget.size,
+                  child: InkWell(
+                    radius: 0.6*widget.size,
                     splashColor:  Colors.white.withAlpha(100),
+                    highlightColor: Colors.transparent,
+                    focusColor: Colors.transparent,
                     onTap: (){
                       setState(() {
                         _onPressed();

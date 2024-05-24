@@ -6,7 +6,9 @@ import "package:frontend/widgets/resizable_panel.dart";
 import "../widgets/tool_bar.dart";
 
 class MainFrame extends StatefulWidget{
+  static GlobalKey<VerticalNavbarState> vNavBarKey = GlobalKey();
   MainFrame({super.key});
+
 
   @override
   State<MainFrame> createState(){
@@ -27,19 +29,14 @@ class MainFrameState extends State<MainFrame>{
   double maxWidth = double.infinity;
   double maxHeight = double.infinity;
 
+  VerticalNavbar navBar;
 
-  @override
-  void initState() {
-    width1 = 70;
-    width2 = 100;
-  }
-
-
-
-  @override
-  Widget build(BuildContext context){
-
-    Widget page = HomeScreen();
+  MainFrameState():
+        navBar = VerticalNavbar(
+          key: MainFrame.vNavBarKey,
+          iconSize: 30,
+          items: const [],),
+          super(){
 
     final List<NavItem> items = [
 
@@ -69,28 +66,53 @@ class MainFrameState extends State<MainFrame>{
 
     ];
 
-    VerticalNavbar navBar = VerticalNavbar(iconSize: 30, items: items);
+
+    navBar = VerticalNavbar(
+        key: MainFrame.vNavBarKey,
+        iconSize: 30,
+        items: items);
+
+  }
+
+  @override
+  void initState() {
+
+    setState(() {
+      width1 = 70;
+      width2 = 100;
+    });
+  }
 
 
-    void performResize(double dx){
-      if(grabbing1){
-        if(width1 + dx >= 0){
-          setState(() {
-            width1 += dx;
-          });
-        }
-        return;
+
+
+  void performResize(double dx){
+    if(grabbing1){
+      if(width1 + dx >= 0){
+        setState(() {
+          width1 += dx;
+        });
       }
-
-      if(grabbing2){
-        if(width2 + dx >= 0){
-          setState(() {
-            width2 -= dx;
-          });
-        }
-        return;
-      }
+      return;
     }
+
+    if(grabbing2){
+      if(width2 + dx >= 0){
+        setState(() {
+          width2 -= dx;
+        });
+      }
+      return;
+    }
+  }
+
+
+
+  @override
+  Widget build(BuildContext context){
+
+    Widget page = HomeScreen();
+
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -100,123 +122,81 @@ class MainFrameState extends State<MainFrame>{
         maxHeight = constraints.maxHeight;
 
 
-
         return Container(
           height: double.infinity,
           width: double.infinity,
           color: Colors.black,
           padding: const EdgeInsets.all(10),
-          child: GestureDetector(
-
-            onPanStart: (event){
-              if(onFrontier1){
-                setState(() {
-                  grabbing1 = true;
-                  return;
-                });
-              }
-              if(onFrontier2){
-                setState(() {
-                  grabbing2 = true;
-                  return;
-                });
-              }
-            },
-
-            onPanUpdate: (event){
-              performResize(event.delta.dx);
-            },
-
-            onPanCancel: (){
-
-                grabbing1 = false;
-                grabbing2 = false;
-                setState(() {
-
-                });
-            },
-
-            onPanEnd: (event){
-              setState(() {
-                grabbing1 = false;
-                grabbing2 = false;
-              });
-            },
-
-            child: MouseRegion(
-              cursor: grabbing1 || grabbing2? SystemMouseCursors.grabbing : SystemMouseCursors.basic,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ResizablePanel(
-                      width: width1,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: navBar,
-                      )),
-                  MouseRegion(
-                    cursor:  SystemMouseCursors.grab,
-                    onEnter: (event){
-                      setState(() {onFrontier1 = true;});
-                    },
-                    onExit: (event){
-                      setState((){onFrontier1 = false;});
-                    },
-                    child: const SizedBox(
-                      height: double.infinity,
-                      width: 10,
-                    ),
-                  ),
-
-
-                  Expanded(
-                    child: ResizablePanel(
-                      width: double.infinity,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 21, 21, 1.0),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Stack(
-                          children: [
-
-                            HomeScreen(),
-                            ToolBar(),
-                          ],
-                        ),
-                      )
-                    ),
-                  ),
-                  MouseRegion(
-                    cursor:  SystemMouseCursors.grab,
-                    onEnter: (event){
-                      setState(() {onFrontier2 = true;});
-                    },
-                    onExit: (event){
-                      setState((){onFrontier2 = false;});
-                    },
-                    child: const SizedBox(
-                      height: double.infinity,
-                      width: 10,
-                    ),
-                  ),
-
-
-                  ResizablePanel(
-                      width: width2,
-                      stops: [200, 210, 305, 400, 600],
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 21, 21, 1.0),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      )
-                  ),
-
-                ],
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ResizablePanel(
+                  width: width1,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: navBar,
+                  )),
+              MouseRegion(
+                cursor:  SystemMouseCursors.grab,
+                onEnter: (event){
+                  setState(() {onFrontier1 = true;});
+                },
+                onExit: (event){
+                  setState((){onFrontier1 = false;});
+                },
+                child: const SizedBox(
+                  height: double.infinity,
+                  width: 10,
+                ),
               ),
-            ),
+
+
+              Expanded(
+                child: ResizablePanel(
+                  width: double.infinity,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(21, 21, 21, 1.0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Stack(
+                      children: [
+
+                        HomeScreen(),
+                        ToolBar(),
+                      ],
+                    ),
+                  )
+                ),
+              ),
+              MouseRegion(
+                cursor:  SystemMouseCursors.grab,
+                onEnter: (event){
+                  setState(() {onFrontier2 = true;});
+                },
+                onExit: (event){
+                  setState((){onFrontier2 = false;});
+                },
+                child: const SizedBox(
+                  height: double.infinity,
+                  width: 10,
+                ),
+              ),
+
+
+              ResizablePanel(
+                  width: width2,
+                  stops: [200, 210, 305, 400, 600],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(21, 21, 21, 1.0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  )
+              ),
+
+            ],
           ),
         );
       }

@@ -40,6 +40,7 @@ class CustomIconButton extends StatefulWidget {
 class IconButtonState extends State<CustomIconButton> {
   bool isHovered = false;
 
+
   void _onEnter(PointerEvent event) {
     setState(() {
       isHovered = true;
@@ -74,7 +75,7 @@ class IconButtonState extends State<CustomIconButton> {
       cursor: SystemMouseCursors.click,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.4, end: isHovered ? 1 : 0.5),
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 200),
         builder: (context, value, child) {
           Icon icon = Icon(
             widget.isSelected && widget.iconSelected != null
@@ -85,19 +86,19 @@ class IconButtonState extends State<CustomIconButton> {
             size: (0.05*value+0.975)*widget.size,
           );
 
-          return Padding(
-            padding: EdgeInsets.all(widget.size/3),
-            child: Center(
-              heightFactor: 1.1,
-              widthFactor: 1.1,
-              child: IconButton(
-                icon: icon,
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                iconSize: widget.size,
-                onPressed: _onPressed,
+          return Container(
+              width: 2*widget.size,
+              padding : EdgeInsets.all(widget.size/3),
+              child: Center(
+                child: IconButton(
+                  icon: icon,
+                  color: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  iconSize: widget.size,
+                  onPressed: _onPressed,
+                ),
               ),
-            ),
           );
         },
       ),

@@ -12,7 +12,7 @@ class VerticalNavbar extends StatefulWidget {
   });
 
   @override
-  VerticalNavbarState createState() => VerticalNavbarState();
+  State<StatefulWidget> createState() => VerticalNavbarState();
 }
 
 class VerticalNavbarState extends State<VerticalNavbar> {
@@ -21,6 +21,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
 
   @override
   void initState() {
+
     super.initState();
     if(widget.items.isEmpty){
       selected = null;
@@ -45,7 +46,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
             if(item.onPressed!=null){
               item.onPressed!();
             }
-            print(selected?.iconNormal);},
+          },
         )
       );
     }
