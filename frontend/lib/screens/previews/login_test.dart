@@ -14,9 +14,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
+    return Center(
         child: Container(
           padding: const EdgeInsets.all(20.0),
           decoration: BoxDecoration(
@@ -66,7 +64,6 @@ class LoginScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

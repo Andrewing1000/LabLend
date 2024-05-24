@@ -5,8 +5,9 @@ import 'package:frontend/widgets/cicular_button.dart';
 class ToolBar extends StatefulWidget{
   static double height = 130;
   Function(String query) onConsult;
+  Function onLogin;
 
-  ToolBar({super.key, required this.onConsult});
+  ToolBar({super.key, required this.onConsult, required this.onLogin});
 
   @override
   State<ToolBar> createState(){
@@ -23,7 +24,7 @@ class ToolBarState extends State<ToolBar>{
     return Container(
       padding: EdgeInsets.all(20),
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
         color: Colors.indigo,
       ),
@@ -88,7 +89,7 @@ class ToolBarState extends State<ToolBar>{
                 isSelected: true,
                 onPressed: (){
                   setState(() {
-
+                    widget.onLogin();
                   });
                 },
               ),

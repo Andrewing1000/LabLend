@@ -4,7 +4,10 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:frontend/screens/home_screen.dart";
+import "package:frontend/screens/previews/login_recuperado_test.dart";
+import "package:frontend/screens/previews/login_test.dart";
 import "package:frontend/widgets/navbar.dart";
+import "package:frontend/widgets/pagesViews/welcome_page.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
 import "../widgets/pagesViews/search_page.dart";
@@ -39,6 +42,12 @@ class MainFrameState extends State<MainFrame>{
 
   ScrollController homeScrollController = ScrollController();
 
+
+  bool onLogin = false;
+
+  Widget loginPage = LoginScreen();
+  Widget passResetPage = RecuperarContrasenaScreen();
+  Widget welcomePage = const WelcomePage();
   Widget? homePage;
   Widget? searchPage;
   Widget page = HomeScreen(scrollController: ScrollController());
@@ -238,12 +247,20 @@ class MainFrameState extends State<MainFrame>{
                             children: [
 
                               page,
-                              ToolBar(onConsult: (e){
-                                setState(() {
-                                  searchPage = SearchPage(query: e);
-                                  page = searchPage!;
-                                });
-                              },),
+                              ToolBar(
+                                onConsult: (e){
+                                  setState(() {
+                                    searchPage = SearchPage(query: e);
+                                    page = searchPage!;
+                                  },);
+                                },
+
+                                onLogin: (){
+                                  setState(() {
+                                    onLogin = true;
+                                  });
+                                },
+                              ),
                             ],
                           ),
                         )
@@ -288,18 +305,24 @@ class MainFrameState extends State<MainFrame>{
                 ),
               ),
 
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                  child: Container(
-                    color: Colors.black.withOpacity(0.2),
+              if(onLogin) GestureDetector(
+
+                onTapDown: (e){
+                  setState(() {
+                    onLogin = false;
+                  });
+                },
+                child: Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                    child: Container(
+                      color: onLogin? Colors.black.withOpacity(0.2) : Colors.transparent,
+                    ),
                   ),
                 ),
               ),
 
-              Center(
-
-              ),
+              if(onLogin) loginPage,
             ],
           ),
         );
