@@ -27,11 +27,11 @@ class SearchPageState extends State<SearchPage> {
       subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Marron",
+      title: "Marraqueta",
       subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "MAquina 2",
+      title: "Proveta",
       subtitle: 'Maquina 2',
     ),
     CustomCard(
@@ -39,11 +39,11 @@ class SearchPageState extends State<SearchPage> {
       subtitle: 'Maquina',
     ),
     CustomCard(
-      title: "Pizarra",
+      title: "Pantera",
       subtitle: 'Pizarra',
     ),
     CustomCard(
-      title: "Marron",
+      title: "Carnaval",
       subtitle: 'Pizarra',
     ),
     CustomCard(

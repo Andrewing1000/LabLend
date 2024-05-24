@@ -13,6 +13,8 @@ import "package:frontend/widgets/resizable_panel.dart";
 import "../widgets/pagesViews/search_page.dart";
 import "../widgets/tool_bar.dart";
 
+import "../widgets/notification.dart";
+
 class MainFrame extends StatefulWidget {
   static GlobalKey<VerticalNavbarState> vNavBarKey = GlobalKey();
   MainFrame({super.key});
@@ -40,12 +42,19 @@ class MainFrameState extends State<MainFrame> {
 
   bool onLogin = false;
 
-  Widget loginPage = LoginScreen();
+  Widget loginPage = LoginScreen(
+    onSubmit: () {
+      NotificationWidget(
+        message: "Login Exitoso",
+      );
+    },
+  );
   Widget passResetPage = RecuperarContrasenaScreen();
   Widget welcomePage = const WelcomePage();
   Widget? homePage;
   Widget? searchPage;
   Widget page = HomeScreen(scrollController: ScrollController());
+  Widget? sidePanel;
 
   MainFrameState()
       : navBar = VerticalNavbar(
@@ -273,11 +282,11 @@ class MainFrameState extends State<MainFrame> {
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 21, 21, 1.0),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      )),
+                          decoration: BoxDecoration(
+                            color: const Color.fromRGBO(21, 21, 21, 1.0),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: sidePanel)),
                 ],
               ),
             ),
