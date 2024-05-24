@@ -6,9 +6,10 @@ class BarraBusqueda extends StatefulWidget {
   static double maxWidth = 400;
 
   final Function(String)? onSearch;
-  final TextEditingController controller;
-  const BarraBusqueda({Key? key, this.onSearch, required this.controller}) : super(key: key);
+  final Function (String) onChange;
 
+  final TextEditingController controller;
+  const BarraBusqueda({super.key, this.onSearch, required this.onChange,  required this.controller});
 
 
   @override
@@ -100,6 +101,7 @@ class BarraBusquedaState extends State<BarraBusqueda>{
 
                     focusNode: _focusNode,
                     onSubmitted: widget.onSearch,
+                    onChanged: widget.onChange,
 
                   ),
                 ),
@@ -109,5 +111,12 @@ class BarraBusquedaState extends State<BarraBusqueda>{
       ),
     );
   }
+
+}
+
+
+class InputFillResponse{
+  String input = "" ;
+
 
 }

@@ -8,5 +8,5 @@ void main() {
             height: double.infinity,
               width: double.infinity,
               color: const Color.fromARGB(255, 110, 0, 0),
-              child: BarraBusqueda(controller: TextEditingController(), onSearch: (var a) {})))));
+              child: BarraBusqueda(controller: TextEditingController(), onSearch: (var a) {}, onChange: (var a){},)))));
 }

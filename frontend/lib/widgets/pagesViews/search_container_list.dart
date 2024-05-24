@@ -33,6 +33,10 @@ class _SearchResultsContentState extends State<SearchResultsContent> {
 
   List<CustomCard> filterItems(List<CustomCard> items, String query) {
     //print("Entrada a al fucnion");
+    if(query == ""){
+      return items;
+    }
+
     setState(() {
       items
           .where((item) => item.title.toLowerCase() == query.toLowerCase())

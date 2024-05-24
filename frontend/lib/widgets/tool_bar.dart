@@ -4,8 +4,9 @@ import 'package:frontend/widgets/cicular_button.dart';
 
 class ToolBar extends StatefulWidget{
   static double height = 130;
+  Function(String query) onConsult;
 
-  ToolBar({super.key});
+  ToolBar({super.key, required this.onConsult});
 
   @override
   State<ToolBar> createState(){
@@ -59,6 +60,9 @@ class ToolBarState extends State<ToolBar>{
               Expanded(
                   child: BarraBusqueda(
                       controller: searchBarController,
+                      onChange: (e){
+                        widget.onConsult(e);
+                      },
                       onSearch: (e){})
               ),
 

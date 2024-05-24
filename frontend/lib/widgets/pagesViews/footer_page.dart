@@ -166,7 +166,7 @@ class Footer extends StatelessWidget {
                         color: Colors.black87,
                         borderRadius: BorderRadius.circular(35)),
                     height: 500,
-                    width: size.width * 0.3,
+                    width: size.width * 0.1,
                     child: Center(
                       child: Container(
                         decoration: BoxDecoration(

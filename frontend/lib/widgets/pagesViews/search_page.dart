@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/barra_buesqueda.dart';
-import 'package:frontend/widgets/barra_buesqueda.dart';
 import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/pagesViews/mi_barra_busqueda.dart';
 import 'package:frontend/widgets/pagesViews/search_container_list.dart';
@@ -8,7 +6,10 @@ import 'package:frontend/widgets/pagesViews/search_container_list.dart';
 import '../barra_busqueda.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  String query;
+
+  SearchPage({super.key, required this.query});
+
 
   @override
   State<SearchPage> createState() => SearchPageState();
@@ -74,34 +75,14 @@ class SearchPageState extends State<SearchPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Text(
-                //   "Coso de Navegacion",
-                //   style: TextStyle(color: Colors.white, fontSize: 45),
-                // ),
-                BarraBusqueda(
-                  onSearch: (p0) => print(p0),
-                  onChange: (value) {
-                    setState(() {
-                      input.input = value;
-                      busqueda = value;
-
-                      //print(input.input);
-                    });
-                  },
+                Container(
+                  height: 110,
                 ),
-                // MyBarraBusqueda(
-                //   hintText: 'Buscar...',
-                //   onChanged: (value) {
-                //     print('Texto de búsqueda: $value');
-                //   },
-                // ),
-                // Text(
-                //   "Contenedor con la lista de los objetos",
-                //   style: TextStyle(color: Colors.white, fontSize: 45),
-                // )
+
                 Expanded(
                   child: SearchResultsContent(
                     misItems: cItems,
-                    query: "America",
+                    query: widget.query,
                   ),
                 ),
               ],
