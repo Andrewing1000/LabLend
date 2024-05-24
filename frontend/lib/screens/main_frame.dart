@@ -43,11 +43,7 @@ class MainFrameState extends State<MainFrame> {
   bool onLogin = false;
 
   Widget loginPage = LoginScreen(
-    onSubmit: () {
-      NotificationWidget(
-        message: "Login Exitoso",
-      );
-    },
+    onSubmit: () {},
   );
   Widget passResetPage = RecuperarContrasenaScreen();
   Widget welcomePage = const WelcomePage();
@@ -66,6 +62,7 @@ class MainFrameState extends State<MainFrame> {
     homePage = HomeScreen(scrollController: homeScrollController);
     searchPage = SearchPage(query: "");
     page = homePage!;
+    loginPage = LoginScreen(onSubmit: loginSucces);
 
     final List<NavItem> items = [
       NavItem(
@@ -105,6 +102,12 @@ class MainFrameState extends State<MainFrame> {
 
     navBar =
         VerticalNavbar(key: MainFrame.vNavBarKey, iconSize: 30, items: items);
+  }
+
+  void loginSucces() {
+    setState() {
+      onLogin = false;
+    }
   }
 
   void switchPage(Widget? page) {
