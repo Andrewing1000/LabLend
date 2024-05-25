@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/card.dart'; // Importar el widget CustomCard
+import 'package:frontend/widgets/banner.dart';
+import 'package:frontend/widgets/card_extended.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -13,34 +14,59 @@ void main() {
 class AddItemsScreen extends StatelessWidget {
   // Datos de prueba para las tarjetas
   final List<Map<String, String>> items = [
-    {"title": "Matraz", "subtitle": "Loren por favor, ya he dejado el alcohol"},
-    {"title": "Reactivo", "subtitle": "Sulfato de cobre, altamente reactivo"},
-    {"title": "Tubo de ensayo", "subtitle": "Útil para mezclas pequeñas"},
-    {"title": "Bureta", "subtitle": "Medición precisa de volúmenes"},
-    {"title": "Pipeta", "subtitle": "Transferencia precisa de líquidos"},
+    {
+      "imageUrl": "assets/images/place_holder.png",
+      "equipmentName": "Osciloscopio",
+      "manufacturer": "froga",
+      "model": "TDS 2002B",
+      "acquisitionDate": "14 Sept 2023",
+      "location": "Lab 1",
+    },
+    {
+      "imageUrl": "assets/images/place_holder.png",
+      "equipmentName": "Generador de Funciones",
+      "manufacturer": "frago",
+      "model": "33220A",
+      "acquisitionDate": "20 Oct 2022",
+      "location": "Lab 2",
+    },
+
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: CustomCard(
-              title: item['title']!,
-              subtitle: item['subtitle']!,
-              onTap: () {
-                // Acción a realizar cuando se hace clic en la tarjeta
-                print("Card tapped: ${item['title']} - ${item['subtitle']}");
+    return Column(
+      children: [
+        BannerWidget(
+          imageUrl: "assets/images/place_holder.png",
+          title: "Fuckme",
+          subtitle: "culoos",
+          description: "No que hise mierda ",
+          baseColor: Colors.green, // Color base para el degradado
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: CardExtended(
+                    imageUrl: item['imageUrl']!,
+                    equipmentName: item['equipmentName']!,
+                    manufacturer: item['manufacturer']!,
+                    model: item['model']!,
+                    acquisitionDate: item['acquisitionDate']!,
+                    location: item['location']!,
+                  ),
+                );
               },
             ),
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 }
