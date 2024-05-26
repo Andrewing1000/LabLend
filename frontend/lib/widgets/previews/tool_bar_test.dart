@@ -14,7 +14,7 @@ void main(){
               end: Alignment(0, 0.2),
             ),
           ),
-        child: ToolBar(),
+        child: ToolBar(onConsult: (e){}, onLogin: (){},),
         ),
       ),
     ),

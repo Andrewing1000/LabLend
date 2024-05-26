@@ -16,6 +16,8 @@ class ResizablePanel extends StatefulWidget{
     this.stops = const [],
     this.controller,
   }){
+
+
     if(stops.isNotEmpty) {
       stops.sort((a, b) {
         return a.start.compareTo(b.start);
@@ -41,38 +43,60 @@ class ResizablePanelState extends State<ResizablePanel>{
         controlWidth = 0,
         width = 0,
         controller = null,
-        super(){
+        super();
+
+  @override
+  void initState() {
+    super.initState();
+    if(widget.stops.isNotEmpty){
+
+      width = widget.stops[0].start;
+      controlWidth = width;
+    }
+
     controller = widget.controller;
     if(controller != null){
-      controller?.addListener((double delta){
-        setState(() {
-          performResize(delta);
-        });
-      });
+      controller?.addClient(this);
     }
   }
 
   void performResize(double delta){
-    controlWidth += delta;
-    for(int i = 0; i < widget.stops.length; i++){
-      ResizeRange stop= widget.stops[i];
-      if(stop.inRange(controlWidth) || i == widget.stops.length-1){
-          if(stop.isPoint()){
-            width = stop.start;
-          }
 
+    controlWidth += delta;
+    if(widget.stops.isEmpty){
+      setWidth(controlWidth);
+      return;
+    }
+
+    for(var stop in widget.stops.reversed){
+      if(controlWidth >= stop.start || stop == widget.stops[0]){
+          if(stop.isPoint()){
+            if(width != stop.start) setWidth(stop.start);
+          }
+          else{
+            if(stop.inRange(controlWidth)){setWidth(controlWidth);}
+            else if(controlWidth > stop.end){setWidth(stop.end);}
+            else{setWidth(stop.start);}
+          }
           break;
         }
       }
   }
 
+  void commitResize(){
+    controlWidth = width;
+  }
+
+
+  void setWidth(double width){
+    setState(() {
+      this.width = width;
+    });
+  }
   @override
   Widget build(BuildContext context){
 
     double width = this.width;
-
-
-
 
     return ConstrainedBox(
         constraints: BoxConstraints(
@@ -93,12 +117,12 @@ class ResizeRange{
   double start;
   double end;
   ResizeRange({required this.start, required this.end});
-  ResizeRange.point({required double point}):
+  ResizeRange.point(point):
     start = point,
     end = point;
 
   bool inRange(double width){
-    return width >= start && width >= end;
+    return width >= start && width <= end;
   }
 
   bool isPoint(){
@@ -108,16 +132,23 @@ class ResizeRange{
 
 
 class ResizeController{
-  List<Function(double)> listeners = [];
+  List<ResizablePanelState> clients = [];
   ResizeController();
 
-  void addListener(Function(double) listener){
-    listeners.add(listener);
+
+  void addClient(ResizablePanelState client){
+    clients.add(client);
   }
 
   void widthUpdate({double delta = 0}){
-    for(var callback in listeners){
-      callback(delta);
+    for(var client in clients){
+      client.performResize(delta);
+    }
+  }
+
+  void commitUpdate(){
+    for(var client in clients){
+      client.commitResize();
     }
   }
 }
