@@ -82,7 +82,7 @@ class ResizablePanelState extends State<ResizablePanel>{
         child: SizedBox(
           width: width,
           height: double.infinity,
-          child: child,
+          child: widget.child,
         ),
     );
   }
