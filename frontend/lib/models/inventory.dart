@@ -1,4 +1,4 @@
-import 'item.dart';
+import 'Item.dart';
 
 class Inventory {
   List<Item> inventory = [];
