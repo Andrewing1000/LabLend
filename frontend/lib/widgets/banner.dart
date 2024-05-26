@@ -52,7 +52,7 @@ class BannerWidget extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 50,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
