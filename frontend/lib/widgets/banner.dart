@@ -25,7 +25,7 @@ class BannerWidget extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             baseColor,
-            baseColor.withOpacity(0.2),
+            baseColor.withOpacity(0.15),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

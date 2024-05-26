@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 
 class NotificationWidget extends StatelessWidget {
   final String message;
+  final Alignment alignment;
 
   const NotificationWidget({
     Key? key,
     required this.message,
+    this.alignment = Alignment.topCenter,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.topCenter,
+      alignment: alignment,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Material(
