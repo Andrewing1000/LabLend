@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/card_extended.dart';
+import 'package:frontend/widgets/boton_agregar.dart';
+import 'package:frontend/models/inventory.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -11,27 +13,48 @@ void main() {
   ));
 }
 
-class AddItemsScreen extends StatelessWidget {
+class AddItemsScreen extends StatefulWidget {
+  @override
+  _AddItemsScreenState createState() => _AddItemsScreenState();
+}
+
+class _AddItemsScreenState extends State<AddItemsScreen> {
+  final Inventory inventory = Inventory();
+
   // Datos de prueba para las tarjetas
   final List<Map<String, String>> items = [
     {
       "imageUrl": "assets/images/place_holder.png",
-      "equipmentName": "Osciloscopio",
-      "manufacturer": "froga",
+      "equipmentName": "menos lorem",
+      "manufacturer": "culo",
       "model": "TDS 2002B",
       "acquisitionDate": "14 Sept 2023",
       "location": "Lab 1",
     },
     {
       "imageUrl": "assets/images/place_holder.png",
-      "equipmentName": "Generador de Funciones",
-      "manufacturer": "frago",
-      "model": "33220A",
-      "acquisitionDate": "20 Oct 2022",
-      "location": "Lab 2",
+      "equipmentName": "menos lorem",
+      "manufacturer": "culo mas",
+      "model": "TDS 2002B",
+      "acquisitionDate": "14 Sept 2023",
+      "location": "Lab 1",
     },
-
+    
   ];
+
+  void _createNewItem() {
+    setState(() {
+      inventory.createItem();
+      items.add({
+        "imageUrl": "assets/images/place_holder.png",
+        "equipmentName": "Nuevo Item",
+        "manufacturer": "Desconocido",
+        "model": "fuckj",
+        "acquisitionDate": DateTime.now().toString(),
+        "location": "Lab Desconocidoaa",
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +62,9 @@ class AddItemsScreen extends StatelessWidget {
       children: [
         BannerWidget(
           imageUrl: "assets/images/place_holder.png",
-          title: "Fuckme",
-          subtitle: "culoos",
-          description: "No que hise mierda ",
+          title: "froga",
+          subtitle: "menos lorem",
+          description: "fuck",
           baseColor: Colors.green, // Color base para el degradado
         ),
         Expanded(
@@ -63,6 +86,15 @@ class AddItemsScreen extends StatelessWidget {
                   ),
                 );
               },
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: BotonAgregar(
+              onPressed: _createNewItem,
             ),
           ),
         ),

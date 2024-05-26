@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CardExtended extends StatefulWidget {
-  static const double minWidth = 600; // Ancho ajustado para más contenido
+  static const double minWidth = 1000; // Ancho ajustado para más contenido
   static const double minHeight = 60;
-  static const double maxWidth = 800;
+  static const double maxWidth = 1500;
   static const double maxHeight = 100;
 
   final String imageUrl;

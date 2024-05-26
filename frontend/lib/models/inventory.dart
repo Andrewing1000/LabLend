@@ -3,5 +3,8 @@ import 'item.dart';
 class Inventory {
   List<Item> inventory = [];
 
-  createItem({String name = ""}) {}
+  void createItem({String name = ""}) {
+    
+    print("Si");
+  }
 }

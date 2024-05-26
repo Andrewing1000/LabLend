@@ -19,12 +19,13 @@ class BannerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 250, // Altura específica para el banner
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             baseColor,
-            baseColor.withOpacity(0.3),
+            baseColor.withOpacity(0.2),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -45,6 +46,7 @@ class BannerWidget extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
