@@ -62,7 +62,7 @@ class MainFrameState extends State<MainFrame> {
     homePage = HomeScreen(scrollController: homeScrollController);
     searchPage = SearchPage(query: "");
     page = homePage!;
-    loginPage = LoginScreen(onSubmit: loginSucces);
+    loginPage = LoginScreen(onSubmit: loginSuccess);
 
     final List<NavItem> items = [
       NavItem(
@@ -104,7 +104,7 @@ class MainFrameState extends State<MainFrame> {
         VerticalNavbar(key: MainFrame.vNavBarKey, iconSize: 30, items: items);
   }
 
-  void loginSucces() {
+  void loginSuccess() {
     setState() {
       onLogin = false;
     }
@@ -279,9 +279,9 @@ class MainFrameState extends State<MainFrame> {
                       controller: sizeRight,
                       stops: [
                         ResizeRange(start: 100, end: 200),
-                        ResizeRange.point(300),
-                        ResizeRange.point(400),
-                        ResizeRange(start: 400, end: 600)
+                        ResizeRange.point(300.0),
+                        ResizeRange.point(400.0),
+                        ResizeRange(start: 400.0, end: 600.0)
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
                       child: Container(

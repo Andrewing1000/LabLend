@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:frontend/services/frame_adapter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
+import 'Item.dart';
 import 'User.dart';
 
 
@@ -30,93 +31,264 @@ class Session {
     return await manager.sessionCheck();
   }
 
+  Future<bool> connectionCheck() async{
+    return await manager.connectionCheck();
+  }
 
+  bool isAdmin(){
+    return user is AdminUser;
+  }
+
+  Future<bool> isReady() async{
+    //Implement login
+    return await sessionCheck() && await connectionCheck();
+  }
+
+
+
+  Future<List<User>> getUserList() async {
+    //isReady();
+    // if(!isAdmin()){
+    //   //Implement notification
+    //   print("Not enough permissions");
+    //   return [];
+    // }
+
+    var response = await requestHandler.getRequest('/api/user/list/');
+
+    List<User> userList = [];
+    for(var userData in response.data['results']){
+      var user = User.fromJson(userData);
+      userList.add(user);
+    }
+
+    return userList;
+  }
 
   Future<User> getUser(String email) async {
+    isReady();
+    if(user.email == email){
+      var response = await requestHandler.getRequest('/api/user/me');
+      return User.fromJson(response.data);
+    }
 
-    //Check if user doesent exists
-    //Check permisssions
+    if(!isAdmin()){
+      //Implement notification
+      print("Not valid permissions");
+      return VisitorUser.anonymousUser;
+    }
 
+    try{
+      var response = await requestHandler.getRequest('/api/user/manage', query: {'email' : email});
+      return User.fromJson(response.data);
+    }on  DioException catch(e){
+      if(e.response?.statusCode == 404){
+        print("User not found");
+      }
+      return VisitorUser.anonymousUser;
+    }
+    return user;
+  }
+
+  Future<User> createUser(User user, String password) async {
+    //isReady();
+
+    // if(!isAdmin()){
+    //   //Implement notification
+    //   print('Not valid permissions');
+    //   return VisitorUser.anonymousUser;
+    // }
+
+    if(password == ""){
+      print("Password cannot be empty");
+      return user;
+    }
+
+    Map<String, dynamic> userData = user.toJson();
+    userData['password'] = password;
+
+    var response;
+    if(user.role == Role.adminRole || user.role == Role.superAdminRole){
+      try{
+        response = requestHandler.postRequest('/api/user/create/admin/', body: userData);
+        print("User Created");
+      }on DioException catch(e){
+        print("Error");
+      }
+
+    }
+    else if(user.role == Role.assistantRole){
+      try{
+        response = requestHandler.postRequest('/api/user/create/', body: userData);
+        print("User Created");
+      }on DioException catch(e){
+        print("Error");
+      }
+
+    }
+    else{
+      print("Cannot create visitor user");
+    }
 
     return user;
   }
 
+  Future<User> updateUser(User user,  {required User newUser, String? password}) async {
+
+    isReady();
+    if(!isAdmin()){
+      //Implement notification
+      print('Not valid permissions');
+      return VisitorUser.anonymousUser;
+    }
+
+    if(user.email != newUser.email){
+      print("Email cannot be changed");
+      return user;
+    }
+
+    Map<String, dynamic> userData = newUser.toJson();
+    if(password != null){
+      userData['password'] = password;
+    }
 
 
+    var response;
+    if(user.role == Role.adminRole || user.role == Role.superAdminRole){
+      try{
+        response = requestHandler.patchRequest('/api/user/manage/', body: userData, query: {'email': user.email});
+        user.updateData(newUser: newUser);
+        print("User Updated");
+      }on DioException catch(e){
+        print("Error");
+      }
 
-  Future<User> createUser(User user) async {
+    }
+    else if(user.role == Role.assistantRole){
+      try{
+        response = requestHandler.patchRequest('/api/user/manage/', body: userData, query: {'email': user.email});
+        user.updateData(newUser: newUser);
+        print("User Updated");
+      }on DioException catch(e){
+        print("Error");
+      }
 
-    //Check if user doesent exists
-    //Check permisssions
-
-
-    return user;
-  }
-
-
-  Future<User> updateUser(User user) async {
-
-
-    //Check if user doesent exists
-    //Check permisssions
+    }
+    else{
+      print("Cannot update user");
+    }
 
     return user;
   }
 
 
   Future<User> disableUser(User user) async {
-    user.isActive = false;
-    return updateUser(user);
+
+    if(!isAdmin()){
+      //Implement notification
+      return VisitorUser.anonymousUser;
+    }
+    isReady();
+
+    User newUser = User.clone(user);
+    newUser.isActive = false;
+    return updateUser(user, newUser: newUser);
   }
 
-  Future<User> makeAdmin() async{
-    user.role = Role.adminRole;
-    return updateUser(user);
+
+  Future<User> enableUser(User user) async {
+
+    if(!isAdmin()){
+      //Implement notification
+      return VisitorUser.anonymousUser;
+    }
+    isReady();
+
+    User newUser = User.clone(user);
+    newUser.isActive = true;
+    return updateUser(user, newUser: newUser);
   }
 
 
-  Future<List<Map<String, String>>> getEquipmentList() async {
+
+  Future<User> makeAdmin(User user) async{
+    if(!isAdmin()){
+      //Implement notification
+      return user;
+    }
+
+    if(user.role == Role.adminRole || user.role == Role.superAdminRole){
+      print("Already admin");
+      return user;
+    }
+
+    isReady();
+
+    User newUser = User.clone(user);
+    newUser.role = Role.adminRole;
+    return updateUser(user, newUser: newUser);
+  }
+
+  Future<List<Item>> getEquipmentList() async {
+    if(isAdmin()){
+      //Implement notification
       return [];
+    }
+
+
+    return [];
   }
 
 
 
-  Future<User> getItem(User user) async {
+  Future<Item> getItem(String id) async {
 
     //Check if user doesent exists
     //Check permisssions
 
 
-    return user;
+    return Item();
   }
 
 
-  Future<User> createItem(User user) async {
+  Future<Item> createItem(Item item) async {
 
+    if(isAdmin()){
+      //Implement notification
+      return Item();
+    }
     //Check if user doesent exists
     //Check permisssions
 
 
-    return user;
+    return Item();
   }
 
-  Future<User> deleteItem(User user) async {
+  Future<Item> deleteItem(Item item) async {
 
+    if(isAdmin()){
+      //Implement notification
+      return Item();
+    }
     //Check if user doesent exists
     //Check permisssions
 
 
-    return user;
+    return Item();
   }
 
 
-  Future<User> updateItem(User user) async {
+  Future<Item> updateItem(Item item) async {
 
+    if(isAdmin()){
+      //Implement notification
+      return Item();
+    }
 
     //Check if user doesent exists
     //Check permisssions
 
-    return user;
+    return Item();
   }
 
 }
@@ -179,11 +351,12 @@ class SessionManager with ChangeNotifier {
   }
 
   Future<bool> sessionCheck() async{
-    var response = await httpHandler.getRequest('api/user/me/');
+    var response = await httpHandler.getRequest('/api/user/me/');
 
     if(response.statusCode == 200){
       return true;
     }
+
     return false;
   }
 
@@ -199,8 +372,8 @@ class SessionManager with ChangeNotifier {
   ///
   ///
   ///Login management
-  Future<Session?> login(String email, String password) async {
-    connectionCheck();
+  Future<Session> login(String email, String password) async {
+    //connectionCheck();
 
     if(_session is!  AnonymousSession){
       if(session?.user.email == email){
@@ -221,28 +394,15 @@ class SessionManager with ChangeNotifier {
     try{
       var response = await httpHandler.postRequest('/api/user/token/', body: data);
 
-      if(!response.data['is_active']){
+      User user = User.fromJson(response.data);
+
+
+      if(!user.isActive){
+        print('Not available account');
         return AnonymousSession();
       }
 
-      User user;
-      if(response.data['role_field'] == 'AdministradorLaboratorio' ||
-          response.data['role_field'] == 'SuperAdmin'){
-        user = AdminUser(
-          email : response.data['email'],
-          name: response.data['name'],
-        );
-      }
-      else if(response.data['role_field'] == 'AdministradorLaboratorio'){
-        user = AssistUser(
-          email : response.data['email'],
-          name: response.data['name'],
-        );
-      }
-      else{
-        user = VisitorUser.anonymousUser;
-      }
-
+      print("Logged in");
       _session = Session(user: user, loginTime: DateTime.now());
       return _session;
 

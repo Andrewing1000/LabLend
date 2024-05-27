@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ), // Sección nueva
                   CardSection(items: cItems),
                   CardSection(items: cItems),
-                  const Footer(),
+                  //const Footer(),
                 ],
               ),
             ),

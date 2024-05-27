@@ -117,7 +117,7 @@ class ResizeRange{
   double start;
   double end;
   ResizeRange({required this.start, required this.end});
-  ResizeRange.point(point):
+  ResizeRange.point(double point):
     start = point,
     end = point;
 

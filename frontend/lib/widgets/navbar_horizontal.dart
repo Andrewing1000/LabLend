@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/icon_button.dart';
 
-class VerticalNavbar extends StatefulWidget {
+class HorizontalNavbar extends StatefulWidget {
   final List<NavItem> items;
   final double iconSize;
 
-  const VerticalNavbar({
+  const HorizontalNavbar({
     super.key,
     required this.iconSize,
     required this.items,
@@ -15,7 +15,7 @@ class VerticalNavbar extends StatefulWidget {
   State<StatefulWidget> createState() => VerticalNavbarState();
 }
 
-class VerticalNavbarState extends State<VerticalNavbar> {
+class VerticalNavbarState extends State<HorizontalNavbar> {
 
   NavItem? selected;
 
@@ -37,38 +37,35 @@ class VerticalNavbarState extends State<VerticalNavbar> {
     List<CustomIconButton> iconList = [];
     for(NavItem item in widget.items){
       iconList.add(CustomIconButton(
-          iconNormal: item.iconNormal,
-          iconSelected: item.iconSelected,
-          isSelected: selected == item,
-          size: widget.iconSize,
-          onPressed: (){
-            setSelectedIndex(item);
-            if(item.onPressed!=null){
-              item.onPressed!();
-            }
-          },
-        )
+        iconNormal: item.iconNormal,
+        iconSelected: item.iconSelected,
+        isSelected: selected == item,
+        size: widget.iconSize,
+        onPressed: (){
+          setSelectedIndex(item);
+          if(item.onPressed!=null){
+            item.onPressed!();
+          }
+        },
+      )
       );
     }
 
 
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color.fromRGBO(21, 21, 21, 1.0),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: const EdgeInsets.all(5),
-        constraints: BoxConstraints(
-          minWidth: widget.iconSize,
-        ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:iconList,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(21, 21, 21, 1.0),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: const EdgeInsets.all(5),
+      constraints: BoxConstraints(
+        minHeight: widget.iconSize,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children:iconList,
       ),
     );
   }

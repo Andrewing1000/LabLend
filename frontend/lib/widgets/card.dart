@@ -74,8 +74,8 @@ class CustomCardState extends State<CustomCard> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(6),
-                            child: Image.network(
-                              "/assets/images/place_holder.png",
+                            child: Image.asset(
+                              "assets/images/place_holder.png",
                               fit: BoxFit.cover,
                             ),
                           )),

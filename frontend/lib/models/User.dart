@@ -7,8 +7,9 @@ import 'package:provider/provider.dart';
 
 
 class Role{
-  static const Role adminRole = Role(name : "AdminRole");
-  static const Role assistantRole = Role(name : "AssistantRole");
+  static const Role adminRole = Role(name : "AdministradorLaboratorio");
+  static const Role superAdminRole = Role(name : "SuperAdmin");
+  static const Role assistantRole = Role(name : "AsistenteLaboratorio");
   static const Role visitorRole = Role(name : "VisitorRole");
 
   final String name;
@@ -30,12 +31,63 @@ abstract class User extends ChangeNotifier{
     getFrameAdapter();
   }
 
+
+  factory User.clone(User newUser){
+    return User.fromJson(newUser.toJson());
+  }
+
+  factory User.fromJson(Map<String, dynamic> userData){
+    String roleField = userData['role_field'];
+    User user = VisitorUser.anonymousUser;
+    if(roleField == Role.adminRole.name || roleField == Role.superAdminRole.name){
+      user = AdminUser(
+        email: userData['email'],
+        name: userData['name'],
+        isActive : userData['is_active'],
+      );
+    }
+    else if(roleField == Role.assistantRole.name){
+      user = AssistUser(
+        email: userData['email'],
+        name: userData['name'],
+        isActive : userData['is_active'],
+      );
+    }
+
+    return user;
+  }
+
+
+  Map<String, dynamic> toJson(){
+    return {
+      'email' : email,
+      'name' : name,
+      'role_field' : role.name,
+      'is_active' : isActive,
+    };
+  }
+
   FrameAdapter getFrameAdapter();
 
-  void create();
+  @override
+  void create({required String password}) {
+    SessionManager.session.createUser(this, password);
+    return;
+  }
 
-  void update();
+  @override
+  void update({required User newUser, String? password}) {
+    SessionManager.session.updateUser(this, newUser: newUser, password: password);
+    return;
+  }
 
+  @override
+  void updateData({required User newUser}) {
+    email = newUser.email;
+    name = newUser.name;
+    isActive =  newUser.isActive;
+    role = newUser.role;
+  }
 }
 
 class VisitorUser extends User{
@@ -51,19 +103,11 @@ class VisitorUser extends User{
     return VisitorFrameAdapter();
   }
 
-  @override
-  void create() {
-    return;
-  }
 
-  @override
-  void update() {
-    return;
-  }
 }
 
 class AdminUser extends User{
-  AdminUser({required super.email, required super.name}):
+  AdminUser({required super.email, required super.name, super.isActive}):
         super(role: Role.adminRole);
 
   @override
@@ -71,20 +115,11 @@ class AdminUser extends User{
     return AdminFrameAdapter();
   }
 
-  @override
-  void create() {
-    SessionManager.session.createUser(this);
-  }
-
-  @override
-  void update() {
-    SessionManager.session.updateUser(this);
-  }
 }
 
 
 class AssistUser extends User{
-  AssistUser({required super.email, required super.name}):
+  AssistUser({required super.email, required super.name, super.isActive}):
         super(role: Role.assistantRole);
 
   @override
@@ -92,13 +127,4 @@ class AssistUser extends User{
     return AssistantFrameAdapter();
   }
 
-  @override
-  void create() {
-    SessionManager.session.createUser(this);
-  }
-
-  @override
-  void update() {
-    SessionManager.session.updateUser(this);
-  }
 }

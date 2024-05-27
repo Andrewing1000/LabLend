@@ -86,19 +86,20 @@ class IconButtonState extends State<CustomIconButton> {
             size: (0.05*value+0.975)*widget.size,
           );
 
-          return Container(
-              width: 2*widget.size,
-              padding : EdgeInsets.all(widget.size/3),
-              child: Center(
-                child: IconButton(
-                  icon: icon,
-                  color: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  iconSize: widget.size,
-                  onPressed: _onPressed,
+          return FittedBox(
+            child: Container(
+                padding : EdgeInsets.all(widget.size/4),
+                child: Center(
+                  child: IconButton(
+                    icon: icon,
+                    color: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    iconSize: widget.size,
+                    onPressed: _onPressed,
+                  ),
                 ),
-              ),
+            ),
           );
         },
       ),
