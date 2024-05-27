@@ -11,18 +11,8 @@ Future<void> main() async {
   var manager = SessionManager();
   Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
-  //var admin = AdminUser(name: "Admin3", email: "admin3@example.com", isActive: true);
-  //admin.create(password: "#123#AndresHinojosa#123");
-  List<User> list = await session.getUserList();
-
-  var newUser = User.clone(session.user);
-  newUser.name = "Admin";
-  session.user.update(newUser: newUser);
-  // list.forEach((e){
-  //   print(e.toString());
-  // });
-
-
+  User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
+  admin2.create(password: "#123#AndresHinojosa#123");
 
 }
 

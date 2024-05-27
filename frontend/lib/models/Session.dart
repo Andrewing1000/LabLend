@@ -36,54 +36,76 @@ class Session {
   }
 
   bool isAdmin(){
-    return user is AdminUser;
+    if(user is AdminUser){
+      return true;
+    }
+    manager.errorNotification(error: "Acción denegada");
+    return false ;
   }
 
   Future<bool> isReady() async{
     //Implement login
-    return await sessionCheck() && await connectionCheck();
+    return await connectionCheck();
   }
 
 
 
   Future<List<User>> getUserList() async {
-    //isReady();
-    // if(!isAdmin()){
-    //   //Implement notification
-    //   print("Not enough permissions");
-    //   return [];
-    // }
-
-    var response = await requestHandler.getRequest('/api/user/list/');
-
-    List<User> userList = [];
-    for(var userData in response.data['results']){
-      var user = User.fromJson(userData);
-      userList.add(user);
+    if(!await isReady()){
+      return [];
+    }
+    if(!isAdmin()){
+      return [];
+    }
+    if(!await sessionCheck()){
+      return [];
     }
 
-    return userList;
+    var response;
+    try {
+      response = await requestHandler.getRequest('/api/user/list/');
+    }on DioException catch(e) {
+      manager.errorNotification(error : '' , details : e.response?.data);
+      return [];
+    }
+
+      List<User> userList = [];
+      for(var userData in response.data['results']){
+        var user = User.fromJson(userData);
+        userList.add(user);
+      }
+
+      return userList;
   }
 
   Future<User> getUser(String email) async {
-    isReady();
+    if(!await isReady()){
+      return VisitorUser.anonymousUser;
+    }
+    if(!await sessionCheck()){
+      return VisitorUser.anonymousUser;
+    }
+
     if(user.email == email){
       var response = await requestHandler.getRequest('/api/user/me');
       return User.fromJson(response.data);
     }
 
+
     if(!isAdmin()){
-      //Implement notification
-      print("Not valid permissions");
       return VisitorUser.anonymousUser;
     }
+
 
     try{
       var response = await requestHandler.getRequest('/api/user/manage', query: {'email' : email});
       return User.fromJson(response.data);
     }on  DioException catch(e){
       if(e.response?.statusCode == 404){
-        print("User not found");
+        manager.errorNotification(error : 'No se encontró a un usuario con ese email');
+      }
+      else{
+        manager.errorNotification(error : "", details : e.response?.data);
       }
       return VisitorUser.anonymousUser;
     }
@@ -91,43 +113,48 @@ class Session {
   }
 
   Future<User> createUser(User user, String password) async {
-    //isReady();
-
-    // if(!isAdmin()){
-    //   //Implement notification
-    //   print('Not valid permissions');
-    //   return VisitorUser.anonymousUser;
-    // }
+    if(!await isReady()){
+      return VisitorUser.anonymousUser;
+    }
+    if(!isAdmin()){
+      return VisitorUser.anonymousUser;
+    }
+    if(!await sessionCheck()){
+      return VisitorUser.anonymousUser;
+    }
 
     if(password == ""){
-      print("Password cannot be empty");
+      manager.errorNotification(error: 'El password no puede estar vacío');
       return user;
     }
 
     Map<String, dynamic> userData = user.toJson();
     userData['password'] = password;
 
-    var response;
     if(user.role == Role.adminRole || user.role == Role.superAdminRole){
       try{
-        response = requestHandler.postRequest('/api/user/create/admin/', body: userData);
-        print("User Created");
+        var response = await requestHandler.postRequest('/api/user/create/admin/', body: userData);
+        manager.notification(notification: 'Administrador creado');
+        return user;
       }on DioException catch(e){
-        print("Error");
+        manager.errorNotification(error: "Adición de usuario fallida", details: e.response?.data);
+        return VisitorUser.anonymousUser;
       }
 
     }
     else if(user.role == Role.assistantRole){
       try{
-        response = requestHandler.postRequest('/api/user/create/', body: userData);
-        print("User Created");
+        var response = requestHandler.postRequest('/api/user/create/', body: userData);
+        manager.notification(notification: 'Asistente creado');
+        return user;
       }on DioException catch(e){
-        print("Error");
+        manager.errorNotification(error: "Adición de usuario fallida", details: e.response?.data);
+        return VisitorUser.anonymousUser;
       }
 
     }
     else{
-      print("Cannot create visitor user");
+      manager.errorNotification(error: "Ingrese un rol válido");
     }
 
     return user;
@@ -135,47 +162,39 @@ class Session {
 
   Future<User> updateUser(User user,  {required User newUser, String? password}) async {
 
-    isReady();
+    if(!await isReady()){
+      return VisitorUser.anonymousUser;
+    }
     if(!isAdmin()){
-      //Implement notification
-      print('Not valid permissions');
+      return VisitorUser.anonymousUser;
+    }
+    if(!await sessionCheck()){
       return VisitorUser.anonymousUser;
     }
 
-    if(user.email != newUser.email){
-      print("Email cannot be changed");
-      return user;
-    }
 
-    Map<String, dynamic> userData = newUser.toJson();
-    if(password != null){
-      userData['password'] = password;
-    }
-
-
-    var response;
     if(user.role == Role.adminRole || user.role == Role.superAdminRole){
       try{
-        response = requestHandler.patchRequest('/api/user/manage/', body: userData, query: {'email': user.email});
+        var response = requestHandler.patchRequest('/api/user/manage/', body: newUser.toJson(), query: {'email': user.email});
         user.updateData(newUser: newUser);
-        print("User Updated");
+        manager.notification(notification: "Información de usuaro actualizada");
       }on DioException catch(e){
-        print("Error");
+        manager.errorNotification(error: "Actualización fallida", details: e.response?.data);
       }
 
     }
     else if(user.role == Role.assistantRole){
       try{
-        response = requestHandler.patchRequest('/api/user/manage/', body: userData, query: {'email': user.email});
+        var response = requestHandler.patchRequest('/api/user/manage/', body: newUser.toJson(), query: {'email': user.email});
         user.updateData(newUser: newUser);
-        print("User Updated");
+        manager.notification(notification: "Información de usuaro actualizada");
       }on DioException catch(e){
-        print("Error");
+        manager.errorNotification(error: "Actualización fallida", details: e.response?.data);
       }
 
     }
     else{
-      print("Cannot update user");
+      manager.errorNotification(error: "Rol inválido");
     }
 
     return user;
@@ -183,12 +202,6 @@ class Session {
 
 
   Future<User> disableUser(User user) async {
-
-    if(!isAdmin()){
-      //Implement notification
-      return VisitorUser.anonymousUser;
-    }
-    isReady();
 
     User newUser = User.clone(user);
     newUser.isActive = false;
@@ -212,17 +225,20 @@ class Session {
 
 
   Future<User> makeAdmin(User user) async{
+    if(!await isReady()){
+      return VisitorUser.anonymousUser;
+    }
     if(!isAdmin()){
-      //Implement notification
-      return user;
+      return VisitorUser.anonymousUser;
+    }
+    if(!await sessionCheck()){
+      return VisitorUser.anonymousUser;
     }
 
     if(user.role == Role.adminRole || user.role == Role.superAdminRole){
-      print("Already admin");
+      manager.notification(notification: "Ya es administrador");
       return user;
     }
-
-    isReady();
 
     User newUser = User.clone(user);
     newUser.role = Role.adminRole;
@@ -325,7 +341,33 @@ class SessionManager with ChangeNotifier {
 
   static Session get session => _session;
 
+  static set session(Session session){
+    _session = session;
+  }
+
   bool get isOnline => _isOnline;
+
+  ///
+  ///
+  ///
+  /// Notify MainFrame
+  void errorNotification({required String error, Map<String, dynamic>? details}){
+    print(error);
+
+    for(String key in details!.keys){
+      print(key + ": " + details[key].toString());
+    }
+  }
+
+  void notification({required String notification}){
+    print(notification);
+
+  }
+
+  void confirmNotification(){
+
+  }
+
 
   ///
   ///
@@ -351,18 +393,28 @@ class SessionManager with ChangeNotifier {
   }
 
   Future<bool> sessionCheck() async{
-    var response = await httpHandler.getRequest('/api/user/me/');
-
-    if(response.statusCode == 200){
-      return true;
+    try{
+      var response = await httpHandler.getRequest('/api/user/me/');
+      if(response.statusCode == 200){
+        return true;
+      }
+      return false;
+    }on DioException catch (e){
+      session = AnonymousSession();
     }
 
+    errorNotification(error: 'Inicie sesión');
     return false;
   }
 
 
   Future<bool> connectionCheck() async{
     isOnline = await httpHandler.connectionCheck();
+
+    if(!isOnline){
+      errorNotification(error : 'Sin conección');
+    }
+
     return isOnline;
   }
 
@@ -373,7 +425,7 @@ class SessionManager with ChangeNotifier {
   ///
   ///Login management
   Future<Session> login(String email, String password) async {
-    //connectionCheck();
+    if(!(await connectionCheck())){return AnonymousSession();};
 
     if(_session is!  AnonymousSession){
       if(session?.user.email == email){
@@ -393,16 +445,14 @@ class SessionManager with ChangeNotifier {
 
     try{
       var response = await httpHandler.postRequest('/api/user/token/', body: data);
-
       User user = User.fromJson(response.data);
 
-
       if(!user.isActive){
-        print('Not available account');
+        errorNotification(error :'La cuenta no está habilitada');
         return AnonymousSession();
       }
 
-      print("Logged in");
+      notification(notification : 'Sesión iniciada');
       _session = Session(user: user, loginTime: DateTime.now());
       return _session;
 
@@ -410,20 +460,20 @@ class SessionManager with ChangeNotifier {
 
       if(e.response?.statusCode == 404){
 
-        print("User not found");
+        errorNotification(error : 'Usuario no registrado');
         //Not found
         return AnonymousSession();
       }
       else if(e.response?.statusCode == 401){
 
         //Bad credentials
-        print("Not correct credentials");
+        errorNotification(error: 'Credenciales inválidas');
         return AnonymousSession();
       }
       else if(e.response?.statusCode == 429){
 
         //Too many attempts
-        print("Too many attempts");
+        errorNotification(error :'Muchos intentos, intente de nuevo más tarde');
         return AnonymousSession();
       }
       else{
@@ -436,26 +486,26 @@ class SessionManager with ChangeNotifier {
 
 
   void logOut() async{
+    if(!(await connectionCheck())){
+      return;
+    };
 
-    connectionCheck();
-
-    if(_session is AnonymousSession){
-      print("Session wasnt opened");
+    if(!(await sessionCheck())){
       return;
     }
 
     var response = await httpHandler.postRequest('/api/user/logout/');
 
     if(response.statusCode == 200){
-      print("Logged Out");
+      errorNotification(error : 'Sesión cerrada');
       _session = AnonymousSession();
     }
     else if(response.statusCode == 412){
-      print("Session wasnt opened");
+      errorNotification(error :'Primero inicie sesión');
       _session = AnonymousSession();
     }
     else{
-      print("Session closed");
+      errorNotification(error :'Sesión cerrada');
       _session = AnonymousSession();
     }
   }

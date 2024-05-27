@@ -44,22 +44,22 @@ class RequestHandler {
           ).value;
 
           if (csrfToken.isNotEmpty) {
-            print("Phone cookie found");
+            //print("Phone cookie found");
             options.headers['X-CSRFToken'] = csrfToken;
           }
           else{
-            print("Phone cookie NOT found");
+            //print("Phone cookie NOT found");
           }
         } else {
           _loadCsrfToken();
           if (_csrfToken.isNotEmpty) {
-            print("Web cookie found");
+            //print("Web cookie found");
             options.headers['X-CSRFToken'] = _csrfToken;
           }
           else{
             String? csrfToken = readCookie('csrftoken');
             options.headers['X-CSRFToken'] = csrfToken;
-            print("Web cookie NOT found");
+            //print("Web cookie NOT found");
           }
         }
 
@@ -74,7 +74,7 @@ class RequestHandler {
         // Usage
         // Store CSRF token from response if available
         if (response.headers.map.containsKey('set-cookie')) {
-          print('Set-Cookie found');
+          //print('Set-Cookie found');
           for (var cookie in response.headers['set-cookie']!) {
             print('Cookie: $cookie');
             if (cookie.contains('csrftoken')) {
@@ -86,7 +86,7 @@ class RequestHandler {
             }
           }
         } else {
-          print('Set-Cookie NOT found');
+          //print('Set-Cookie NOT found');
         }
         // Store session cookies
         await setCookiesFromResponse(response);
@@ -195,6 +195,16 @@ class RequestHandler {
   }
 
   Future<bool> connectionCheck() async {
-    return true;
+    try {
+      final response = await _dio.get('/health_check');
+
+      // If we reach here, it means the server responded, regardless of the status code.
+      print("Server is up and responded with status code: ${response.statusCode}");
+      return true;
+    } catch (e) {
+      // If there is an error, it means the server did not respond or there was another issue.
+      print("Error during connection check: $e");
+      return false;
+    }
   }
 }
