@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  app:                                  #Service name
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+      - dev-static-data:/vol/web
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+  #  --certificate /etc/ssl/certs/cert.pem --key /etc/ssl/private/key.pem"
+
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=changeme
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - dev-db-data:/var/lib/postgres/data
+    environment:
+      - POSTGRES_DB=devdb             #Local dev DataBase configuration for instalation
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+volumes:
+  dev-db-data: #volume name, if left blank docker will assign it automatically
+  dev-static-data:
