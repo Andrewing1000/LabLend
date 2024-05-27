@@ -4,16 +4,22 @@ import 'Item.dart';
 import 'Session.dart';
 
 class Inventory {
-  get manager => SessionManager();
-  get session => manager.session;
-  get user => session.user;
-  get requestHandler => session.requestHandler;
+  static var manager = SessionManager();
+  var session = SessionManager.session;
+  var user;
+  var requestHandler;
+
+  Inventory(){
+    user = session.user;
+    requestHandler = session.requestHandler;
+  }
+
 
   List<Item> inventory = [];
 
   Future<List<Brand>> getBrands() async {
     try {
-      final response = await requestHandler.getRequest('/api/brands/');
+      final response = await requestHandler.getRequest('/api/item/brands/');
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.data);
         return data.map((json) => Brand.fromJson(json)).toList();
@@ -28,7 +34,7 @@ class Inventory {
 
   Future<List<Category>> getCategories() async {
     try {
-      final response = await requestHandler.getRequest('/api/categories/');
+      final response = await requestHandler.getRequest('/api/item/categories/');
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.data);
         return data.map((json) => Category.fromJson(json)).toList();
@@ -53,7 +59,7 @@ class Inventory {
         if (namePattern != null) 'name': namePattern,
       };
 
-      final response = await requestHandler.getRequest('/api/items/', query: queryParameters);
+      final response = await requestHandler.getRequest('/api/item/items/', query: queryParameters);
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.data);
         return data.map((json) => Item.fromJson(json)).toList();
@@ -68,7 +74,7 @@ class Inventory {
 
   Future<void> createBrand(Brand brand) async {
     try {
-      final response = await requestHandler.postRequest('/api/brands/', body: brand.toJson());
+      final response = await requestHandler.postRequest('/api/item/brands/', body: brand.toJson());
       if (response.statusCode != 201) {
         throw Exception('Failed to create brand');
       }
@@ -80,7 +86,7 @@ class Inventory {
 
   Future<void> createCategory(Category category) async {
     try {
-      final response = await requestHandler.postRequest('/api/categories/', body: category.toJson());
+      final response = await requestHandler.postRequest('/api/item/categories/', body: category.toJson());
       if (response.statusCode != 201) {
         throw Exception('Failed to create category');
       }
@@ -92,7 +98,7 @@ class Inventory {
 
   Future<void> createItem(Item item) async {
     try {
-      final response = await requestHandler.postRequest('/api/items/', body: item.toJson());
+      final response = await requestHandler.postRequest('/api/item/items/', body: item.toJson());
       if (response.statusCode != 201) {
         throw Exception('Failed to create item');
       }
@@ -104,7 +110,7 @@ class Inventory {
 
   Future<void> updateItem(Item item, Item newItem) async {
     try {
-      final response = await requestHandler.putRequest('/api/items/${item.id}/', body: newItem.toJson());
+      final response = await requestHandler.putRequest('/api/item/items/${item.id}/', body: newItem.toJson());
       item.updateItem(newItem);
       if (response.statusCode != 200) {
         throw Exception('Failed to update item');
@@ -117,7 +123,7 @@ class Inventory {
 
   Future<void> deleteItem(Item item) async {
     try {
-      final response = await requestHandler.deleteRequest('/api/items/${item.id}/');
+      final response = await requestHandler.deleteRequest('/api/item/items/${item.id}/');
       if (response.statusCode != 204) {
         throw Exception('Failed to delete item');
       }
@@ -129,7 +135,7 @@ class Inventory {
 
   Future<void> deleteBrand(Brand brand) async {
     try {
-      final response = await requestHandler.deleteRequest('/api/brands/${brand.id}/');
+      final response = await requestHandler.deleteRequest('/api/item/brands/${brand.id}/');
       if (response.statusCode != 204) {
         throw Exception('Failed to delete brand');
       }
@@ -141,7 +147,7 @@ class Inventory {
 
   Future<void> deleteCategory(Category category) async {
     try {
-      final response = await requestHandler.deleteRequest('/api/categories/${category.id}/');
+      final response = await requestHandler.deleteRequest('/api/item/categories/${category.id}/');
       if (response.statusCode != 204) {
         throw Exception('Failed to delete category');
       }
@@ -154,7 +160,7 @@ class Inventory {
 
   Future<Brand> getBrandById(int id) async {
     try {
-      final response = await requestHandler.getRequest('/api/brands/$id/');
+      final response = await requestHandler.getRequest('/api/item/brands/$id/');
       if (response.statusCode == 200) {
         return Brand.fromJson(json.decode(response.data));
       } else {
@@ -168,7 +174,7 @@ class Inventory {
 
   Future<Category> getCategoryById(int id) async {
     try {
-      final response = await requestHandler.getRequest('/api/categories/$id/');
+      final response = await requestHandler.getRequest('/api/item/categories/$id/');
       if (response.statusCode == 200) {
         return Category.fromJson(json.decode(response.data));
       } else {
@@ -182,7 +188,7 @@ class Inventory {
 
   Future<Item> getItemById(int id) async {
     try {
-      final response = await requestHandler.getRequest('/api/items/$id/');
+      final response = await requestHandler.getRequest('/api/item/items/$id/');
       if (response.statusCode == 200) {
         return Item.fromJson(json.decode(response.data));
       } else {
