@@ -71,13 +71,13 @@ abstract class User extends ChangeNotifier{
 
   @override
   void create({required String password}) {
-    SessionManager.session.createUser(this, password);
+    SessionManager.userManager.createUser(this, password);
     return;
   }
 
   @override
   void update({required User newUser, String? password}) {
-    SessionManager.session.updateUser(this, newUser: newUser, password: password);
+    SessionManager.userManager.updateUser(this, newUser: newUser, password: password);
     return;
   }
 
@@ -87,6 +87,7 @@ abstract class User extends ChangeNotifier{
     name = newUser.name;
     isActive =  newUser.isActive;
     role = newUser.role;
+    notifyListeners();
   }
 }
 

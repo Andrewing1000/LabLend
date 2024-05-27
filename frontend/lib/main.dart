@@ -11,8 +11,8 @@ Future<void> main() async {
   var manager = SessionManager();
   Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
-  User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
-  admin2.create(password: "#123#AndresHinojosa#123");
+  //User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
+  //admin2.create(password: "#123#AndresHinojosa#123");
 
 }
 
