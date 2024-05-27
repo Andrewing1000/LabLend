@@ -213,6 +213,7 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
 
 class HealthCheck(generics.RetrieveAPIView):
+    #serializer_class = serializers.Serializer
     def get(self, request, *args, **kargs):
         return Response({'':'OK'}, status=status.HTTP_200_OK)
 

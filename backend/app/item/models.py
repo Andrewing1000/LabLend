@@ -1,5 +1,17 @@
+
+import os
+import uuid
+
+
 from django.db import models
 from django.core.exceptions import ValidationError
+
+def item_image_file_path(instance, filename):
+    """Generate file path for new image"""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4}{ext}'
+
+    return os.path.join('uploads', 'item', filename)
 
 
 class Brand(models.Model):
@@ -35,7 +47,7 @@ class Category(models.Model):
 
 class Item(models.Model):
     """Objeto de laboratorio."""
-    marca = models.ManyToManyField(Brand)
+    marca = models.ForeignKey(Brand, null=True, on_delete=models.SET_NULL)
     categories = models.ManyToManyField(Category, related_name='items')
 
     nombre = models.CharField(max_length=255, blank=False, null=False)
@@ -43,6 +55,7 @@ class Item(models.Model):
     link = models.CharField(max_length=255, blank=True)
     serial_number = models.CharField(max_length=100, blank=True)
     quantity = models.PositiveIntegerField(default=1)
+    image = models.ImageField(null=True, blank=True, upload_to=item_image_file_path)
 
     def clean(self):
         if self.nombre.strip() == "":

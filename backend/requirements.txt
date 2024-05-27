@@ -6,3 +6,5 @@ django-password-validators
 django-cors-headers
 Pillow>=8.2.0, <8.3.0
 django-sslserver
+django-filter
+psycopg2-binary
