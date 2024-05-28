@@ -5,7 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:frontend/models/UserManager.dart';
 import 'package:frontend/services/frame_adapter.dart';
 import 'Inventory.dart';
-import 'Item.dart';
+import 'item.dart';
+import 'LoanService.dart';
 import 'User.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,7 @@ class SessionManager with ChangeNotifier {
 
   static UserManager userManager = UserManager();
   static Inventory inventory = Inventory();
+  static LoanService loanService = LoanService(httpHandler);
 
   Widget mainFrame = Container();
 
@@ -99,7 +101,6 @@ class SessionManager with ChangeNotifier {
 
   void notification({required String notification}){
     print(notification);
-
   }
 
   void confirmNotification(){

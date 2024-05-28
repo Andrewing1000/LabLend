@@ -5,10 +5,16 @@ import 'package:dio/dio.dart';
 
 class UserManager{
 
-  get manager => SessionManager();
-  get session => manager.session;
-  get user => session.user;
-  get requestHandler => session.requestHandler;
+  static var manager = SessionManager();
+  var session = SessionManager.session;
+  var user;
+  var requestHandler;
+
+  UserManager(){
+    user = session.user;
+    requestHandler = session.requestHandler;
+  }
+
 
   Future<List<User>> getUserList() async {
     if(!await isReady()){
@@ -213,9 +219,8 @@ class UserManager{
     session.sessionCheck();
   }
 
-  isReady() {
-    session.isReady();
+  Future<bool> isReady() async {
+    return await session.isReady();
   }
-
 
 }

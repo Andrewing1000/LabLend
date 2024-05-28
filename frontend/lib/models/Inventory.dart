@@ -1,7 +1,7 @@
 import 'dart:convert';
-
-import 'Item.dart';
+import 'item.dart';
 import 'Session.dart';
+import 'package:dio/dio.dart';
 
 class Inventory {
   static var manager = SessionManager();
@@ -9,42 +9,59 @@ class Inventory {
   var user;
   var requestHandler;
 
-  Inventory(){
+  Inventory() {
     user = session.user;
     requestHandler = session.requestHandler;
   }
 
-
-  List<Item> inventory = [];
-
   Future<List<Brand>> getBrands() async {
-    try {
-      final response = await requestHandler.getRequest('/api/item/brands/');
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.data);
-        return data.map((json) => Brand.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load brands');
-      }
-    } catch (e) {
-      print('Error fetching brands: $e');
-      throw e;
+    if (!await isReady()) {
+      return [];
     }
+    if (!await sessionCheck()) {
+      return [];
+    }
+
+    var response;
+    try {
+      response = await requestHandler.getRequest('/api/item/brands/');
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      return [];
+    }
+
+    List<Brand> brandList = [];
+    for (var brandData in response.data['results']) {
+      var brand = Brand.fromJson(brandData);
+      brandList.add(brand);
+    }
+
+    return brandList;
   }
 
   Future<List<Category>> getCategories() async {
-    try {
-      final response = await requestHandler.getRequest('/api/item/categories/');
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.data);
-        return data.map((json) => Category.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load categories');
-      }
-    } catch (e) {
-      print('Error fetching categories: $e');
-      throw e;
+    if (!await isReady()) {
+      return [];
     }
+    if (!await sessionCheck()) {
+      return [];
+    }
+
+    var response;
+    try {
+      response = await requestHandler.getRequest('/api/item/categories/');
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      return [];
+    }
+
+    List<Category> categoryList = [];
+    for (var categoryData in response.data['results']) {
+      var category = Category.fromJson(categoryData);
+      categoryList.add(category);
+    }
+
+    return categoryList;
   }
 
   Future<List<Item>> getItems({
@@ -52,151 +69,205 @@ class Inventory {
     int? brandId,
     String? namePattern,
   }) async {
-    try {
-      final queryParameters = {
-        if (categoryIds != null) 'categories': categoryIds.join(','),
-        if (brandId != null) 'brand': brandId.toString(),
-        if (namePattern != null) 'name': namePattern,
-      };
-
-      final response = await requestHandler.getRequest('/api/item/items/', query: queryParameters);
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.data);
-        return data.map((json) => Item.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load items');
-      }
-    } catch (e) {
-      print('Error fetching items: $e');
-      throw e;
+    if (!await isReady()) {
+      return [];
     }
+    if (!await sessionCheck()) {
+      return [];
+    }
+
+    var queryParameters = {
+      if (categoryIds != null) 'categories': categoryIds.join(','),
+      if (brandId != null) 'brand': brandId.toString(),
+      if (namePattern != null) 'name': namePattern,
+    };
+
+    var response;
+    try {
+      response = await requestHandler.getRequest('/api/item/items/', query: queryParameters);
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      return [];
+    }
+
+    List<Item> itemList = [];
+    for (var itemData in response.data['results']) {
+      var item = Item.fromJson(itemData);
+      itemList.add(item);
+    }
+
+    return itemList;
   }
 
   Future<void> createBrand(Brand brand) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.postRequest('/api/item/brands/', body: brand.toJson());
-      if (response.statusCode != 201) {
-        throw Exception('Failed to create brand');
-      }
-    } catch (e) {
-      print('Error creating brand: $e');
-      throw e;
+      var response = await requestHandler.postRequest('/api/item/brands/', body: brand.toJson());
+      manager.notification(notification: 'Marca creada con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Creación de marca fallida', details: e.response?.data);
     }
   }
 
   Future<void> createCategory(Category category) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.postRequest('/api/item/categories/', body: category.toJson());
-      if (response.statusCode != 201) {
-        throw Exception('Failed to create category');
-      }
-    } catch (e) {
-      print('Error creating category: $e');
-      throw e;
+      var response = await requestHandler.postRequest('/api/item/categories/', body: category.toJson());
+      manager.notification(notification: 'Categoría creada con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Creación de categoría fallida', details: e.response?.data);
     }
   }
 
   Future<void> createItem(Item item) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.postRequest('/api/item/items/', body: item.toJson());
-      if (response.statusCode != 201) {
-        throw Exception('Failed to create item');
-      }
-    } catch (e) {
-      print('Error creating item: $e');
-      throw e;
+      var response = await requestHandler.postRequest('/api/item/items/', body: item.toJson());
+      manager.notification(notification: 'Ítem creado con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Creación de ítem fallida', details: e.response?.data);
     }
   }
 
   Future<void> updateItem(Item item, Item newItem) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.putRequest('/api/item/items/${item.id}/', body: newItem.toJson());
+      var response = await requestHandler.putRequest('/api/item/items/${item.id}/', body: newItem.toJson());
       item.updateItem(newItem);
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update item');
-      }
-    } catch (e) {
-      print('Error updating item: $e');
-      throw e;
+      manager.notification(notification: 'Ítem actualizado con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Actualización de ítem fallida', details: e.response?.data);
     }
   }
 
   Future<void> deleteItem(Item item) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.deleteRequest('/api/item/items/${item.id}/');
-      if (response.statusCode != 204) {
-        throw Exception('Failed to delete item');
-      }
-    } catch (e) {
-      print('Error deleting item: $e');
-      throw e;
+      var response = await requestHandler.deleteRequest('/api/item/items/${item.id}/');
+      manager.notification(notification: 'Ítem eliminado con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Eliminación de ítem fallida', details: e.response?.data);
     }
   }
 
   Future<void> deleteBrand(Brand brand) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.deleteRequest('/api/item/brands/${brand.id}/');
-      if (response.statusCode != 204) {
-        throw Exception('Failed to delete brand');
-      }
-    } catch (e) {
-      print('Error deleting brand: $e');
-      throw e;
+      var response = await requestHandler.deleteRequest('/api/item/brands/${brand.id}/');
+      manager.notification(notification: 'Marca eliminada con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Eliminación de marca fallida', details: e.response?.data);
     }
   }
 
   Future<void> deleteCategory(Category category) async {
+    if (!await isReady()) {
+      return;
+    }
+    if (!await sessionCheck()) {
+      return;
+    }
+
     try {
-      final response = await requestHandler.deleteRequest('/api/item/categories/${category.id}/');
-      if (response.statusCode != 204) {
-        throw Exception('Failed to delete category');
-      }
-    } catch (e) {
-      print('Error deleting category: $e');
-      throw e;
+      var response = await requestHandler.deleteRequest('/api/item/categories/${category.id}/');
+      manager.notification(notification: 'Categoría eliminada con éxito');
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Eliminación de categoría fallida', details: e.response?.data);
     }
   }
 
-
   Future<Brand> getBrandById(int id) async {
+    if (!await isReady()) {
+      throw Exception('Not ready');
+    }
+    if (!await sessionCheck()) {
+      throw Exception('Session check failed');
+    }
+
     try {
-      final response = await requestHandler.getRequest('/api/item/brands/$id/');
-      if (response.statusCode == 200) {
-        return Brand.fromJson(json.decode(response.data));
-      } else {
-        throw Exception('Failed to load brand');
-      }
-    } catch (e) {
-      print('Error fetching brand: $e');
-      throw e;
+      var response = await requestHandler.getRequest('/api/item/brands/$id/');
+      return Brand.fromJson(response.data);
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      throw Exception('Failed to load brand');
     }
   }
 
   Future<Category> getCategoryById(int id) async {
+    if (!await isReady()) {
+      throw Exception('Not ready');
+    }
+    if (!await sessionCheck()) {
+      throw Exception('Session check failed');
+    }
+
     try {
-      final response = await requestHandler.getRequest('/api/item/categories/$id/');
-      if (response.statusCode == 200) {
-        return Category.fromJson(json.decode(response.data));
-      } else {
-        throw Exception('Failed to load category');
-      }
-    } catch (e) {
-      print('Error fetching category: $e');
-      throw e;
+      var response = await requestHandler.getRequest('/api/item/categories/$id/');
+      return Category.fromJson(response.data);
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      throw Exception('Failed to load category');
     }
   }
 
   Future<Item> getItemById(int id) async {
-    try {
-      final response = await requestHandler.getRequest('/api/item/items/$id/');
-      if (response.statusCode == 200) {
-        return Item.fromJson(json.decode(response.data));
-      } else {
-        throw Exception('Failed to load item');
-      }
-    } catch (e) {
-      print('Error fetching item: $e');
-      throw e;
+    if (!await isReady()) {
+      throw Exception('Not ready');
     }
+    if (!await sessionCheck()) {
+      throw Exception('Session check failed');
+    }
+
+    try {
+      var response = await requestHandler.getRequest('/api/item/items/$id/');
+      return Item.fromJson(response.data);
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      throw Exception('Failed to load item');
+    }
+  }
+
+  Future<bool> isReady() async {
+    return await session.isReady();
+  }
+
+  sessionCheck() {
+    return session.sessionCheck();
   }
 }
