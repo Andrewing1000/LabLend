@@ -36,8 +36,8 @@ class Loan with ChangeNotifier {
     return {
       'id': id,
       'usuario': usuario,
-      'fecha_prestamo': fechaPrestamo.toIso8601String(),
-      'fecha_devolucion': fechaDevolucion.toIso8601String(),
+      'fecha_prestamo': fechaPrestamo.toIso8601String().split('T')[0],
+      'fecha_devolucion': fechaDevolucion.toIso8601String().split('T')[0],
       'devuelto': devuelto,
       'items': items.map((i) => i.toJson()).toList(),
     };
@@ -77,7 +77,7 @@ class PrestamoItem {
 
   Map<String, dynamic> toJson() {
     return {
-      'item': item.toJson(),
+      'item': item.id,
       'cantidad': cantidad,
     };
   }

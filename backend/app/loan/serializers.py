@@ -16,7 +16,7 @@ class PrestamoItemSerializer(serializers.ModelSerializer):
 
 class PrestamoSerializer(serializers.ModelSerializer):
     items = PrestamoItemSerializer(many=True)
-    usuario = serializers.StringRelatedField()
+    usuario = serializers.StringRelatedField()  # Para la serialización
 
     class Meta:
         model = Prestamo
@@ -34,7 +34,7 @@ class PrestamoSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         request = self.context['request']
         user = request.user
-        isAdmin = user.is_superuser or (hasattr(user, 'role') and user.role.role_name == 'LAB_ADMIN')
+        isAdmin = user.is_superuser or (hasattr(user, 'role') and user.role.role_name == LAB_ADMIN)
 
         if instance.usuario != user and not isAdmin:
             raise serializers.ValidationError("No tiene permiso para editar este préstamo.")

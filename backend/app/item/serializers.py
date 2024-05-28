@@ -52,3 +52,15 @@ class ItemSerializer(serializers.ModelSerializer):
             instance.categories.add(cat)
 
         return instance
+
+
+class ItemImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to lab items."""
+
+    class Meta:
+        model = Item
+        fields = ['id', 'image']
+        read_only_fields = ['id']
+        kwargs = {
+            'image' : {'required' : True}
+        }

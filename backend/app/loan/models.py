@@ -39,6 +39,8 @@ class PrestamoItem(models.Model):
 
     def save(self, *args, **kwargs):
         # Calcula la diferencia en cantidad prestada antes de la actualización
+
+
         previous_cantidad = 0
         if self.pk:
             previous_cantidad = PrestamoItem.objects.get(pk=self.pk).cantidad
@@ -46,10 +48,13 @@ class PrestamoItem(models.Model):
         self.full_clean()  # Validar la instancia del modelo
         super().save(*args, **kwargs)
 
+
+
         # Actualiza la cantidad en préstamo del ítem
         difference = self.cantidad - previous_cantidad
         self.item.quantity_on_loan += difference
         self.item.save()
+        print("------------------------------------------------>", type(self.item))
 
     def delete(self, *args, **kwargs):
         # Al eliminar, resta la cantidad prestada del campo quantity_on_loan

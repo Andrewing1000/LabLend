@@ -186,7 +186,7 @@ REST_FRAMEWORK = {
 
         'anon': '10/min',
 
-        'user': '20/min',
+        'user': '50/min',
 
         'login' : '3/min',
     }
@@ -244,3 +244,7 @@ CSRF_COOKIE_SAMESITE = 'None'  # 'None' si 'Lax' no funciona para tus necesidade
 SESSION_COOKIE_HTTPONLY = False
 SESSION_COOKIE_SECURE = True  # Asegúrate de que sea False solo si no estás usando HTTPS
 SESSION_COOKIE_SAMESITE = 'None'
+
+SPECTACULAR_SETTINGS = {
+    'COMPONENT_SPLIT_REQUEST' : True,
+}

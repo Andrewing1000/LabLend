@@ -81,6 +81,14 @@ abstract class User extends ChangeNotifier{
     return;
   }
 
+  void deactivate(){
+    SessionManager.userManager.disableUser(this);
+  }
+
+  void activte(){
+    SessionManager.userManager.enableUser(this);
+  }
+
   @override
   void updateData({required User newUser}) {
     email = newUser.email;

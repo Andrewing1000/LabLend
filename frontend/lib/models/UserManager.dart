@@ -110,7 +110,7 @@ class UserManager{
     }
     else if(user.role == Role.assistantRole){
       try{
-        var response = requestHandler.postRequest('/api/user/create/', body: userData);
+        var response = await requestHandler.postRequest('/api/user/create/', body: userData);
         manager.notification(notification: 'Asistente creado');
         return user;
       }on DioException catch(e){
@@ -215,8 +215,8 @@ class UserManager{
     return session.isAdmin();
   }
 
-  sessionCheck() {
-    session.sessionCheck();
+  Future<bool> sessionCheck() async {
+    return await session.sessionCheck();
   }
 
   Future<bool> isReady() async {
