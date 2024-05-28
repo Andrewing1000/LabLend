@@ -30,6 +30,7 @@ void main() {
         onPressed: () {
           print("Opcion4");
         },
+<<<<<<< HEAD
         title: "Profile"),
     NavItem(
         iconNormal: Icons.person_2_outlined,
@@ -38,6 +39,17 @@ void main() {
           print("Opcion4");
         },
         title: "Profile"),
+=======
+      title: "Profile"),
+    
+    NavItem(
+      iconNormal : Icons.person_2_outlined,
+      iconSelected: Icons.abc,
+        onPressed: (){
+          print("hola");
+        },
+      title: "Profile"),
+>>>>>>> Pruebas
   ];
 
   return runApp(MaterialApp(

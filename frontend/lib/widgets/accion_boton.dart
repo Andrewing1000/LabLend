@@ -6,11 +6,11 @@ class AccionBoton extends StatefulWidget {
   final IconData icon; // Icono que se mostrará en el botón
 
   const AccionBoton({
-    Key? key,
+    super.key,
     required this.onNotification,
     required this.message,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   _AccionBotonState createState() => _AccionBotonState();

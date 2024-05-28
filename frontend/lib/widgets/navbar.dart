@@ -12,7 +12,7 @@ class VerticalNavbar extends StatefulWidget {
   });
 
   @override
-  VerticalNavbarState createState() => VerticalNavbarState();
+  State<StatefulWidget> createState() => VerticalNavbarState();
 }
 
 class VerticalNavbarState extends State<VerticalNavbar> {
@@ -21,8 +21,9 @@ class VerticalNavbarState extends State<VerticalNavbar> {
 
   @override
   void initState() {
+
     super.initState();
-    if(widget.items.length == 0){
+    if(widget.items.isEmpty){
       selected = null;
     }
     else{
@@ -32,28 +33,43 @@ class VerticalNavbarState extends State<VerticalNavbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Color.fromRGBO(21, 21, 21, 1.0),
-        borderRadius: BorderRadius.circular(widget.iconSize/4),
-      ),
-      width: 2*widget.iconSize,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
+
+    List<CustomIconButton> iconList = [];
+    for(NavItem item in widget.items){
+      iconList.add(CustomIconButton(
+          iconNormal: item.iconNormal,
+          iconSelected: item.iconSelected,
+          isSelected: selected == item,
+          size: widget.iconSize,
+          onPressed: (){
+            setSelectedIndex(item);
+            if(item.onPressed!=null){
+              item.onPressed!();
+            }
+          },
+        )
+      );
+    }
+
+
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(21, 21, 21, 1.0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.all(5),
+        constraints: BoxConstraints(
+          minWidth: widget.iconSize,
+        ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: widget.items.map((item) {
-              return CustomIconButton(iconNormal: item.iconNormal,
-                                        iconSelected: item.iconSelected,
-                                        isSelected: selected == item,
-                                        onPressed: (){  setSelectedIndex(item);
-                                                        if(item.onPressed!=null){
-                                                          item.onPressed!();
-                                                        }},
-                                        size: widget.iconSize);
-            }).toList(),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children:iconList,
           ),
-        ),
+      ),
     );
   }
 
@@ -66,7 +82,7 @@ class VerticalNavbarState extends State<VerticalNavbar> {
 
 }
 
-class NavItem {
+class NavItem{
   final IconData iconNormal;
   final IconData? iconSelected;
   final Function? onPressed;
@@ -78,4 +94,16 @@ class NavItem {
     required this.onPressed,
     required this.title,
   });
+}
+
+
+class NavBarController{
+  List<NavItem> items;
+  List<VerticalNavbarState> clients = [];
+
+  NavBarController({this.items = const []});
+
+  void addClient(VerticalNavbarState client){
+
+  }
 }

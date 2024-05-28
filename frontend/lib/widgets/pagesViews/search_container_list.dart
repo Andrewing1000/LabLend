@@ -33,6 +33,13 @@ class _SearchResultsContentState extends State<SearchResultsContent> {
 
   List<CustomCard> filterItems(List<CustomCard> items, String query) {
     //print("Entrada a al fucnion");
+<<<<<<< HEAD
+=======
+    if (query == "") {
+      return items;
+    }
+
+>>>>>>> Pruebas
     setState(() {
       items
           .where(

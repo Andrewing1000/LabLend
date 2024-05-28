@@ -55,7 +55,7 @@ class HorizontalCardState extends State<HorizontalCard> {
                     height: double.infinity,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image.network(
+                      child: Image.asset(
                           "assets/images/place_holder.png",
                         fit: BoxFit.cover,
                         isAntiAlias: true,

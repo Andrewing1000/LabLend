@@ -21,11 +21,27 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Stack(
           children: [
+<<<<<<< HEAD
             Expanded(child: SearchPage()),
 
             //Footer(),
 
             //WelcomePage()
+=======
+            // Container(
+            //   decoration: const BoxDecoration(
+            //       image: DecorationImage(
+            //           image: AssetImage('assets/images/place_holder.png'),
+            //           fit: BoxFit.cover)),
+            // ),
+            // Container(
+            //   color: Colors.black.withOpacity(0.45),
+            // ),
+            //Expanded(child: SearchPage()),
+
+            //const Footer()
+             const WelcomePage()
+>>>>>>> Pruebas
           ],
         ),
       ),
