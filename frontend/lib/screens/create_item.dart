@@ -5,6 +5,7 @@ import 'package:frontend/models/item.dart';
 //import 'package:frontend/models/brand.dart';
 import 'package:frontend/widgets/boton_agregar.dart';
 import 'package:frontend/widgets/notification.dart';
+import 'package:frontend/widgets/banner.dart';
 
 class CreationItemScreen extends StatefulWidget {
   @override
@@ -53,7 +54,7 @@ class _CreationItemScreenState extends State<CreationItemScreen> {
       return;
     }
 
-    /*Brand brand = Brand(id: 1, marca: brandName);
+    /*  Brand brand = Brand(id: 1, marca: brandName);
     Category category = Category(
         id: 1, nombre: categoryName, description: 'Category description');
     List<Category> categories = [category];
@@ -96,128 +97,139 @@ class _CreationItemScreenState extends State<CreationItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('Crear Nuevo Item'),
         backgroundColor: Colors.black,
       ),
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Nombre del Item',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                BannerWidget(
+                  imageUrl: "assets/images/place_holder.png",
+                  title: "Inventario del Laboratorio de Física",
+                  subtitle: "Creacion de items",
+                  description: "asdasdaskdlaskd.",
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Nombre del Item',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Descripción',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: descriptionController,
+                        decoration: InputDecoration(
+                          labelText: 'Descripción',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: linkController,
-                    decoration: InputDecoration(
-                      labelText: 'Enlace',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: linkController,
+                        decoration: InputDecoration(
+                          labelText: 'Enlace',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: serialNumberController,
-                    decoration: InputDecoration(
-                      labelText: 'Número de Serie',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: serialNumberController,
+                        decoration: InputDecoration(
+                          labelText: 'Número de Serie',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: quantityController,
-                    decoration: InputDecoration(
-                      labelText: 'Cantidad',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: quantityController,
+                        decoration: InputDecoration(
+                          labelText: 'Cantidad',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    keyboardType: TextInputType.number,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: brandController,
-                    decoration: InputDecoration(
-                      labelText: 'Marca',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: brandController,
+                        decoration: InputDecoration(
+                          labelText: 'Marca',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: categoryController,
-                    decoration: InputDecoration(
-                      labelText: 'Categoría',
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      labelStyle: TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: categoryController,
+                        decoration: InputDecoration(
+                          labelText: 'Categoría',
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          labelStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    style: TextStyle(color: Colors.white),
+                      SizedBox(height: 20),
+                      BotonAgregar(
+                        onPressed: _createNewItem,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                  BotonAgregar(
-                    onPressed: _createNewItem,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           if (_showNotification)

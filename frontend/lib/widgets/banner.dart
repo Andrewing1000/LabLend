@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:palette_generator/palette_generator.dart';
 
-class BannerWidget extends StatelessWidget {
+class BannerWidget extends StatefulWidget {
   final String imageUrl;
   final String title;
   final String subtitle;
   final String description;
-  final Color baseColor;
 
   const BannerWidget({
     Key? key,
@@ -13,56 +13,102 @@ class BannerWidget extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.description,
-    required this.baseColor,
   }) : super(key: key);
+
+  @override
+  _BannerWidgetState createState() => _BannerWidgetState();
+}
+
+class _BannerWidgetState extends State<BannerWidget> {
+  Color dominantColor = Colors.black;
+
+  @override
+  void initState() {
+    super.initState();
+    _updatePalette();
+  }
+
+  Future<void> _updatePalette() async {
+    final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
+      NetworkImage(widget.imageUrl),
+    );
+    setState(() {
+      dominantColor = generator.dominantColor?.color ?? Colors.black;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
+      height: 300,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [baseColor, baseColor.withOpacity(0.7)],
+          colors: [dominantColor, dominantColor.withOpacity(0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Image.network(
-            imageUrl,
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.3,
+              child: Image.network(
+                widget.imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          const SizedBox(width: 20),
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  title,
+                  widget.title,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10.0,
+                        color: Colors.black,
+                        offset: Offset(2.0, 2.0),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  subtitle,
+                  widget.subtitle,
                   style: TextStyle(
                     color: Colors.white70,
-                    fontSize: 16,
+                    fontSize: 18,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10.0,
+                        color: Colors.black,
+                        offset: Offset(2.0, 2.0),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  description,
+                  widget.description,
                   style: TextStyle(
                     color: Colors.white60,
-                    fontSize: 14,
+                    fontSize: 16,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10.0,
+                        color: Colors.black,
+                        offset: Offset(2.0, 2.0),
+                      ),
+                    ],
                   ),
                 ),
               ],
