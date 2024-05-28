@@ -55,6 +55,7 @@ class Item(models.Model):
     link = models.CharField(max_length=255, blank=True)
     serial_number = models.CharField(max_length=100, blank=True)
     quantity = models.PositiveIntegerField(default=1)
+    quantity_on_loan = models.PositiveIntegerField(default=0)
     image = models.ImageField(null=True, blank=True, upload_to=item_image_file_path)
 
     def clean(self):

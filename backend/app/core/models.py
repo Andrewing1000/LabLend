@@ -173,6 +173,10 @@ class User(AbstractBaseUser, RolePermissionsMixin):
     USERNAME_FIELD = 'email'
 
 
+    def __str__(self):
+        return self.email
+
+
 
 
 

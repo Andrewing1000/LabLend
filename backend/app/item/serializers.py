@@ -7,6 +7,7 @@ class BrandSerializer(serializers.ModelSerializer):
         model = Brand
         fields = ['id', 'marca']
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -18,9 +19,9 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ['id', 'nombre', 'description', 'link', 'marca', 'categories', 'serial_number', 'quantity']
+        fields = ['id', 'nombre', 'description', 'link', 'marca', 'categories', 'serial_number', 'quantity', 'quantity_on_loan']
         extra_kwargs = {
-            'is' : {'read_only': True},
+             'quantity_on_loan' : {'read_only': True},
         }
 
     def create(self, validated_data):
