@@ -32,10 +32,6 @@ abstract class User extends ChangeNotifier{
   }
 
 
-  factory User.clone(User newUser){
-    return User.fromJson(newUser.toJson());
-  }
-
   factory User.fromJson(Map<String, dynamic> userData){
     String roleField = userData['role_field'];
     User user = VisitorUser.anonymousUser;
@@ -69,13 +65,16 @@ abstract class User extends ChangeNotifier{
 
   FrameAdapter getFrameAdapter();
 
-  @override
+  User clone(){
+    return User.fromJson(toJson());
+  }
+
+
   void create({required String password}) {
     SessionManager.userManager.createUser(this, password);
     return;
   }
 
-  @override
   void update({required User newUser, String? password}) {
     SessionManager.userManager.updateUser(this, newUser: newUser, password: password);
     return;
@@ -85,11 +84,10 @@ abstract class User extends ChangeNotifier{
     SessionManager.userManager.disableUser(this);
   }
 
-  void activte(){
+  void activate(){
     SessionManager.userManager.enableUser(this);
   }
 
-  @override
   void updateData({required User newUser}) {
     email = newUser.email;
     name = newUser.name;

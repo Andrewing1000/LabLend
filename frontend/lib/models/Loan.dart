@@ -38,11 +38,15 @@ class Loan with ChangeNotifier {
     return {
       'id': id,
       'usuario': usuario,
-      'fecha_prestamo': fechaPrestamo.toIso8601String().split('T')[0],
-      'fecha_devolucion': fechaDevolucion.toIso8601String().split('T')[0],
+      'fecha_prestamo': fechaPrestamo.toIso8601String(),
+      'fecha_devolucion': fechaDevolucion.toIso8601String(),
       'devuelto': devuelto,
       'items': items.map((i) => i.toJson()).toList(),
     };
+  }
+
+  Loan clone(){
+    return Loan.fromJson(toJson());
   }
 
   void create() {
@@ -65,21 +69,21 @@ class Loan with ChangeNotifier {
 }
 
 class PrestamoItem {
-  final Item item;
+  final int itemId;
   final int cantidad;
 
-  PrestamoItem({required this.item, required this.cantidad});
+  PrestamoItem({required this.itemId, required this.cantidad});
 
   factory PrestamoItem.fromJson(Map<String, dynamic> json) {
     return PrestamoItem(
-      item: Item.fromJson(json['item']),
+      itemId: json['item_id'],
       cantidad: json['cantidad'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'item': item.id,
+      'item_id': itemId,
       'cantidad': cantidad,
     };
   }

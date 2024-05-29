@@ -3,19 +3,20 @@ from .models import Prestamo, PrestamoItem
 from item.serializers import ItemSerializer
 from django.contrib.auth import get_user_model
 from item.models import Item
-from core.models import IsLabAdmin, LAB_ADMIN
+from core.models import IsLabAdmin, isAdmin
 
 User = get_user_model()
 
 class PrestamoItemSerializer(serializers.ModelSerializer):
-    item = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all())
-
+    item_id = serializers.PrimaryKeyRelatedField(queryset = Item.objects.all(), many = False, source = 'item')
+    cantidad = serializers.IntegerField()
     class Meta:
         model = PrestamoItem
-        fields = ['item', 'cantidad']
+        fields = ['item_id', 'cantidad']
+
 
 class PrestamoSerializer(serializers.ModelSerializer):
-    items = PrestamoItemSerializer(many=True)
+    items = PrestamoItemSerializer(source = 'prestamoitem_set', many=True)
     usuario = serializers.StringRelatedField()  # Para la serialización
 
     class Meta:
@@ -23,7 +24,7 @@ class PrestamoSerializer(serializers.ModelSerializer):
         fields = ['id', 'usuario', 'fecha_prestamo', 'fecha_devolucion', 'devuelto', 'items']
 
     def create(self, validated_data):
-        items_data = validated_data.pop('items')
+        items_data = validated_data.pop('prestamoitem_set')
         usuario = self.context['request'].user
         prestamo = Prestamo.objects.create(usuario=usuario, **validated_data)
         for item_data in items_data:
@@ -33,30 +34,36 @@ class PrestamoSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context['request']
-        user = request.user
-        isAdmin = user.is_superuser or (hasattr(user, 'role') and user.role.role_name == LAB_ADMIN)
 
-        if instance.usuario != user and not isAdmin:
+        if instance.usuario != request.user and not isAdmin(request.user):
             raise serializers.ValidationError("No tiene permiso para editar este préstamo.")
 
         items_data = validated_data.pop('items', None)
         instance.fecha_prestamo = validated_data.get('fecha_prestamo', instance.fecha_prestamo)
         instance.fecha_devolucion = validated_data.get('fecha_devolucion', instance.fecha_devolucion)
-        instance.devuelto = validated_data.get('devuelto', instance.devuelto)
 
-        # Si el préstamo ha sido marcado como devuelto, actualizar la cantidad en préstamo de cada ítem
-        if instance.devuelto:
+        devuelto = validated_data.get('devuelto', instance.devuelto)
+
+
+        if devuelto and not instance.devuelto:
             for prestamo_item in instance.prestamoitem_set.all():
                 prestamo_item.item.quantity_on_loan -= prestamo_item.cantidad
                 prestamo_item.item.save()
 
+
+        if not devuelto and instance.devuelto:
+            for prestamo_item in instance.prestamoitem_set.all():
+                prestamo_item.item.quantity_on_loan += prestamo_item.cantidad
+                prestamo_item.item.save()
+
+        instance.devuelto = devuelto
         instance.save()
 
         if items_data is not None:
             # Clear previous items
             instance.prestamoitem_set.all().delete()
             for item_data in items_data:
-                item = item_data['item']
+                item = item_data['item_id']
                 PrestamoItem.objects.create(prestamo=instance, item=item, cantidad=item_data['cantidad'])
 
         return instance

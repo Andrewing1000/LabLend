@@ -1,14 +1,13 @@
 """
 Views for the user API.
 """
-from rest_framework import generics, authentication, permissions, exceptions
+from rest_framework import generics, views, permissions, exceptions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework import pagination
 from rest_framework import status
-from rest_framework import serializers
 
 from core.models import IsLabAdmin, IsLogged, getAdminRole, getAssistantRole
 from django.contrib.auth import login, logout
@@ -25,7 +24,10 @@ from user.serializers import (
     AdminSerializer,
     ManageUserSerializer,
     SessionSerializer,
+    HealthCheckSerializer,
 )
+
+from user.filters import UserFilter
 
 from django.shortcuts import get_object_or_404
 
@@ -58,8 +60,9 @@ class ListUsersView(generics.ListAPIView):
     """List shows users in the api"""
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
-    pagination_class = UserListPagination
+    #pagination_class = UserListPagination
     queryset = get_user_model().objects.all().order_by('email')
+    filterset_class = UserFilter
 
     def get_queryset(self):
 
@@ -93,7 +96,7 @@ class ListUserLogsView(generics.ListAPIView):
     """List shows user logs in the api"""
     serializer_class = SessionSerializer
     permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
-    pagination_class = LogListPagination
+    #pagination_class = LogListPagination
     queryset = Session.objects.all()
 
     def get_queryset(self):
@@ -212,10 +215,10 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
 
 
-class HealthCheck(generics.RetrieveAPIView):
-    #serializer_class = serializers.Serializer
+class HealthCheck(views.APIView):
+    serializer_class = HealthCheckSerializer
     def get(self, request, *args, **kargs):
-        return Response({'':'OK'}, status=status.HTTP_200_OK)
+        return Response({'status':'OK'}, status=status.HTTP_200_OK)
 
 
 

@@ -1,6 +1,7 @@
 # serializers.py
 from rest_framework import serializers
 from .models import Brand, Category, Item
+import logging
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +20,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ['id', 'nombre', 'description', 'link', 'marca', 'categories', 'serial_number', 'quantity', 'quantity_on_loan']
+        fields = ['id', 'nombre', 'description', 'link', 'marca', 'categories', 'serial_number', 'quantity', 'quantity_on_loan', "image"]
         extra_kwargs = {
              'quantity_on_loan' : {'read_only': True},
         }

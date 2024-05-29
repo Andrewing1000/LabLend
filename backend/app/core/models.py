@@ -21,17 +21,21 @@ LAB_ADMIN = 'AdministradorLaboratorio'
 LAB_ASSIST = 'AsistenteLaboratorio'
 
 
+def isAdmin(user):
+
+    role = user.role
+    if(user.is_superuser):
+        return True
+    if(role.role_name == LAB_ADMIN):
+        return True
+    return False
+
+
+
 class IsLabAdmin(BasePermission):
 
     def has_permission(self, request, view):
-        user = request.user
-        role = user.role
-
-        if(user.is_superuser):
-            return True
-        if(role.role_name == LAB_ADMIN):
-            return True
-        return False
+        return isAdmin(request.user)
 
 class LabAdmin(Role):
     """Lab Administrator role"""
@@ -73,7 +77,7 @@ def createAdminRole():
 def createAssistantRole():
     try:
         Role.objects.get(role_name = LAB_ASSIST)
-        print(LAB_ASSIST + "LabAssistant  Added")
+        print(LAB_ASSIST + "LabAssistant Already Added")
     except:
         LabAssistant.objects.create()
         print(LAB_ASSIST + "LabAssistant Added")
