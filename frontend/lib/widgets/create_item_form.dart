@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/item.dart';
+import 'package:frontend/models/inventory.dart';
 import 'package:frontend/widgets/string_field.dart';
+import 'package:frontend/models/Session.dart';
 
 class CreateItemForm extends StatefulWidget {
   final Function(Item) onFormSubmit;
@@ -20,10 +22,27 @@ class _CreateItemFormState extends State<CreateItemForm> {
   final TextEditingController quantityController = TextEditingController();
 
   Brand? selectedBrand;
-  List<Brand> brands = [
-    Brand(id: 1, marca: 'Example Brand A'),
-    Brand(id: 2, marca: 'Example Brand B'),
-  ];
+  List<Brand> brands = [];
+  bool isLoadingBrands = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBrands();
+  }
+
+  Future<void> _loadBrands() async {
+    // Initialize session for testing purposes
+    var manager = SessionManager();
+    Session session =
+        await manager.login("admin@example.com", "#123#AndresHinojosa#123");
+
+    List<Brand> brandList = await SessionManager.inventory.getBrands();
+    setState(() {
+      brands = brandList;
+      isLoadingBrands = false;
+    });
+  }
 
   List<Category> selectedCategories = [];
   List<Category> categories = [
@@ -67,24 +86,26 @@ class _CreateItemFormState extends State<CreateItemForm> {
           width: MediaQuery.of(context).size.width * 0.8,
         ),
         SizedBox(height: 20),
-        DropdownButton<Brand>(
-          value: selectedBrand,
-          hint: Text("Selecciona una Marca",
-              style: TextStyle(color: Colors.white)),
-          dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
-          items: brands.map((Brand brand) {
-            return DropdownMenuItem<Brand>(
-              value: brand,
-              child: Text(brand.marca),
-            );
-          }).toList(),
-          onChanged: (Brand? newBrand) {
-            setState(() {
-              selectedBrand = newBrand;
-            });
-          },
-        ),
+        isLoadingBrands
+            ? CircularProgressIndicator()
+            : DropdownButton<Brand>(
+                value: selectedBrand,
+                hint: Text("Selecciona una Marca",
+                    style: TextStyle(color: Colors.white)),
+                dropdownColor: Colors.grey[900],
+                style: TextStyle(color: Colors.white),
+                items: brands.map((Brand brand) {
+                  return DropdownMenuItem<Brand>(
+                    value: brand,
+                    child: Text(brand.marca),
+                  );
+                }).toList(),
+                onChanged: (Brand? newBrand) {
+                  setState(() {
+                    selectedBrand = newBrand;
+                  });
+                },
+              ),
         SizedBox(height: 20),
         DropdownButton<Category>(
           hint: Text("Selecciona Categorías",

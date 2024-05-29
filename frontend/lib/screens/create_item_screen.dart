@@ -60,6 +60,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
           if (_showNotification)
             NotificationWidget(
               message: _notificationMessage,
+              //alignment: Alignment.bottomCenter,
             ),
         ],
       ),
