@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/user_form.dart';
 import 'package:frontend/widgets/notification.dart';
+
+import '../models/User.dart';
 // import 'package:frontend/models/user.dart'; // Comentado para ver solo la vista
 
 class CreateUserScreen extends StatefulWidget {
@@ -15,7 +17,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   String _notificationMessage = '';
 
   void _createUser(String email, String name, String password,
-      /*Role role,*/ bool isActive) {
+      Role role, bool isActive) {
     if (email.isEmpty || name.isEmpty || password.isEmpty) {
       setState(() {
         _notificationMessage = "Todos los campos son obligatorios.";
@@ -29,14 +31,19 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       return;
     }
 
-    // User newUser;
-    // if (role == Role.adminRole) {
-    //   newUser = AdminUser(email: email, name: name, isActive: isActive);
-    // } else {
-    //   newUser = AssistUser(email: email, name: name, isActive: isActive);
-    // }
+    User user;
+    if (role == Role.adminRole) {
+      user = AdminUser(email: email, name: name, isActive: isActive);
+    } else {
+      user = AssistUser(email: email, name: name, isActive: isActive);
+    }
 
-    // newUser.create(password: password);
+    user.create(password: password);
+    //User newUser = User.clone(user);
+
+    //newUser.name = newName;
+
+    //user.update(newUser: newUser, password: password);
 
     setState(() {
       _notificationMessage = "Usuario '$name' creado con éxito.";

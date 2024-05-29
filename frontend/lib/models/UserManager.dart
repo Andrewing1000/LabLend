@@ -215,8 +215,8 @@ class UserManager{
     return session.isAdmin();
   }
 
-  sessionCheck() {
-    session.sessionCheck();
+  Future<bool> sessionCheck() {
+    return session.sessionCheck();
   }
 
   Future<bool> isReady() async {

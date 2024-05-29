@@ -36,12 +36,12 @@ Future<void> main() async {
     categories: dummyCategories,
   );
 
-  dummyItem.create();
-  //User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
-  //admin2.create(password: "#123#AndresHinojosa#123");
+  //dummyItem.create();
+  User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
+  admin2.create(password: "#123#AndresHinojosa#123");
 
   Loan loan = Loan(id: 1, usuario: session.user.email, fechaPrestamo: DateTime.now(),
-      fechaDevolucion: DateTime(DateTime.april),
+      fechaDevolucion: DateTime.now().add(Duration(hours: 3)),
       devuelto: false,
       items: [PrestamoItem(item: dummyItem, cantidad: 1)] );
 

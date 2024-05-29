@@ -208,6 +208,8 @@ class _CreationItemScreenState extends State<CreationItemScreen> {
                         style: TextStyle(color: Colors.white),
                       ),
                       SizedBox(height: 20),
+
+                      // List<Category> = SessionManager.inventory.getCategories()
                       TextField(
                         controller: categoryController,
                         decoration: InputDecoration(
