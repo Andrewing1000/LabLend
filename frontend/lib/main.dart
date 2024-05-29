@@ -15,7 +15,6 @@ Future<void> main() async {
   Session session =
       await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
-
   ///
   ///
   /// Cerrar sesion
@@ -32,12 +31,10 @@ Future<void> main() async {
   /// Listar usuarios
   //var list = await SessionManager.userManager.getUserList();
 
-
   ///
   ///
   ///ListarItems
   //var listItems = await SessionManager.inventory.getItems();
-
 
   ///
   ///
@@ -46,7 +43,6 @@ Future<void> main() async {
   //   id: 1,
   //   marca: 'Example Brand',
   // );
-
 
   ///
   ///
@@ -73,13 +69,11 @@ Future<void> main() async {
   // );
   //dummyItem.create();
 
-
   ///
   ///
   /// Obtener Item por id
   // Item? dummyItem = await SessionManager.inventory.getItemById(1);
   // print(dummyItem?.toJson().toString());
-
 
   ///
   ///
@@ -92,18 +86,15 @@ Future<void> main() async {
   //
   // loan.create();
 
-
   ///
   ///
   /// Obtener prestamo usando id
   //Loan? loan = await SessionManager.loanService.getLoan(20);
 
-
   ///
   ///
   /// Devolver prestamo
   //SessionManager.loanService.updateDevuelto(loan, true);
-
 
   ///
   ///
@@ -112,7 +103,6 @@ Future<void> main() async {
   //     endDate: DateTime.now().add(Duration(days: 1)),
   //     startDate: DateTime.now().add(Duration(days: 0)),
   //     email: "admin2");
-
 
   ///
   ///
@@ -134,7 +124,6 @@ Future<void> main() async {
   ///
   /// Obtener Items con categorias
   // List<Item> list= await SessionManager.inventory.getItems(brandId: 1, categoryIds: [1]);
-
 }
 
 class MyApp extends StatelessWidget {
@@ -142,6 +131,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: VerticalMainFrame(),
       ),

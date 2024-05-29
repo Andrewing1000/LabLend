@@ -4,8 +4,10 @@ import '../../widgets/password_field.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: LoginScreen(
-      onSubmit: () {},
+    home: Container(
+      child: LoginScreen(
+        onSubmit: () {},
+      ),
     ),
   ));
 }
