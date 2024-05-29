@@ -66,7 +66,7 @@ class SessionManager with ChangeNotifier {
 
   static UserManager userManager = UserManager();
   static Inventory inventory = Inventory();
-  static LoanService loanService = LoanService(httpHandler);
+  static LoanService loanService = LoanService();
 
   Widget mainFrame = Container();
 

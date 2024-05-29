@@ -3,12 +3,11 @@ import 'Loan.dart';
 import 'package:dio/dio.dart';
 
 class LoanService {
-
   static var manager = SessionManager();
   var session = SessionManager.session;
   var requestHandler;
 
-  LoanService(this.requestHandler) {
+  LoanService() {
     requestHandler = session.requestHandler;
   }
 
@@ -53,25 +52,12 @@ class LoanService {
     return loanList;
   }
 
-
-  Future<Loan> getLoan(int id) async {
+  Future<Loan?> getLoan(int id) async {
     if (!await isReady()) {
-      return Loan(
-          id: 0,
-          usuario: '',
-          fechaPrestamo: DateTime.now(),
-          fechaDevolucion: DateTime.now(),
-          devuelto: false,
-          items: []);
+      return null;
     }
     if (!await sessionCheck()) {
-      return Loan(
-          id: 0,
-          usuario: '',
-          fechaPrestamo: DateTime.now(),
-          fechaDevolucion: DateTime.now(),
-          devuelto: false,
-          items: []);
+      return null;
     }
 
     var response;
@@ -80,34 +66,16 @@ class LoanService {
       return Loan.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
-      return Loan(
-          id: 0,
-          usuario: '',
-          fechaPrestamo: DateTime.now(),
-          fechaDevolucion: DateTime.now(),
-          devuelto: false,
-          items: []);
+      return null;
     }
   }
 
-  Future<Loan> createLoan(Loan loan) async {
+  Future<Loan?> createLoan(Loan loan) async {
     if (!await isReady()) {
-      return Loan(
-          id: 0,
-          usuario: '',
-          fechaPrestamo: DateTime.now(),
-          fechaDevolucion: DateTime.now(),
-          devuelto: false,
-          items: []);
+      return null;
     }
     if (!await sessionCheck()) {
-      return Loan(
-          id: 0,
-          usuario: '',
-          fechaPrestamo: DateTime.now(),
-          fechaDevolucion: DateTime.now(),
-          devuelto: false,
-          items: []);
+      return null;
     }
 
     try {
@@ -116,22 +84,16 @@ class LoanService {
       return Loan.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: 'Creación de préstamo fallida', details: e.response?.data);
-      return Loan(
-          id: 0,
-          usuario: '',
-          fechaPrestamo: DateTime.now(),
-          fechaDevolucion: DateTime.now(),
-          devuelto: false,
-          items: []);
+      return null;
     }
   }
 
-  Future<Loan> updateLoan(Loan loan, Loan newLoan) async {
+  Future<Loan?> updateLoan(Loan loan, Loan newLoan) async {
     if (!await isReady()) {
-      return loan;
+      return null;
     }
     if (!await sessionCheck()) {
-      return loan;
+      return null;
     }
 
     try {
@@ -141,16 +103,16 @@ class LoanService {
       return Loan.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: 'Actualización de préstamo fallida', details: e.response?.data);
-      return loan;
+      return null;
     }
   }
 
-  Future<void> updateDevuelto(Loan loan, bool devuelto) async {
+  Future<Loan?> updateDevuelto(Loan loan, bool devuelto) async {
     if (!await isReady()) {
-      return;
+      return null;
     }
     if (!await sessionCheck()) {
-      return;
+      return null;
     }
 
     var updatedLoan = Loan(
@@ -162,14 +124,36 @@ class LoanService {
       items: loan.items,
     );
 
-    await updateLoan(loan, updatedLoan);
+    return await updateLoan(loan, updatedLoan);
+  }
+
+  Future<bool> deleteLoan(int id) async {
+    if (!await isReady()) {
+      return false;
+    }
+    if (!await sessionCheck()) {
+      return false;
+    }
+
+    try {
+      await requestHandler.deleteRequest('/loan/loan/$id/');
+      manager.notification(notification: 'Préstamo eliminado con éxito');
+      return true;
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Eliminación de préstamo fallida', details: e.response?.data);
+      return false;
+    }
+  }
+
+  bool isAdmin() {
+    return session.isAdmin();
+  }
+
+  Future<bool> sessionCheck() async {
+    return await session.sessionCheck();
   }
 
   Future<bool> isReady() async {
     return await session.isReady();
-  }
-
-  sessionCheck() {
-    return session.sessionCheck();
   }
 }

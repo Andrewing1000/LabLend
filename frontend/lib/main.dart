@@ -22,7 +22,7 @@ Future<void> main() async {
   ///
   ///
   ///Obtener usuario por el email
-  //User user = await SessionManager.userManager.getUser("admin2@example.com");
+  //User? user = await SessionManager.userManager.getUser("admin2@example.com");
 
   ///
   ///
@@ -75,8 +75,8 @@ Future<void> main() async {
   ///
   ///
   /// Obtener Item por id
-  //Item dummyItem = await SessionManager.inventory.getItemById(1);
-  // print(dummyItem.toJson().toString());
+  // Item? dummyItem = await SessionManager.inventory.getItemById(1);
+  // print(dummyItem?.toJson().toString());
 
 
   ///
@@ -94,7 +94,7 @@ Future<void> main() async {
   ///
   ///
   /// Obtener prestamo usando id
-  //Loan loan = await SessionManager.loanService.getLoan(20);
+  //Loan? loan = await SessionManager.loanService.getLoan(20);
 
 
   ///
@@ -114,24 +114,23 @@ Future<void> main() async {
   ///
   ///
   /// Desactivar y actualizar Usuario
-  //User user = AssistUser(email: "pedro@pana.com", name: "Pedrolas", isActive: true);
-  //user.deactivate();
-  // User newUser = User.clone(user);
+  // User user = AssistUser(email: "pedro@pana.com", name: "Pedrolas", isActive: true);
+  // user.deactivate();
+  // User newUser = user.clone();
   // newUser.name = "NoPedrolas";
-
+  //
   // user.update(newUser: newUser);
-  //user.create(password: "#123#AndresHinojosa#123");
+  // user.create(password: "#123#AndresHinojosa#123");
 
   ///
   ///
   /// Obtner marcas
   // List<Brand> brandList = await SessionManager.inventory.getBrands();
-  // brand.id
 
   ///
   ///
   /// Obtener Items con categorias
-  //List<Item> list= await SessionManager.inventory.getItems(brandId: 1, categoryIds: [1]);
+  // List<Item> list= await SessionManager.inventory.getItems(brandId: 1, categoryIds: [1]);
 
 }
 

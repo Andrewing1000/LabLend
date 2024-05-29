@@ -1,20 +1,15 @@
-
 import 'Session.dart';
 import 'User.dart';
 import 'package:dio/dio.dart';
 
-class UserManager{
-
+class UserManager {
   static var manager = SessionManager();
   var session = SessionManager.session;
-  var user;
   var requestHandler;
 
-  UserManager(){
-    user = session.user;
+  UserManager() {
     requestHandler = session.requestHandler;
   }
-
 
   Future<List<User>> getUserList({bool? isAdmin, bool? isActive, String? email}) async {
     if (!await isReady()) {
@@ -41,7 +36,6 @@ class UserManager{
       }
 
       String queryString = Uri(queryParameters: queryParams).query;
-
       response = await requestHandler.getRequest('/user/list/?$queryString');
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -57,170 +51,149 @@ class UserManager{
     return userList;
   }
 
-  Future<User> getUser(String email) async {
-    if(!await isReady()){
-      return VisitorUser.anonymousUser;
+  Future<User?> getUser(String email) async {
+    if (!await isReady()) {
+      return null;
     }
-    if(!await sessionCheck()){
-      return VisitorUser.anonymousUser;
+    if (!await sessionCheck()) {
+      return null;
     }
 
-    if(user.email == email){
+    if (session.user.email == email) {
       var response = await requestHandler.getRequest('/user/me');
       return User.fromJson(response.data);
     }
 
-
-    if(!isAdmin()){
-      return VisitorUser.anonymousUser;
+    if (!isAdmin()) {
+      return null;
     }
 
-
-    try{
-      var response = await requestHandler.getRequest('/user/manage', query: {'email' : email});
+    try {
+      var response = await requestHandler.getRequest('/user/manage', query: {'email': email});
       return User.fromJson(response.data);
-    }on  DioException catch(e){
-      if(e.response?.statusCode == 404){
-        manager.errorNotification(error : 'No se encontró a un usuario con ese email');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        manager.errorNotification(error: 'No se encontró a un usuario con ese email');
+      } else {
+        manager.errorNotification(error: '', details: e.response?.data);
       }
-      else{
-        manager.errorNotification(error : "", details : e.response?.data);
-      }
-      return VisitorUser.anonymousUser;
+      return null;
     }
   }
 
-  Future<User> createUser(User user, String password) async {
-    if(!await isReady()){
-      return VisitorUser.anonymousUser;
+  Future<User?> createUser(User user, String password) async {
+    if (!await isReady()) {
+      return null;
     }
-    if(!isAdmin()){
-      return VisitorUser.anonymousUser;
+    if (!isAdmin()) {
+      return null;
     }
-    if(!await sessionCheck()){
-      return VisitorUser.anonymousUser;
+    if (!await sessionCheck()) {
+      return null;
     }
 
-    if(password == ""){
+    if (password.isEmpty) {
       manager.errorNotification(error: 'El password no puede estar vacío');
-      return user;
+      return null;
     }
 
     Map<String, dynamic> userData = user.toJson();
     userData['password'] = password;
 
-    if(user.role == Role.adminRole || user.role == Role.superAdminRole){
-      try{
+    try {
+      if (user.role == Role.adminRole || user.role == Role.superAdminRole) {
         var response = await requestHandler.postRequest('/user/create/admin/', body: userData);
         manager.notification(notification: 'Administrador creado');
-        return user;
-      }on DioException catch(e){
-        manager.errorNotification(error: "Adición de usuario fallida", details: e.response?.data);
-        return VisitorUser.anonymousUser;
-      }
-
-    }
-    else if(user.role == Role.assistantRole){
-      try{
-        await requestHandler.postRequest('/user/create/', body: userData);
+        return User.fromJson(response.data);
+      } else if (user.role == Role.assistantRole) {
+        var response = await requestHandler.postRequest('/user/create/', body: userData);
         manager.notification(notification: 'Asistente creado');
-        return user;
-      }on DioException catch(e){
-        manager.errorNotification(error: "Adición de usuario fallida", details: e.response?.data);
-        return VisitorUser.anonymousUser;
+        return User.fromJson(response.data);
+      } else {
+        manager.errorNotification(error: 'Ingrese un rol válido');
+        return null;
       }
-
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Adición de usuario fallida', details: e.response?.data);
+      return null;
     }
-    else{
-      manager.errorNotification(error: "Ingrese un rol válido");
-    }
-
-    return user;
   }
 
-  Future<User> updateUser(User user,  {required User newUser, String? password}) async {
-
-    if(!await isReady()){
-      return VisitorUser.anonymousUser;
+  Future<User?> updateUser(User user, {required User newUser, String? password}) async {
+    if (!await isReady()) {
+      return null;
     }
-    if(!isAdmin()){
-      return VisitorUser.anonymousUser;
+    if (!isAdmin()) {
+      return null;
     }
-    if(!await sessionCheck()){
-      return VisitorUser.anonymousUser;
-    }
-
-
-    if(user.role == Role.adminRole || user.role == Role.superAdminRole){
-      try{
-        requestHandler.patchRequest('/user/manage/', body: newUser.toJson(), query: {'email': user.email});
-        user.updateData(newUser: newUser);
-        manager.notification(notification: "Información de usuaro actualizada");
-      }on DioException catch(e){
-        manager.errorNotification(error: "Actualización fallida", details: e.response?.data);
-      }
-
-    }
-    else if(user.role == Role.assistantRole){
-      try{
-        var response = requestHandler.patchRequest('/user/manage/', body: newUser.toJson(), query: {'email': user.email});
-        user.updateData(newUser: newUser);
-        manager.notification(notification: "Información de usuaro actualizada");
-      }on DioException catch(e){
-        manager.errorNotification(error: "Actualización fallida", details: e.response?.data);
-      }
-
-    }
-    else{
-      manager.errorNotification(error: "Rol inválido");
+    if (!await sessionCheck()) {
+      return null;
     }
 
-    return user;
+    try {
+      await requestHandler.patchRequest('/user/manage/', body: newUser.toJson(), query: {'email': user.email});
+      user.updateData(newUser: newUser);
+      manager.notification(notification: 'Información de usuario actualizada');
+      return User.fromJson(newUser.toJson());
+    } on DioException catch (e) {
+      manager.errorNotification(error: 'Actualización fallida', details: e.response?.data);
+      return null;
+    }
   }
 
-
-  Future<User> disableUser(User user) async {
+  Future<bool> disableUser(User user) async {
+    if (!await isReady()) {
+      return false;
+    }
+    if (!isAdmin()) {
+      return false;
+    }
+    if (!await sessionCheck()) {
+      return false;
+    }
 
     User newUser = user.clone();
     newUser.isActive = false;
-    return updateUser(user, newUser: newUser);
+    var result = await updateUser(user, newUser: newUser);
+    return result != null;
   }
 
-
-  Future<User> enableUser(User user) async {
-
-    if(!isAdmin()){
-      //Implement notification
-      return VisitorUser.anonymousUser;
+  Future<bool> enableUser(User user) async {
+    if (!await isReady()) {
+      return false;
     }
-    isReady();
+    if (!isAdmin()) {
+      return false;
+    }
+    if (!await sessionCheck()) {
+      return false;
+    }
 
     User newUser = user.clone();
     newUser.isActive = true;
-    return updateUser(user, newUser: newUser);
+    var result = await updateUser(user, newUser: newUser);
+    return result != null;
   }
 
-
-
-  Future<User> makeAdmin(User user) async{
-    if(!await isReady()){
-      return VisitorUser.anonymousUser;
+  Future<User?> makeAdmin(User user) async {
+    if (!await isReady()) {
+      return null;
     }
-    if(!isAdmin()){
-      return VisitorUser.anonymousUser;
+    if (!isAdmin()) {
+      return null;
     }
-    if(!await sessionCheck()){
-      return VisitorUser.anonymousUser;
+    if (!await sessionCheck()) {
+      return null;
     }
 
-    if(user.role == Role.adminRole || user.role == Role.superAdminRole){
-      manager.notification(notification: "Ya es administrador");
+    if (user.role == Role.adminRole || user.role == Role.superAdminRole) {
+      manager.notification(notification: 'Ya es administrador');
       return user;
     }
 
     User newUser = user.clone();
     newUser.role = Role.adminRole;
-    return updateUser(user, newUser: newUser);
+    return await updateUser(user, newUser: newUser);
   }
 
   bool isAdmin() {
@@ -234,5 +207,4 @@ class UserManager{
   Future<bool> isReady() async {
     return await session.isReady();
   }
-
 }
