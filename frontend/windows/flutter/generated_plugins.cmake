@@ -3,10 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-<<<<<<< HEAD
-=======
   flutter_secure_storage_windows
->>>>>>> Pruebas
   url_launcher_windows
 )
 
