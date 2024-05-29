@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/card.dart';
 
+// ignore: must_be_immutable
 class SearchResultsContent extends StatefulWidget {
   List<CustomCard> misItems;
   String query;
@@ -33,13 +34,10 @@ class _SearchResultsContentState extends State<SearchResultsContent> {
 
   List<CustomCard> filterItems(List<CustomCard> items, String query) {
     //print("Entrada a al fucnion");
-<<<<<<< HEAD
-=======
     if (query == "") {
       return items;
     }
 
->>>>>>> Pruebas
     setState(() {
       items
           .where(

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, avoid_print
+
 import 'package:flutter/material.dart';
 import '../navbar.dart';
 
@@ -30,26 +32,14 @@ void main() {
         onPressed: () {
           print("Opcion4");
         },
-<<<<<<< HEAD
         title: "Profile"),
     NavItem(
         iconNormal: Icons.person_2_outlined,
-        iconSelected: Icons.person_2,
+        iconSelected: Icons.abc,
         onPressed: () {
-          print("Opcion4");
-        },
-        title: "Profile"),
-=======
-      title: "Profile"),
-    
-    NavItem(
-      iconNormal : Icons.person_2_outlined,
-      iconSelected: Icons.abc,
-        onPressed: (){
           print("hola");
         },
-      title: "Profile"),
->>>>>>> Pruebas
+        title: "Profile"),
   ];
 
   return runApp(MaterialApp(
