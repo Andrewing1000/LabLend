@@ -35,9 +35,9 @@ urlpatterns = [
 
 
     path('health_check', HealthCheck.as_view(), name='health_check'),
-    path('api/user/', include('user.urls')),
-    path('api/item/', include('item.urls')),
-    path('api/loan/', include('loan.urls')),
+    path('user/', include('user.urls')),
+    path('item/', include('item.urls')),
+    path('loan/', include('loan.urls')),
     #path('', include('pages.urls')),
 ]
 

@@ -55,6 +55,7 @@ class Item extends ChangeNotifier {
   String? link;
   String? serialNumber;
   int quantity;
+  int quantity_on_loan;
   Brand marca;
   List<Category> categories;
 
@@ -65,6 +66,7 @@ class Item extends ChangeNotifier {
     this.link,
     this.serialNumber,
     required this.quantity,
+    required this.quantity_on_loan,
     required this.marca,
     required this.categories,
   });
@@ -77,6 +79,7 @@ class Item extends ChangeNotifier {
       link: json['link'],
       serialNumber: json['serial_number'],
       quantity: json['quantity'],
+      quantity_on_loan: json['quantity_on_loan'],
       marca: Brand.fromJson(json['marca']),
       categories: (json['categories'] as List).map((i) => Category.fromJson(i)).toList(),
     );
@@ -90,9 +93,14 @@ class Item extends ChangeNotifier {
       'link': link,
       'serial_number': serialNumber,
       'quantity': quantity,
+      'quantity_on_loan' : quantity_on_loan,
       'marca': marca.toJson(),
       'categories': categories.map((c) => c.toJson()).toList(),
     };
+  }
+
+  Item clone(){
+    return Item.fromJson(toJson());
   }
 
   void create(){

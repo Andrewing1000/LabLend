@@ -66,7 +66,7 @@ class SessionManager with ChangeNotifier {
 
   static UserManager userManager = UserManager();
   static Inventory inventory = Inventory();
-  static LoanService loanService = LoanService(httpHandler);
+  static LoanService loanService = LoanService();
 
   Widget mainFrame = Container();
 
@@ -93,6 +93,10 @@ class SessionManager with ChangeNotifier {
   /// Notify MainFrame
   void errorNotification({required String error, Map<String, dynamic>? details}){
     print(error);
+
+    if(details == null){
+      return;
+    }
 
     for(String key in details!.keys){
       print(key + ": " + details[key].toString());
@@ -133,7 +137,7 @@ class SessionManager with ChangeNotifier {
 
   Future<bool> sessionCheck() async{
     try{
-      var response = await httpHandler.getRequest('/api/user/me/');
+      var response = await httpHandler.getRequest('/user/me/');
       if(response.statusCode == 200){
         return true;
       }
@@ -183,7 +187,7 @@ class SessionManager with ChangeNotifier {
     };
 
     try{
-      var response = await httpHandler.postRequest('/api/user/token/', body: data);
+      var response = await httpHandler.postRequest('/user/token/', body: data);
       User user = User.fromJson(response.data);
 
       if(!user.isActive){
@@ -224,16 +228,15 @@ class SessionManager with ChangeNotifier {
   }
 
 
-  void logOut() async{
+  Future<Session> logOut() async{
     if(!(await connectionCheck())){
-      return;
-    };
-
+      return AnonymousSession();
+    }
     if(!(await sessionCheck())){
-      return;
+      return AnonymousSession();
     }
 
-    var response = await httpHandler.postRequest('/api/user/logout/');
+    var response = await httpHandler.postRequest('/user/logout/');
 
     if(response.statusCode == 200){
       errorNotification(error : 'Sesión cerrada');
@@ -247,5 +250,7 @@ class SessionManager with ChangeNotifier {
       errorNotification(error :'Sesión cerrada');
       _session = AnonymousSession();
     }
+
+    return _session;
   }
 }

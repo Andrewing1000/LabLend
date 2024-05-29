@@ -6,8 +6,8 @@ from item.models import Item  # Asegúrate de que la app 'item' esté instalada 
 
 class Prestamo(models.Model):
     usuario = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-    fecha_prestamo = models.DateField()
-    fecha_devolucion = models.DateField()
+    fecha_prestamo = models.DateTimeField()
+    fecha_devolucion = models.DateTimeField()
     devuelto = models.BooleanField(default=False)
     items = models.ManyToManyField(Item, through='PrestamoItem', related_name='prestamos')
 
@@ -39,6 +39,8 @@ class PrestamoItem(models.Model):
 
     def save(self, *args, **kwargs):
         # Calcula la diferencia en cantidad prestada antes de la actualización
+
+
         previous_cantidad = 0
         if self.pk:
             previous_cantidad = PrestamoItem.objects.get(pk=self.pk).cantidad
@@ -46,10 +48,11 @@ class PrestamoItem(models.Model):
         self.full_clean()  # Validar la instancia del modelo
         super().save(*args, **kwargs)
 
-        # Actualiza la cantidad en préstamo del ítem
-        difference = self.cantidad - previous_cantidad
-        self.item.quantity_on_loan += difference
-        self.item.save()
+
+        if not self.prestamo.devuelto:
+            difference = self.cantidad - previous_cantidad
+            self.item.quantity_on_loan += difference
+            self.item.save()
 
     def delete(self, *args, **kwargs):
         # Al eliminar, resta la cantidad prestada del campo quantity_on_loan
