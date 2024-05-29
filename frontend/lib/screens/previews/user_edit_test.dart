@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/create_item_screen.dart';
-
+import 'package:frontend/screens/user_edit_screen.dart';
 import '../../models/Session.dart';
 
 Future<void> main() async {
   runApp(MaterialApp(
-    home: CreateItemScreen(),
+    home: EditUserScreen(),
   ));
 
   var manager = SessionManager();
