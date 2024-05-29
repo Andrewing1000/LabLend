@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/string_field.dart';
 
 class ItemDetailsForm extends StatefulWidget {
@@ -35,13 +36,36 @@ class _ItemDetailsFormState extends State<ItemDetailsForm> {
     selectedCategories = widget.item.categories;
   }
 
+  void _updateItem() async {
+    Item updatedItem = Item(
+      id: widget.item.id,
+      nombre: nameController.text,
+      description: descriptionController.text,
+      link: linkController.text,
+      serialNumber: serialNumberController.text,
+      quantity: int.parse(quantityController.text),
+      marca: selectedBrand!,
+      categories: selectedCategories,
+    );
+
+    await SessionManager.inventory.updateItem(widget.item, updatedItem);
+
+    setState(() {
+      widget.item.updateItem(updatedItem);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Ítem actualizado correctamente')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         StringField(
           controller: nameController,
-          hintText: 'Nombre del Item',
+          hintText: 'Nombre del Ítem',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
         SizedBox(height: 20),
@@ -100,6 +124,11 @@ class _ItemDetailsFormState extends State<ItemDetailsForm> {
               },
             );
           }).toList(),
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _updateItem,
+          child: Text('Actualizar Ítem'),
         ),
       ],
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/item_details_form.dart';
-import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/notification.dart';
 
 class ItemDetailsScreen extends StatefulWidget {
@@ -15,21 +14,38 @@ class ItemDetailsScreen extends StatefulWidget {
 }
 
 class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
-  Item? item;
+  Item? _item;
   bool _showNotification = false;
   String _notificationMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _fetchItemDetails();
+    _fetchItem();
   }
 
-  void _fetchItemDetails() async {
-    Item? fetchedItem =
-        await SessionManager.inventory.getItemById(widget.itemId);
-    setState(() {
-      item = fetchedItem;
+  Future<void> _fetchItem() async {
+    try {
+      Item? fetchedItem =
+          await SessionManager.inventory.getItemById(widget.itemId);
+      setState(() {
+        _item = fetchedItem;
+        if (_item == null) {
+          _notificationMessage = 'Ítem no encontrado';
+          _showNotification = true;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _notificationMessage = 'Error al buscar el ítem';
+        _showNotification = true;
+      });
+    }
+
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _showNotification = false;
+      });
     });
   }
 
@@ -38,30 +54,19 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Detalles del Item'),
+        title: Text('Detalles del Ítem'),
         backgroundColor: Colors.black,
       ),
       body: Stack(
         children: [
-          if (item != null)
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  BannerWidget(
-                    imageUrl: "https://via.placeholder.com/150",
-                    title: item!.nombre,
-                    subtitle: item!.marca.marca,
-                    description: item!.description ?? "No description",
-                  ),
-                  Padding(
+          SingleChildScrollView(
+            child: _item == null
+                ? Center(child: CircularProgressIndicator())
+                : Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: ItemDetailsForm(
-                      item: item!,
-                    ),
+                    child: ItemDetailsForm(item: _item!),
                   ),
-                ],
-              ),
-            ),
+          ),
           if (_showNotification)
             NotificationWidget(
               message: _notificationMessage,
