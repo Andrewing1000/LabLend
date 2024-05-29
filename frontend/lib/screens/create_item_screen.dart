@@ -42,7 +42,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
             child: Column(
               children: [
                 BannerWidget(
-                  imageUrl: "https://via.placeholder.com/150",
+                  imageUrl: "assets/images/place_holder.png",
                   title: "Crear Nuevo Item",
                   subtitle: "Complete el formulario para crear un nuevo item",
                   description:

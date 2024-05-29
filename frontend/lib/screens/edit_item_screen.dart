@@ -3,12 +3,10 @@ import 'package:frontend/models/item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/item_details_form.dart';
 import 'package:frontend/widgets/notification.dart';
+import 'package:frontend/widgets/banner.dart';
+import 'package:frontend/widgets/string_field.dart';
 
 class ItemDetailsScreen extends StatefulWidget {
-  final int itemId;
-
-  const ItemDetailsScreen({Key? key, required this.itemId}) : super(key: key);
-
   @override
   _ItemDetailsScreenState createState() => _ItemDetailsScreenState();
 }
@@ -17,17 +15,20 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
   Item? _item;
   bool _showNotification = false;
   String _notificationMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchItem();
-  }
+  final TextEditingController _idController = TextEditingController();
 
   Future<void> _fetchItem() async {
+    final itemId = int.tryParse(_idController.text);
+    if (itemId == null) {
+      setState(() {
+        _notificationMessage = 'ID inválido';
+        _showNotification = true;
+      });
+      return;
+    }
+
     try {
-      Item? fetchedItem =
-          await SessionManager.inventory.getItemById(widget.itemId);
+      Item? fetchedItem = await SessionManager.inventory.getItemById(itemId);
       setState(() {
         _item = fetchedItem;
         if (_item == null) {
@@ -60,17 +61,48 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            child: _item == null
-                ? Center(child: CircularProgressIndicator())
-                : Padding(
+            child: Column(
+              children: [
+                if (_item == null)
+                  Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: ItemDetailsForm(item: _item!),
+                    child: Column(
+                      children: [
+                        StringField(
+                          controller: _idController,
+                          hintText: 'Ingrese el ID del Ítem',
+                          width: MediaQuery.of(context).size.width * 0.8,
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _fetchItem,
+                          child: Text('Buscar Ítem'),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Column(
+                    children: [
+                      BannerWidget(
+                        imageUrl: 'assets/images/place_holder.png',
+                        title: _item!.nombre,
+                        subtitle: _item!.marca.marca,
+                        description: _item!.description ?? '',
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: ItemDetailsForm(item: _item!),
+                      ),
+                    ],
                   ),
+              ],
+            ),
           ),
           if (_showNotification)
             NotificationWidget(
               message: _notificationMessage,
-              //alignment: Alignment.bottomCenter,
+              // alignment: Alignment.bottomCenter,
             ),
         ],
       ),

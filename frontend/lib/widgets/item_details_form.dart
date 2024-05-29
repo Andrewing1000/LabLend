@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/item.dart';
-import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/string_field.dart';
+import 'package:frontend/widgets/password_creation_field.dart';
 
 class ItemDetailsForm extends StatefulWidget {
   final Item item;
@@ -13,50 +13,59 @@ class ItemDetailsForm extends StatefulWidget {
 }
 
 class _ItemDetailsFormState extends State<ItemDetailsForm> {
-  late TextEditingController nameController;
-  late TextEditingController descriptionController;
-  late TextEditingController linkController;
-  late TextEditingController serialNumberController;
-  late TextEditingController quantityController;
-  Brand? selectedBrand;
-  List<Category> selectedCategories = [];
+  late TextEditingController _nombreController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _linkController;
+  late TextEditingController _serialNumberController;
+  late TextEditingController _quantityController;
+  late TextEditingController _marcaController;
+  late TextEditingController _categoriesController;
+  late TextEditingController _idController;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.item.nombre);
-    descriptionController =
+    _nombreController = TextEditingController(text: widget.item.nombre);
+    _descriptionController =
         TextEditingController(text: widget.item.description);
-    linkController = TextEditingController(text: widget.item.link);
-    serialNumberController =
+    _linkController = TextEditingController(text: widget.item.link);
+    _serialNumberController =
         TextEditingController(text: widget.item.serialNumber);
-    quantityController =
+    _quantityController =
         TextEditingController(text: widget.item.quantity.toString());
-    selectedBrand = widget.item.marca;
-    selectedCategories = widget.item.categories;
+    _marcaController = TextEditingController(text: widget.item.marca.marca);
+    _categoriesController = TextEditingController(
+      text: widget.item.categories.map((c) => c.nombre).join(', '),
+    );
+    _idController = TextEditingController(text: widget.item.id.toString());
   }
 
-  void _updateItem() async {
-    Item updatedItem = Item(
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _descriptionController.dispose();
+    _linkController.dispose();
+    _serialNumberController.dispose();
+    _quantityController.dispose();
+    _marcaController.dispose();
+    _categoriesController.dispose();
+    _idController.dispose();
+    super.dispose();
+  }
+
+  void _updateItem() {
+    // Actualiza los campos del ítem
+    widget.item.update(Item(
       id: widget.item.id,
-      nombre: nameController.text,
-      description: descriptionController.text,
-      link: linkController.text,
-      serialNumber: serialNumberController.text,
-      quantity: int.parse(quantityController.text),
-      marca: selectedBrand!,
-      categories: selectedCategories,
-    );
-
-    await SessionManager.inventory.updateItem(widget.item, updatedItem);
-
-    setState(() {
-      widget.item.updateItem(updatedItem);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Ítem actualizado correctamente')),
-    );
+      nombre: _nombreController.text,
+      description: _descriptionController.text,
+      link: _linkController.text,
+      serialNumber: _serialNumberController.text,
+      quantity: int.parse(_quantityController.text),
+      marca: Brand(id: widget.item.marca.id, marca: _marcaController.text),
+      categories: widget.item.categories, // No cambiamos las categorías aquí
+    ));
+    // Aquí puedes llamar a una función para actualizar el ítem en el servidor si es necesario
   }
 
   @override
@@ -64,66 +73,52 @@ class _ItemDetailsFormState extends State<ItemDetailsForm> {
     return Column(
       children: [
         StringField(
-          controller: nameController,
+          controller: _idController,
+          hintText: 'ID',
+          width: MediaQuery.of(context).size.width * 0.8,
+          enabled: false, // El ID no se puede editar
+        ),
+        SizedBox(height: 10),
+        StringField(
+          controller: _nombreController,
           hintText: 'Nombre del Ítem',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         StringField(
-          controller: descriptionController,
+          controller: _descriptionController,
           hintText: 'Descripción',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         StringField(
-          controller: linkController,
-          hintText: 'Link',
+          controller: _linkController,
+          hintText: 'Enlace',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         StringField(
-          controller: serialNumberController,
+          controller: _serialNumberController,
           hintText: 'Número de Serie',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         StringField(
-          controller: quantityController,
+          controller: _quantityController,
           hintText: 'Cantidad',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
-        DropdownButton<Brand>(
-          value: selectedBrand,
-          hint: Text("Selecciona una Marca",
-              style: TextStyle(color: Colors.white)),
-          dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
-          items: [selectedBrand!].map((Brand brand) {
-            return DropdownMenuItem<Brand>(
-              value: brand,
-              child: Text(brand.marca),
-            );
-          }).toList(),
-          onChanged: (Brand? newBrand) {
-            setState(() {
-              selectedBrand = newBrand;
-            });
-          },
+        SizedBox(height: 10),
+        StringField(
+          controller: _marcaController,
+          hintText: 'Marca',
+          width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
-        Wrap(
-          spacing: 10,
-          children: selectedCategories.map((category) {
-            return Chip(
-              label: Text(category.nombre),
-              onDeleted: () {
-                setState(() {
-                  selectedCategories.remove(category);
-                });
-              },
-            );
-          }).toList(),
+        SizedBox(height: 10),
+        StringField(
+          controller: _categoriesController,
+          hintText: 'Categorías',
+          width: MediaQuery.of(context).size.width * 0.8,
         ),
         SizedBox(height: 20),
         ElevatedButton(
