@@ -11,7 +11,7 @@ class LoanService {
     requestHandler = session.requestHandler;
   }
 
-  Future<List<Loan>> getLoanList({DateTime? startDate, DateTime? endDate, bool? devuelto}) async {
+  Future<List<Loan>> getLoanList({DateTime? startDate, DateTime? endDate, bool? devuelto, String? email}) async {
     if (!await isReady()) {
       return [];
     }
@@ -21,22 +21,25 @@ class LoanService {
 
     var response;
     try {
-      // Build the query parameters
+      // Construir los parámetros de la consulta
       Map<String, dynamic> queryParams = {};
       if (startDate != null) {
-        queryParams['start_date'] = startDate.toIso8601String().split('T').first; // Extracting the date part
+        queryParams['start_date'] = startDate.toIso8601String().split('T').first; // Extraer la parte de la fecha
       }
       if (endDate != null) {
-        queryParams['end_date'] = endDate.toIso8601String().split('T').first; // Extracting the date part
+        queryParams['end_date'] = endDate.toIso8601String().split('T').first; // Extraer la parte de la fecha
       }
       if (devuelto != null) {
         queryParams['devuelto'] = devuelto.toString();
       }
+      if (email != null && email.isNotEmpty) {
+        queryParams['email'] = email;
+      }
 
-      // Convert the query parameters to a query string
+      // Convertir los parámetros de la consulta a una cadena de consulta
       String queryString = Uri(queryParameters: queryParams).query;
 
-      // Make the GET request with the query parameters
+      // Realizar la solicitud GET con los parámetros de la consulta
       response = await requestHandler.getRequest('/loan/loan/?$queryString');
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);

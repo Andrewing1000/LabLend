@@ -86,7 +86,7 @@ Future<void> main() async {
   //  Loan loan = Loan(id: 1, usuario: session.user.email, fechaPrestamo: DateTime.now(),
   //      fechaDevolucion: DateTime.now().add(Duration(days:1)),
   //      devuelto: false,
-  //      items: [PrestamoItem(itemId: dummyItem.id, cantidad: 1)] );
+  //      items: [PrestamoItem(itemId: dummyItem!.id, cantidad: 1)] );
   //
   // loan.create();
 
@@ -106,9 +106,10 @@ Future<void> main() async {
   ///
   ///
   /// Buscar prestamos en rango de fechas y estado de devolucion
-  // var listo =  await SessionManager.loanService.getLoanList(devuelto: true,
+  // var listo =  await SessionManager.loanService.getLoanList(devuelto: false,
   //     endDate: DateTime.now().add(Duration(days: 1)),
-  //     startDate: DateTime.now().add(Duration(days: 0)));
+  //     startDate: DateTime.now().add(Duration(days: 0)),
+  //     email: "admin2");
 
 
   ///
