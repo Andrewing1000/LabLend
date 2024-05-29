@@ -5,7 +5,7 @@ import '../../models/Session.dart';
 
 Future<void> main() async {
   runApp(MaterialApp(
-    home: EditItemScreen(itemId: 1),
+    home: ItemDetailsScreen(itemId: 1),
   ));
 
   var manager = SessionManager();
