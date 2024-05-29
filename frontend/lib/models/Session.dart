@@ -137,7 +137,7 @@ class SessionManager with ChangeNotifier {
 
   Future<bool> sessionCheck() async{
     try{
-      var response = await httpHandler.getRequest('/api/user/me/');
+      var response = await httpHandler.getRequest('/user/me/');
       if(response.statusCode == 200){
         return true;
       }
@@ -187,7 +187,7 @@ class SessionManager with ChangeNotifier {
     };
 
     try{
-      var response = await httpHandler.postRequest('/api/user/token/', body: data);
+      var response = await httpHandler.postRequest('/user/token/', body: data);
       User user = User.fromJson(response.data);
 
       if(!user.isActive){
@@ -236,7 +236,7 @@ class SessionManager with ChangeNotifier {
       return AnonymousSession();
     }
 
-    var response = await httpHandler.postRequest('/api/user/logout/');
+    var response = await httpHandler.postRequest('/user/logout/');
 
     if(response.statusCode == 200){
       errorNotification(error : 'Sesión cerrada');

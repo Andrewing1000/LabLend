@@ -1,7 +1,7 @@
 
 from django_filters import rest_framework as filters
 from django.contrib.postgres.search import TrigramSimilarity
-from .models import Item, Category, Brand
+from item.models import Item, Category, Brand
 import logging
 
 class ItemFilter(filters.FilterSet):
@@ -21,7 +21,5 @@ class ItemFilter(filters.FilterSet):
         ).order_by('-similarity')
 
     def filter_queryset(self, queryset):
-        for name, value in self.form.cleaned_data.items():
-            if name == 'marca':
-                print(f"Filter name: {name}, Filter value: {value} (Type: {type(value)})")
-        return super().filter_queryset(queryset)
+        queryset = super().filter_queryset(queryset)
+        return queryset

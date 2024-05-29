@@ -13,24 +13,52 @@ Future<void> main() async {
   var manager = SessionManager();
   Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
-  Brand dummyBrand = Brand(
-    id: 1,
-    marca: 'Example Brand',
-  );
 
-
-  var list = await SessionManager.userManager.getUserList();
-
-
+  ///
+  ///
+  /// Cerrar sesion
   //await SessionManager().logOut();
 
-  //Create some dummy Categories
-  List<Category> dummyCategories = [
-    Category(id: 1, nombre: 'Category A', description: 'Description for Category A'),
-    Category(id: 2, nombre: 'Category B', description: 'Description for Category B'),
-  ];
+  ///
+  ///
+  ///Obtener usuario por el email
+  //User user = await SessionManager.userManager.getUser("admin2@example.com");
 
-  // Create a dummy Item
+  ///
+  ///
+  ///
+  /// Listar usuarios
+  //var list = await SessionManager.userManager.getUserList();
+
+
+  ///
+  ///
+  ///ListarItems
+  //var listItems = await SessionManager.inventory.getItems();
+
+
+  ///
+  ///
+  /// Crear Marcas
+  // Brand dummyBrand = Brand(
+  //   id: 1,
+  //   marca: 'Example Brand',
+  // );
+
+
+  ///
+  ///
+  /// Crear Categorias
+
+  // List<Category> dummyCategories = [
+  //   Category(id: 1, nombre: 'Category A', description: 'Description for Category A'),
+  //   Category(id: 2, nombre: 'Category B', description: 'Description for Category B'),
+  // ];
+
+  ///
+  ///
+  ///
+  /// Crear item
   // Item dummyItem = Item(
   //   id: 1,
   //   nombre: 'El cojudo',
@@ -41,26 +69,51 @@ Future<void> main() async {
   //   marca: dummyBrand,
   //   categories: dummyCategories,
   // );
-  //
-  //
-
   //dummyItem.create();
+
+
+  ///
+  ///
+  /// Obtener Item por id
   //Item dummyItem = await SessionManager.inventory.getItemById(1);
+  // print(dummyItem.toJson().toString());
 
 
-
-
-  //print(dummyItem.toJson().toString());
-
-  // DateTime p =  DateTime.now().add(Duration(days: 3));
+  ///
+  ///
+  ///
+  /// Crear prestamo
   //  Loan loan = Loan(id: 1, usuario: session.user.email, fechaPrestamo: DateTime.now(),
-  //      fechaDevolucion: p,
+  //      fechaDevolucion: DateTime.now().add(Duration(days:1)),
   //      devuelto: false,
-  //      items: [PrestamoItem(item: dummyItem, cantidad: 1)] );
+  //      items: [PrestamoItem(itemId: dummyItem.id, cantidad: 1)] );
   //
   // loan.create();
 
 
+  ///
+  ///
+  /// Obtener prestamo usando id
+  //Loan loan = await SessionManager.loanService.getLoan(20);
+
+
+  ///
+  ///
+  /// Devolver prestamo
+  //SessionManager.loanService.updateDevuelto(loan, true);
+
+
+  ///
+  ///
+  /// Buscar prestamos en rango de fechas y estado de devolucion
+  // var listo =  await SessionManager.loanService.getLoanList(devuelto: true,
+  //     endDate: DateTime.now().add(Duration(days: 1)),
+  //     startDate: DateTime.now().add(Duration(days: 0)));
+
+
+  ///
+  ///
+  /// Desactivar y actualizar Usuario
   //User user = AssistUser(email: "pedro@pana.com", name: "Pedrolas", isActive: true);
   //user.deactivate();
   // User newUser = User.clone(user);
@@ -69,13 +122,16 @@ Future<void> main() async {
   // user.update(newUser: newUser);
   //user.create(password: "#123#AndresHinojosa#123");
 
+  ///
+  ///
+  /// Obtner marcas
   // List<Brand> brandList = await SessionManager.inventory.getBrands();
   // brand.id
 
+  ///
+  ///
+  /// Obtener Items con categorias
   //List<Item> list= await SessionManager.inventory.getItems(brandId: 1, categoryIds: [1]);
-
-
-  //list= await SessionManager.inventory.listItems(brandId: 1, categoryIds: [1]);
 
 }
 

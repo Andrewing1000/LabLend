@@ -153,3 +153,7 @@ class  SessionSerializer(serializers.ModelSerializer):
         model = Session
         fields = ['id', 'login_time', 'logout_time']
         read_only_fields = ['id', 'login_time', 'logout_time']
+
+
+class HealthCheckSerializer(serializers.Serializer):
+    status = serializers.CharField()

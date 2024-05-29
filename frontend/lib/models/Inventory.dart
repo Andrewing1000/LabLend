@@ -18,13 +18,10 @@ class Inventory {
     if (!await isReady()) {
       return [];
     }
-    if (!await sessionCheck()) {
-      return [];
-    }
 
     var response;
     try {
-      response = await requestHandler.getRequest('/api/item/brands/');
+      response = await requestHandler.getRequest('/item/list/brands/');
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
       return [];
@@ -43,13 +40,10 @@ class Inventory {
     if (!await isReady()) {
       return [];
     }
-    if (!await sessionCheck()) {
-      return [];
-    }
 
     var response;
     try {
-      response = await requestHandler.getRequest('/api/item/categories/');
+      response = await requestHandler.getRequest('/item/list/categories/');
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
       return [];
@@ -72,9 +66,7 @@ class Inventory {
     if (!await isReady()) {
       return [];
     }
-    if (!await sessionCheck()) {
-      return [];
-    }
+
 
 
     var queryParameters = {
@@ -85,40 +77,7 @@ class Inventory {
 
     var response;
     try {
-      response = await requestHandler.getRequest('/api/item/items/', query: queryParameters);
-    } on DioException catch (e) {
-      manager.errorNotification(error: '', details: e.response?.data);
-      return [];
-    }
-
-    List<Item> itemList = [];
-    for (var itemData in response.data) {
-      var item = Item.fromJson(itemData);
-      itemList.add(item);
-    }
-
-    return itemList;
-  }
-
-
-  Future<List<Item>> listItems({
-    List<int>? categoryIds,
-    int? brandId,
-    String? namePattern,
-  }) async {
-    if (!await isReady()) {
-      return [];
-    }
-
-    var queryParameters = {
-      if (categoryIds != null) 'categories': categoryIds.join(','),
-      if (brandId != null) 'marca': brandId.toString(),
-      if (namePattern != null) 'name': namePattern,
-    };
-
-    var response;
-    try {
-      response = await requestHandler.getRequest('/api/item/list/', query: queryParameters);
+      response = await requestHandler.getRequest('/item/list/items/', query: queryParameters);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
       return [];
@@ -143,7 +102,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.postRequest('/api/item/brands/', body: brand.toJson());
+      var response = await requestHandler.postRequest('/item/brands/', body: brand.toJson());
       manager.notification(notification: 'Marca creada con éxito');
     } on DioException catch (e) {
       manager.errorNotification(error: 'Creación de marca fallida', details: e.response?.data);
@@ -159,7 +118,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.postRequest('/api/item/categories/', body: category.toJson());
+      var response = await requestHandler.postRequest('/item/categories/', body: category.toJson());
       manager.notification(notification: 'Categoría creada con éxito');
     } on DioException catch (e) {
       manager.errorNotification(error: 'Creación de categoría fallida', details: e.response?.data);
@@ -175,7 +134,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.postRequest('/api/item/items/', body: item.toJson());
+      var response = await requestHandler.postRequest('/item/items/', body: item.toJson());
       manager.notification(notification: 'Ítem creado con éxito');
     } on DioException catch (e) {
       manager.errorNotification(error: 'Creación de ítem fallida', details: e.response?.data);
@@ -191,7 +150,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.putRequest('/api/item/items/${item.id}/', body: newItem.toJson());
+      var response = await requestHandler.putRequest('/item/items/${item.id}/', body: newItem.toJson());
       item.updateItem(newItem);
       manager.notification(notification: 'Ítem actualizado con éxito');
     } on DioException catch (e) {
@@ -208,7 +167,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.deleteRequest('/api/item/items/${item.id}/');
+      var response = await requestHandler.deleteRequest('/item/items/${item.id}/');
       manager.notification(notification: 'Ítem eliminado con éxito');
     } on DioException catch (e) {
       manager.errorNotification(error: 'Eliminación de ítem fallida', details: e.response?.data);
@@ -224,7 +183,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.deleteRequest('/api/item/brands/${brand.id}/');
+      var response = await requestHandler.deleteRequest('/item/brands/${brand.id}/');
       manager.notification(notification: 'Marca eliminada con éxito');
     } on DioException catch (e) {
       manager.errorNotification(error: 'Eliminación de marca fallida', details: e.response?.data);
@@ -240,7 +199,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.deleteRequest('/api/item/categories/${category.id}/');
+      var response = await requestHandler.deleteRequest('/item/categories/${category.id}/');
       manager.notification(notification: 'Categoría eliminada con éxito');
     } on DioException catch (e) {
       manager.errorNotification(error: 'Eliminación de categoría fallida', details: e.response?.data);
@@ -256,7 +215,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/api/item/brands/$id/');
+      var response = await requestHandler.getRequest('/item/brands/$id/');
       return Brand.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -273,7 +232,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/api/item/categories/$id/');
+      var response = await requestHandler.getRequest('/item/categories/$id/');
       return Category.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -290,7 +249,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/api/item/items/$id/');
+      var response = await requestHandler.getRequest('/item/items/$id/');
       return Item.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);

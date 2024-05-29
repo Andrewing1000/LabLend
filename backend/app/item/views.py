@@ -43,24 +43,26 @@ class ItemViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        marca_id = self.request.query_params.get('marca', None)
-        if marca_id is not None:
-            try:
-                marca_id = int(marca_id)
-            except ValueError:
-                # Handle the case where 'marca' is not an integer
-                marca_id = None
 
-        if marca_id is not None:
-            queryset = queryset.filter(marca_id=marca_id)
+class ListBrandsView(viewsets.ReadOnlyModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
 
-        return queryset
 
-class ListItemsView(generics.ListAPIView):
+class ListCategoriesView(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class ListItemsView(viewsets.ReadOnlyModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     filterset_class = ItemFilter
+
+
+
+
+
+
 
 

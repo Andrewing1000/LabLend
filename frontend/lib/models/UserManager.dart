@@ -16,27 +16,40 @@ class UserManager{
   }
 
 
-  Future<List<User>> getUserList() async {
-    if(!await isReady()){
+  Future<List<User>> getUserList({bool? isAdmin, bool? isActive, String? email}) async {
+    if (!await isReady()) {
       return [];
     }
-    if(!isAdmin()){
+    if (!this.isAdmin()) {
       return [];
     }
-    if(!await sessionCheck()){
+    if (!await sessionCheck()) {
       return [];
     }
 
     var response;
     try {
-      response = await requestHandler.getRequest('/api/user/list/');
-    }on DioException catch(e) {
-      manager.errorNotification(error : '' , details : e.response?.data);
+      Map<String, dynamic> queryParams = {};
+      if (isAdmin != null) {
+        queryParams['is_admin'] = isAdmin.toString();
+      }
+      if (isActive != null) {
+        queryParams['is_active'] = isActive.toString();
+      }
+      if (email != null && email.isNotEmpty) {
+        queryParams['email'] = email;
+      }
+
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      response = await requestHandler.getRequest('/user/list/?$queryString');
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
       return [];
     }
 
     List<User> userList = [];
-    for(var userData in response.data['results']){
+    for (var userData in response.data) {
       var user = User.fromJson(userData);
       userList.add(user);
     }
@@ -53,7 +66,7 @@ class UserManager{
     }
 
     if(user.email == email){
-      var response = await requestHandler.getRequest('/api/user/me');
+      var response = await requestHandler.getRequest('/user/me');
       return User.fromJson(response.data);
     }
 
@@ -64,7 +77,7 @@ class UserManager{
 
 
     try{
-      var response = await requestHandler.getRequest('/api/user/manage', query: {'email' : email});
+      var response = await requestHandler.getRequest('/user/manage', query: {'email' : email});
       return User.fromJson(response.data);
     }on  DioException catch(e){
       if(e.response?.statusCode == 404){
@@ -75,7 +88,6 @@ class UserManager{
       }
       return VisitorUser.anonymousUser;
     }
-    return user;
   }
 
   Future<User> createUser(User user, String password) async {
@@ -99,7 +111,7 @@ class UserManager{
 
     if(user.role == Role.adminRole || user.role == Role.superAdminRole){
       try{
-        var response = await requestHandler.postRequest('/api/user/create/admin/', body: userData);
+        var response = await requestHandler.postRequest('/user/create/admin/', body: userData);
         manager.notification(notification: 'Administrador creado');
         return user;
       }on DioException catch(e){
@@ -110,7 +122,7 @@ class UserManager{
     }
     else if(user.role == Role.assistantRole){
       try{
-        var response = await requestHandler.postRequest('/api/user/create/', body: userData);
+        await requestHandler.postRequest('/user/create/', body: userData);
         manager.notification(notification: 'Asistente creado');
         return user;
       }on DioException catch(e){
@@ -141,7 +153,7 @@ class UserManager{
 
     if(user.role == Role.adminRole || user.role == Role.superAdminRole){
       try{
-        var response = requestHandler.patchRequest('/api/user/manage/', body: newUser.toJson(), query: {'email': user.email});
+        requestHandler.patchRequest('/user/manage/', body: newUser.toJson(), query: {'email': user.email});
         user.updateData(newUser: newUser);
         manager.notification(notification: "Información de usuaro actualizada");
       }on DioException catch(e){
@@ -151,7 +163,7 @@ class UserManager{
     }
     else if(user.role == Role.assistantRole){
       try{
-        var response = requestHandler.patchRequest('/api/user/manage/', body: newUser.toJson(), query: {'email': user.email});
+        var response = requestHandler.patchRequest('/user/manage/', body: newUser.toJson(), query: {'email': user.email});
         user.updateData(newUser: newUser);
         manager.notification(notification: "Información de usuaro actualizada");
       }on DioException catch(e){
@@ -169,7 +181,7 @@ class UserManager{
 
   Future<User> disableUser(User user) async {
 
-    User newUser = User.clone(user);
+    User newUser = user.clone();
     newUser.isActive = false;
     return updateUser(user, newUser: newUser);
   }
@@ -183,7 +195,7 @@ class UserManager{
     }
     isReady();
 
-    User newUser = User.clone(user);
+    User newUser = user.clone();
     newUser.isActive = true;
     return updateUser(user, newUser: newUser);
   }
@@ -206,7 +218,7 @@ class UserManager{
       return user;
     }
 
-    User newUser = User.clone(user);
+    User newUser = user.clone();
     newUser.role = Role.adminRole;
     return updateUser(user, newUser: newUser);
   }

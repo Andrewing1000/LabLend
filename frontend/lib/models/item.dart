@@ -99,6 +99,10 @@ class Item extends ChangeNotifier {
     };
   }
 
+  Item clone(){
+    return Item.fromJson(toJson());
+  }
+
   void create(){
     SessionManager.inventory.createItem(this);
   }

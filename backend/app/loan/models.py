@@ -49,12 +49,10 @@ class PrestamoItem(models.Model):
         super().save(*args, **kwargs)
 
 
-
-        # Actualiza la cantidad en préstamo del ítem
-        difference = self.cantidad - previous_cantidad
-        self.item.quantity_on_loan += difference
-        self.item.save()
-        print("------------------------------------------------>", type(self.item))
+        if not self.prestamo.devuelto:
+            difference = self.cantidad - previous_cantidad
+            self.item.quantity_on_loan += difference
+            self.item.save()
 
     def delete(self, *args, **kwargs):
         # Al eliminar, resta la cantidad prestada del campo quantity_on_loan

@@ -12,7 +12,7 @@ class LoanService {
     requestHandler = session.requestHandler;
   }
 
-  Future<List<Loan>> getLoanList() async {
+  Future<List<Loan>> getLoanList({DateTime? startDate, DateTime? endDate, bool? devuelto}) async {
     if (!await isReady()) {
       return [];
     }
@@ -22,20 +22,37 @@ class LoanService {
 
     var response;
     try {
-      response = await requestHandler.getRequest('/api/loan/loan/');
+      // Build the query parameters
+      Map<String, dynamic> queryParams = {};
+      if (startDate != null) {
+        queryParams['start_date'] = startDate.toIso8601String().split('T').first; // Extracting the date part
+      }
+      if (endDate != null) {
+        queryParams['end_date'] = endDate.toIso8601String().split('T').first; // Extracting the date part
+      }
+      if (devuelto != null) {
+        queryParams['devuelto'] = devuelto.toString();
+      }
+
+      // Convert the query parameters to a query string
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      // Make the GET request with the query parameters
+      response = await requestHandler.getRequest('/loan/loan/?$queryString');
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
       return [];
     }
 
     List<Loan> loanList = [];
-    for (var loanData in response.data['results']) {
+    for (var loanData in response.data) {
       var loan = Loan.fromJson(loanData);
       loanList.add(loan);
     }
 
     return loanList;
   }
+
 
   Future<Loan> getLoan(int id) async {
     if (!await isReady()) {
@@ -59,7 +76,7 @@ class LoanService {
 
     var response;
     try {
-      response = await requestHandler.getRequest('/api/loan/loan/$id/');
+      response = await requestHandler.getRequest('/loan/loan/$id/');
       return Loan.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -94,7 +111,7 @@ class LoanService {
     }
 
     try {
-      var response = await requestHandler.postRequest('/api/loan/loan/', body: loan.toJson());
+      var response = await requestHandler.postRequest('/loan/loan/', body: loan.toJson());
       manager.notification(notification: 'Préstamo creado con éxito');
       return Loan.fromJson(response.data);
     } on DioException catch (e) {
@@ -118,7 +135,7 @@ class LoanService {
     }
 
     try {
-      var response = await requestHandler.putRequest('/api/loan/loan/${loan.id}/', body: newLoan.toJson());
+      var response = await requestHandler.putRequest('/loan/loan/${loan.id}/', body: newLoan.toJson());
       loan.updatePrestamo(newLoan);
       manager.notification(notification: 'Préstamo actualizado con éxito');
       return Loan.fromJson(response.data);
