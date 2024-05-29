@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'item',
     'loan',
     #'pages',
-    'sslserver',
+    'django_filters',
 
 ]
 
@@ -172,6 +172,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'core.User'
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+
     'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema',
 
     'DEFAULT_THROTTLE_CLASSES': [
@@ -184,12 +187,13 @@ REST_FRAMEWORK = {
 
     'DEFAULT_THROTTLE_RATES': {
 
-        'anon': '10/min',
+        'anon': '20/min',
 
         'user': '50/min',
 
         'login' : '3/min',
-    }
+    },
+
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

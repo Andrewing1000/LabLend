@@ -28,6 +28,7 @@ class PrestamoSerializer(serializers.ModelSerializer):
         prestamo = Prestamo.objects.create(usuario=usuario, **validated_data)
         for item_data in items_data:
             item = item_data['item']
+            print("----------------->"+ repr(item))
             PrestamoItem.objects.create(prestamo=prestamo, item=item, cantidad=item_data['cantidad'])
         return prestamo
 

@@ -76,9 +76,10 @@ class Inventory {
       return [];
     }
 
+
     var queryParameters = {
       if (categoryIds != null) 'categories': categoryIds.join(','),
-      if (brandId != null) 'brand': brandId.toString(),
+      if (brandId != null) 'marca': brandId.toString(),
       if (namePattern != null) 'name': namePattern,
     };
 
@@ -91,13 +92,47 @@ class Inventory {
     }
 
     List<Item> itemList = [];
-    for (var itemData in response.data['results']) {
+    for (var itemData in response.data) {
       var item = Item.fromJson(itemData);
       itemList.add(item);
     }
 
     return itemList;
   }
+
+
+  Future<List<Item>> listItems({
+    List<int>? categoryIds,
+    int? brandId,
+    String? namePattern,
+  }) async {
+    if (!await isReady()) {
+      return [];
+    }
+
+    var queryParameters = {
+      if (categoryIds != null) 'categories': categoryIds.join(','),
+      if (brandId != null) 'marca': brandId.toString(),
+      if (namePattern != null) 'name': namePattern,
+    };
+
+    var response;
+    try {
+      response = await requestHandler.getRequest('/api/item/list/', query: queryParameters);
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      return [];
+    }
+
+    List<Item> itemList = [];
+    for (var itemData in response.data) {
+      var item = Item.fromJson(itemData);
+      itemList.add(item);
+    }
+
+    return itemList;
+  }
+
 
   Future<void> createBrand(Brand brand) async {
     if (!await isReady()) {

@@ -18,7 +18,13 @@ Future<void> main() async {
     marca: 'Example Brand',
   );
 
-  // Create some dummy Categories
+
+  var list = await SessionManager.userManager.getUserList();
+
+
+  //await SessionManager().logOut();
+
+  //Create some dummy Categories
   List<Category> dummyCategories = [
     Category(id: 1, nombre: 'Category A', description: 'Description for Category A'),
     Category(id: 2, nombre: 'Category B', description: 'Description for Category B'),
@@ -35,16 +41,24 @@ Future<void> main() async {
   //   marca: dummyBrand,
   //   categories: dummyCategories,
   // );
+  //
+  //
 
-  var dummyItem = await SessionManager.inventory.getItemById(1);
+  //dummyItem.create();
+  //Item dummyItem = await SessionManager.inventory.getItemById(1);
 
-  DateTime p =  DateTime.now().add(Duration(days: 3));
-   Loan loan = Loan(id: 1, usuario: session.user.email, fechaPrestamo: DateTime.now(),
-       fechaDevolucion: p,
-       devuelto: false,
-       items: [PrestamoItem(item: dummyItem, cantidad: 1)] );
 
-  loan.create();
+
+
+  //print(dummyItem.toJson().toString());
+
+  // DateTime p =  DateTime.now().add(Duration(days: 3));
+  //  Loan loan = Loan(id: 1, usuario: session.user.email, fechaPrestamo: DateTime.now(),
+  //      fechaDevolucion: p,
+  //      devuelto: false,
+  //      items: [PrestamoItem(item: dummyItem, cantidad: 1)] );
+  //
+  // loan.create();
 
 
   //User user = AssistUser(email: "pedro@pana.com", name: "Pedrolas", isActive: true);
@@ -54,6 +68,15 @@ Future<void> main() async {
 
   // user.update(newUser: newUser);
   //user.create(password: "#123#AndresHinojosa#123");
+
+  // List<Brand> brandList = await SessionManager.inventory.getBrands();
+  // brand.id
+
+  //List<Item> list= await SessionManager.inventory.getItems(brandId: 1, categoryIds: [1]);
+
+
+  //list= await SessionManager.inventory.listItems(brandId: 1, categoryIds: [1]);
+
 }
 
 class MyApp extends StatelessWidget {

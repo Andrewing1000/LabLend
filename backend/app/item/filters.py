@@ -1,15 +1,17 @@
-# filters.py
+
 from django_filters import rest_framework as filters
+from django.contrib.postgres.search import TrigramSimilarity
 from .models import Item, Category, Brand
+import logging
 
 class ItemFilter(filters.FilterSet):
     categories = filters.ModelMultipleChoiceFilter(queryset=Category.objects.all(), field_name='categories__id', to_field_name='id')
-    brand = filters.ModelChoiceFilter(queryset=Brand.objects.all(), field_name='marca__id', to_field_name='id')
+    marca = filters.ModelChoiceFilter(queryset=Brand.objects.all(), field_name='marca_id', to_field_name='id')
     name = filters.CharFilter(method='filter_by_name')
 
     class Meta:
         model = Item
-        fields = ['categories', 'brand', 'name']
+        fields = ['categories', 'marca', 'name']
 
     def filter_by_name(self, queryset, name, value):
         return queryset.annotate(
@@ -17,3 +19,9 @@ class ItemFilter(filters.FilterSet):
         ).filter(
             similarity__gt=0.1  # Adjust threshold as needed
         ).order_by('-similarity')
+
+    def filter_queryset(self, queryset):
+        for name, value in self.form.cleaned_data.items():
+            if name == 'marca':
+                print(f"Filter name: {name}, Filter value: {value} (Type: {type(value)})")
+        return super().filter_queryset(queryset)

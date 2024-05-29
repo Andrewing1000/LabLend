@@ -85,6 +85,7 @@ class MainFrameState extends State<MainFrame> {
             switchPage(this.searchPage);
           },
           title: "Search"),
+
       NavItem(
           iconNormal: Icons.info_outline,
           iconSelected: Icons.info,

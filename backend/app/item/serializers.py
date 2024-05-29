@@ -1,6 +1,7 @@
 # serializers.py
 from rest_framework import serializers
 from .models import Brand, Category, Item
+import logging
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:

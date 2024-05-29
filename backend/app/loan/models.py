@@ -6,8 +6,8 @@ from item.models import Item  # Asegúrate de que la app 'item' esté instalada 
 
 class Prestamo(models.Model):
     usuario = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-    fecha_prestamo = models.DateField()
-    fecha_devolucion = models.DateField()
+    fecha_prestamo = models.DateTimeField()
+    fecha_devolucion = models.DateTimeField()
     devuelto = models.BooleanField(default=False)
     items = models.ManyToManyField(Item, through='PrestamoItem', related_name='prestamos')
 

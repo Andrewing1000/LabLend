@@ -94,6 +94,10 @@ class SessionManager with ChangeNotifier {
   void errorNotification({required String error, Map<String, dynamic>? details}){
     print(error);
 
+    if(details == null){
+      return;
+    }
+
     for(String key in details!.keys){
       print(key + ": " + details[key].toString());
     }
@@ -224,13 +228,12 @@ class SessionManager with ChangeNotifier {
   }
 
 
-  void logOut() async{
+  Future<Session> logOut() async{
     if(!(await connectionCheck())){
-      return;
-    };
-
+      return AnonymousSession();
+    }
     if(!(await sessionCheck())){
-      return;
+      return AnonymousSession();
     }
 
     var response = await httpHandler.postRequest('/api/user/logout/');
@@ -247,5 +250,7 @@ class SessionManager with ChangeNotifier {
       errorNotification(error :'Sesión cerrada');
       _session = AnonymousSession();
     }
+
+    return _session;
   }
 }
