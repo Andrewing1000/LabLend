@@ -127,7 +127,7 @@ class ToolBarState extends State<ToolBar> {
                 width: 100,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(100),
+                  color: Colors.black.withAlpha(170),
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -167,7 +167,7 @@ class ToolBarState extends State<ToolBar> {
                 width: 100,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(100),
+                  color: Colors.black.withAlpha(170),
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -207,7 +207,7 @@ class ToolBarState extends State<ToolBar> {
                 width: 100,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(100),
+                  color: Colors.black.withAlpha(170),
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadius.circular(30),
                 ),
