@@ -2,6 +2,8 @@ import "dart:ui";
 
 
 import "package:flutter/material.dart";
+import "package:frontend/screens/create_item_screen.dart";
+import "package:frontend/screens/create_user.dart";
 import 'package:provider/provider.dart';
 
 import "package:frontend/models/Session.dart";
@@ -44,6 +46,9 @@ class MainFrameState extends State<MainFrame> {
 
   HomePage homePage = HomePage();
   SearchItemPage searchPage = SearchItemPage();
+  CreateItemScreen createItemPage = CreateItemScreen();
+  CreateUserScreen createUserPage = CreateUserScreen();
+
   Widget sidePanel = Container(); /// Implementar
   late PageManager pageManager;
   late VerticalNavbar navBar;
@@ -74,6 +79,22 @@ class MainFrameState extends State<MainFrame> {
 
           },
           title: "Search"),
+
+      NavItem(
+          iconNormal: Icons.people_outline,
+          iconSelected: Icons.people,
+          onPressed: (){
+            pageManager.setPage(createUserPage);
+          },
+          title: "Create User"),
+
+      NavItem(
+          iconNormal: Icons.add_circle_outline_outlined,
+          iconSelected: Icons.add_circle,
+          onPressed: (){
+            pageManager.setPage(createItemPage);
+          },
+          title: "Create User"),
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);

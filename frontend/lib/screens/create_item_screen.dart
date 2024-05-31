@@ -4,9 +4,21 @@ import 'package:frontend/widgets/create_item_form.dart';
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/notification.dart';
 
-class CreateItemScreen extends StatefulWidget {
+import 'PageBase.dart';
+
+class CreateItemScreen extends PageBase{
   @override
   _CreateItemScreenState createState() => _CreateItemScreenState();
+
+  @override
+  Future<PageBase> onDispose() async {
+    return this;
+  }
+
+  @override
+  Future<PageBase> onSet() async {
+    return this;
+  }
 }
 
 class _CreateItemScreenState extends State<CreateItemScreen> {

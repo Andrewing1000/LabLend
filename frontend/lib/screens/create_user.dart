@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/PageBase.dart';
 // import 'package:frontend/models/Session.dart'; // Comentado para ver solo la vista
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/user_form.dart';
@@ -7,9 +8,19 @@ import 'package:frontend/widgets/notification.dart';
 import '../models/User.dart';
 // import 'package:frontend/models/user.dart'; // Comentado para ver solo la vista
 
-class CreateUserScreen extends StatefulWidget {
+class CreateUserScreen extends PageBase{
   @override
   _CreateUserScreenState createState() => _CreateUserScreenState();
+
+  @override
+  Future<PageBase> onDispose() async{
+    return this;
+  }
+
+  @override
+  Future<PageBase> onSet() async{
+    return this;
+  }
 }
 
 class _CreateUserScreenState extends State<CreateUserScreen> {
