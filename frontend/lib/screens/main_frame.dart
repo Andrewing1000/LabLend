@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import "package:frontend/models/Session.dart";
 import "package:frontend/screens/HomePage.dart";
-import "package:frontend/screens/home_screen.dart";
 import "package:frontend/services/ContextMessageService.dart";
 import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
@@ -17,6 +16,7 @@ import "../services/PageManager.dart";
 
 import "LoginPage.dart";
 import "PageContainer.dart";
+import "SearchItemPage.dart";
 
 class MainFrame extends StatefulWidget {
   ContextMessageService messageService;
@@ -43,6 +43,7 @@ class MainFrameState extends State<MainFrame> {
   bool onPasswordReset = false;
 
   HomePage homePage = HomePage();
+  SearchItemPage searchPage = SearchItemPage();
   Widget sidePanel = Container(); /// Implementar
   late PageManager pageManager;
   late VerticalNavbar navBar;
@@ -50,7 +51,6 @@ class MainFrameState extends State<MainFrame> {
 
   MainFrameState() {
     pageManager = PageManager(defaultPage: homePage);
-    HomeScreen hs = HomeScreen(scrollController: ScrollController(), manager: pageManager);
     final List<NavItem> items = [
       NavItem(
           iconNormal: Icons.home_outlined,
@@ -63,7 +63,7 @@ class MainFrameState extends State<MainFrame> {
           iconNormal: Icons.search_sharp,
           iconSelected: Icons.search,
           onPressed: () {
-            pageManager.setPage(hs);
+            pageManager.setPage(searchPage);
           },
           title: "Search"),
 

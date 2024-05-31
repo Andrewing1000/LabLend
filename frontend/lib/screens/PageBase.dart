@@ -10,13 +10,13 @@ abstract class PageBase extends StatefulWidget {
 
   PageBase({
     Key? key,
-    required this.manager,
+    this.manager,
     this.child,
     this.disposable = false}):
   super(key: key);
 
-  PageBase onDispose();
-  PageBase onSet();
+  Future<PageBase> onDispose();
+  Future<PageBase> onSet();
 }
 
 abstract class BrowsablePage extends PageBase {
@@ -27,12 +27,20 @@ abstract class BrowsablePage extends PageBase {
   BrowsablePage({
     super.key,
     this.searchEnabled = true,
-    required super.manager,
+    super.manager,
     List<Filter> filters = const [],
   }) {
     for (Filter filter in filters) {
       this.filters.add(filter);
     }
+  }
+
+  @override
+  Future<PageBase> onSet() async {
+    for(Filter filter in filters.items){
+      await filter.getItems();
+    }
+    return this;
   }
 
   @override
@@ -87,8 +95,8 @@ abstract class Filter<T> extends ChangeNotifier {
     Set<T> selected = const {},
   }) : _selected = selected;
 
-  List<T> getItems() {
-    items = retrieveItems();
+  Future<List<T>> getItems() async {
+    items = await retrieveItems();
     for (T item in _selected) {
       if (!items.contains(item)) {
         deselect(item);
@@ -140,7 +148,7 @@ abstract class Filter<T> extends ChangeNotifier {
     }
   }
 
-  List<T> retrieveItems();
+  Future<List<T>> retrieveItems();
 
   String getRepresentation(T item);
 }

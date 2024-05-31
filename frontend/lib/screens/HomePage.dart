@@ -27,12 +27,12 @@ class HomePage extends PageBase{
   }
 
   @override
-  PageBase onDispose() {
+  Future<PageBase> onDispose() async {
     return this;
   }
 
   @override
-  PageBase onSet() {
+  Future<PageBase> onSet() async {
     return this;
   }
 

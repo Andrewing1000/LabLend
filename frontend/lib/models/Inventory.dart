@@ -26,7 +26,7 @@ class Inventory {
     }
 
     List<Brand> brandList = [];
-    for (var brandData in response.data['results']) {
+    for (var brandData in response.data) {
       var brand = Brand.fromJson(brandData);
       brandList.add(brand);
     }
@@ -48,7 +48,7 @@ class Inventory {
     }
 
     List<Category> categoryList = [];
-    for (var categoryData in response.data['results']) {
+    for (var categoryData in response.data) {
       var category = Category.fromJson(categoryData);
       categoryList.add(category);
     }
