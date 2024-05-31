@@ -23,7 +23,8 @@ class SearchItemPage extends BrowsablePage {
   }
 
   @override
-  Widget build(BuildContext context, SearchField searchField, FilterList filters, Widget? child) {
+  Widget build(BuildContext context, SearchField searchField,
+      FilterList filters, Widget? child) {
     String? pattern;
     if (searchField.value.isNotEmpty) {
       pattern = searchField.value;
@@ -33,12 +34,21 @@ class SearchItemPage extends BrowsablePage {
       future: _fetchItems(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: Colors.white,));
+          return Center(
+              child: CircularProgressIndicator(
+            color: Colors.white,
+          ));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No se encontraron items',
-          style: TextStyle(color: Colors.white),));
+          return Center(
+            child: Text(
+              'No se encontraron items',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          );
         } else {
           List<Item> items = snapshot.data!;
           return CustomScrollView(
@@ -50,10 +60,11 @@ class SearchItemPage extends BrowsablePage {
                     maxCrossAxisExtent: 200.0, // Maximum width of each item
                     mainAxisSpacing: 10.0, // Spacing between rows
                     crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio: .5, // Optional: You can adjust this if needed
+                    childAspectRatio:
+                        .5, // Optional: You can adjust this if needed
                   ),
                   delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
+                    (BuildContext context, int index) {
                       return CustomCard(
                         title: items[index].nombre,
                         subtitle: items[index].description ?? "",
@@ -77,7 +88,8 @@ class SearchItemPage extends BrowsablePage {
 }
 
 class BrandFilter extends Filter<Brand> {
-  BrandFilter({required super.items}) : super(attributeName: "Marca", multiple: false);
+  BrandFilter({required super.items})
+      : super(attributeName: "Marca", multiple: false);
 
   @override
   String getRepresentation(Brand item) {
@@ -91,7 +103,8 @@ class BrandFilter extends Filter<Brand> {
 }
 
 class CategoryFilter extends Filter<Category> {
-  CategoryFilter({required super.items}) : super(attributeName: "Categoría", multiple: true);
+  CategoryFilter({required super.items})
+      : super(attributeName: "Categoría", multiple: true);
 
   @override
   String getRepresentation(Category item) {
