@@ -7,11 +7,10 @@ import 'models/item.dart';
 import 'models/User.dart';
 
 Future<void> main() async {
-
   runApp(MyApp());
   var manager = SessionManager();
-  Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
-
+  Session session =
+      await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
   ///
   ///
@@ -23,18 +22,29 @@ Future<void> main() async {
   ///Obtener usuario por el email
   //User? user = await SessionManager.userManager.getUser("admin2@example.com");
 
+  //dummyItem.create();
+  /*
+  User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
+  admin2.create(password: "#123#AndresHinojosa#123");
+
+  Loan loan = Loan(
+      id: 1,
+      usuario: session.user.email,
+      fechaPrestamo: DateTime.now(),
+      fechaDevolucion: DateTime.now().add(Duration(hours: 3)),
+      devuelto: false,
+      items: [PrestamoItem(item: dummyItem, cantidad: 1)]);
+*/
   ///
   ///
   ///
   /// Listar usuarios
   //var list = await SessionManager.userManager.getUserList();
 
-
   ///
   ///
   ///ListarItems
   //var listItems = await SessionManager.inventory.getItems();
-
 
   ///
   ///
@@ -43,7 +53,6 @@ Future<void> main() async {
   //   id: 1,
   //   marca: 'Example Brand',
   // );
-
 
   ///
   ///
@@ -70,13 +79,11 @@ Future<void> main() async {
   // );
   //dummyItem.create();
 
-
   ///
   ///
   /// Obtener Item por id
   // Item? dummyItem = await SessionManager.inventory.getItemById(1);
   // print(dummyItem?.toJson().toString());
-
 
   ///
   ///
@@ -89,18 +96,15 @@ Future<void> main() async {
   //
   // loan.create();
 
-
   ///
   ///
   /// Obtener prestamo usando id
   //Loan? loan = await SessionManager.loanService.getLoan(20);
 
-
   ///
   ///
   /// Devolver prestamo
   //SessionManager.loanService.updateDevuelto(loan, true);
-
 
   ///
   ///
@@ -109,7 +113,6 @@ Future<void> main() async {
   //     endDate: DateTime.now().add(Duration(days: 1)),
   //     startDate: DateTime.now().add(Duration(days: 0)),
   //     email: "admin2");
-
 
   ///
   ///
@@ -131,7 +134,6 @@ Future<void> main() async {
   ///
   /// Obtener Items con categorias
   // List<Item> list= await SessionManager.inventory.getItems(brandId: 1, categoryIds: [1]);
-
 }
 
 class MyApp extends StatelessWidget {

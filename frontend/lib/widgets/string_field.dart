@@ -4,12 +4,14 @@ class StringField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
   final double width;
+  final bool enabled;
 
   const StringField({
     Key? key,
     required this.controller,
     required this.hintText,
     required this.width,
+    this.enabled = true, // Valor por defecto de true
   }) : super(key: key);
 
   @override
@@ -35,15 +37,18 @@ class _StringFieldState extends State<StringField> {
       width: widget.width,
       child: TextField(
         controller: widget.controller,
+        enabled: widget.enabled, // Controla si el campo está habilitado o no
         style: TextStyle(color: Colors.white), // Estilo del texto
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.grey[900], // Color de fondo del campo de texto
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: Colors.white54), // Estilo del texto de sugerencia
+          hintStyle: TextStyle(
+              color: Colors.white54), // Estilo del texto de sugerencia
           errorText: _errorMessage,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.0), // Define el radio de las esquinas del campo de texto
+            borderRadius: BorderRadius.circular(
+                30.0), // Define el radio de las esquinas del campo de texto
             borderSide: BorderSide.none,
           ),
         ),

@@ -15,10 +15,13 @@ class PasswordCreationField extends StatefulWidget {
 
   // Método para verificar si la contraseña es válida
   bool isValid(String password) {
-    final RegExp hasUpperCase = RegExp(r'[A-Z]'); // Verifica si contiene mayúsculas
-    final RegExp hasLowerCase = RegExp(r'[a-z]'); // Verifica si contiene minúsculas
+    final RegExp hasUpperCase =
+        RegExp(r'[A-Z]'); // Verifica si contiene mayúsculas
+    final RegExp hasLowerCase =
+        RegExp(r'[a-z]'); // Verifica si contiene minúsculas
     final RegExp hasDigit = RegExp(r'\d'); // Verifica si contiene dígitos
-    final RegExp hasSpecialCharacter = RegExp(r'[!@#$%^&*(),.?":{}|<>]'); // Verifica si contiene caracteres especiales
+    final RegExp hasSpecialCharacter = RegExp(
+        r'[!@#$%^&*(),.?":{}|<>]'); // Verifica si contiene caracteres especiales
 
     // Verifica los requisitos mínimos de la contraseña
     return password.length >= 8 &&
@@ -89,12 +92,14 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_updatePasswordCriteria); // Agrega listener para actualizar la fuerza y validez
+    widget.controller.addListener(
+        _updatePasswordCriteria); // Agrega listener para actualizar la fuerza y validez
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_updatePasswordCriteria); // Elimina listener
+    widget.controller
+        .removeListener(_updatePasswordCriteria); // Elimina listener
     super.dispose();
   }
 
@@ -129,16 +134,19 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
               filled: true,
               fillColor: Colors.grey[900], // Color de fondo del campo de texto
               hintText: widget.hintText,
-              hintStyle: TextStyle(color: Colors.white54), // Estilo del texto de sugerencia
+              hintStyle: TextStyle(
+                  color: Colors.white54), // Estilo del texto de sugerencia
               suffixIcon: IconButton(
                 icon: Icon(
                   _isObscured ? Icons.visibility_off : Icons.visibility,
                   color: Colors.white54, // Color del icono
                 ),
-                onPressed: _toggleObscured, // Alterna la visibilidad al presionar el icono
+                onPressed:
+                    _toggleObscured, // Alterna la visibilidad al presionar el icono
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30.0), // Define el radio de las esquinas del campo de texto
+                borderRadius: BorderRadius.circular(
+                    30.0), // Define el radio de las esquinas del campo de texto
                 borderSide: BorderSide.none,
               ),
             ),
@@ -150,10 +158,11 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
           child: LinearProgressIndicator(
             value: _strength, // Valor de la fuerza de la contraseña
             backgroundColor: Colors.red,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              _strength < 0.33 ? Colors.red :
-              _strength < 0.66 ? Colors.yellow :
-              Colors.green),
+            valueColor: AlwaysStoppedAnimation<Color>(_strength < 0.33
+                ? Colors.red
+                : _strength < 0.66
+                    ? Colors.yellow
+                    : Colors.green),
           ),
         ),
         SizedBox(height: 5),
