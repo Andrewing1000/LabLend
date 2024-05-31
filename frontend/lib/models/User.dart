@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/services/frame_adapter.dart';
 import 'package:provider/provider.dart';
 
 
@@ -27,9 +26,7 @@ abstract class User extends ChangeNotifier{
   User({required this.email,
         required this.name,
         this.isActive = true,
-        this.role = Role.assistantRole}){
-    getFrameAdapter();
-  }
+        this.role = Role.assistantRole});
 
 
   factory User.fromJson(Map<String, dynamic> userData){
@@ -62,8 +59,6 @@ abstract class User extends ChangeNotifier{
       'is_active' : isActive,
     };
   }
-
-  FrameAdapter getFrameAdapter();
 
   User clone(){
     return User.fromJson(toJson());
@@ -104,34 +99,16 @@ class VisitorUser extends User{
 
   VisitorUser({required super.email, required super.name}):
         super(role: Role.visitorRole);
-
-  @override
-  FrameAdapter getFrameAdapter() {
-    return VisitorFrameAdapter();
-  }
-
-
 }
 
 class AdminUser extends User{
   AdminUser({required super.email, required super.name, super.isActive}):
         super(role: Role.adminRole);
-
-  @override
-  FrameAdapter getFrameAdapter() {
-    return AdminFrameAdapter();
-  }
-
 }
 
 
 class AssistUser extends User{
   AssistUser({required super.email, required super.name, super.isActive}):
         super(role: Role.assistantRole);
-
-  @override
-  FrameAdapter getFrameAdapter() {
-    return AssistantFrameAdapter();
-  }
 
 }

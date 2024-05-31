@@ -20,7 +20,6 @@ class Brand extends ChangeNotifier {
       'marca': marca,
     };
   }
-
 }
 
 class Category extends ChangeNotifier {
@@ -45,7 +44,6 @@ class Category extends ChangeNotifier {
       'description': description,
     };
   }
-
 }
 
 class Item extends ChangeNotifier {
@@ -55,7 +53,6 @@ class Item extends ChangeNotifier {
   String? link;
   String? serialNumber;
   int quantity;
-  int quantity_on_loan;
   Brand marca;
   List<Category> categories;
 
@@ -66,7 +63,6 @@ class Item extends ChangeNotifier {
     this.link,
     this.serialNumber,
     required this.quantity,
-    required this.quantity_on_loan,
     required this.marca,
     required this.categories,
   });
@@ -79,9 +75,10 @@ class Item extends ChangeNotifier {
       link: json['link'],
       serialNumber: json['serial_number'],
       quantity: json['quantity'],
-      quantity_on_loan: json['quantity_on_loan'],
       marca: Brand.fromJson(json['marca']),
-      categories: (json['categories'] as List).map((i) => Category.fromJson(i)).toList(),
+      categories: (json['categories'] as List)
+          .map((i) => Category.fromJson(i))
+          .toList(),
     );
   }
 
@@ -93,26 +90,20 @@ class Item extends ChangeNotifier {
       'link': link,
       'serial_number': serialNumber,
       'quantity': quantity,
-      'quantity_on_loan' : quantity_on_loan,
       'marca': marca.toJson(),
       'categories': categories.map((c) => c.toJson()).toList(),
     };
   }
 
-  Item clone(){
-    return Item.fromJson(toJson());
-  }
-
-  void create(){
+  void create() {
     SessionManager.inventory.createItem(this);
   }
 
-  void update(Item newItem){
+  void update(Item newItem) {
     SessionManager.inventory.updateItem(this, newItem);
   }
 
   void updateItem(Item newItem) {
-
     nombre = newItem.nombre;
     description = newItem.description;
     link = newItem.link;
@@ -123,7 +114,3 @@ class Item extends ChangeNotifier {
     notifyListeners();
   }
 }
-
-
-
-

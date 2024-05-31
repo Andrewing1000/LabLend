@@ -11,7 +11,8 @@ class UserManager {
     requestHandler = session.requestHandler;
   }
 
-  Future<List<User>> getUserList({bool? isAdmin, bool? isActive, String? email}) async {
+  Future<List<User>> getUserList(
+      {bool? isAdmin, bool? isActive, String? email}) async {
     if (!await isReady()) {
       return [];
     }
@@ -69,11 +70,13 @@ class UserManager {
     }
 
     try {
-      var response = await requestHandler.getRequest('/user/manage', query: {'email': email});
+      var response = await requestHandler
+          .getRequest('/user/manage', query: {'email': email});
       return User.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        manager.errorNotification(error: 'No se encontró a un usuario con ese email');
+        manager.errorNotification(
+            error: 'No se encontró a un usuario con ese email');
       } else {
         manager.errorNotification(error: '', details: e.response?.data);
       }
@@ -102,11 +105,13 @@ class UserManager {
 
     try {
       if (user.role == Role.adminRole || user.role == Role.superAdminRole) {
-        var response = await requestHandler.postRequest('/user/create/admin/', body: userData);
+        var response = await requestHandler.postRequest('/user/create/admin/',
+            body: userData);
         manager.notification(notification: 'Administrador creado');
         return User.fromJson(response.data);
       } else if (user.role == Role.assistantRole) {
-        var response = await requestHandler.postRequest('/user/create/', body: userData);
+        var response =
+            await requestHandler.postRequest('/user/create/', body: userData);
         manager.notification(notification: 'Asistente creado');
         return User.fromJson(response.data);
       } else {
@@ -114,12 +119,14 @@ class UserManager {
         return null;
       }
     } on DioException catch (e) {
-      manager.errorNotification(error: 'Adición de usuario fallida', details: e.response?.data);
+      manager.errorNotification(
+          error: 'Adición de usuario fallida', details: e.response?.data);
       return null;
     }
   }
 
-  Future<User?> updateUser(User user, {required User newUser, String? password}) async {
+  Future<User?> updateUser(User user,
+      {required User newUser, String? password}) async {
     if (!await isReady()) {
       return null;
     }
@@ -131,12 +138,14 @@ class UserManager {
     }
 
     try {
-      await requestHandler.patchRequest('/user/manage/', body: newUser.toJson(), query: {'email': user.email});
+      await requestHandler.patchRequest('/user/manage/',
+          body: newUser.toJson(), query: {'email': user.email});
       user.updateData(newUser: newUser);
       manager.notification(notification: 'Información de usuario actualizada');
       return User.fromJson(newUser.toJson());
     } on DioException catch (e) {
-      manager.errorNotification(error: 'Actualización fallida', details: e.response?.data);
+      manager.errorNotification(
+          error: 'Actualización fallida', details: e.response?.data);
       return null;
     }
   }

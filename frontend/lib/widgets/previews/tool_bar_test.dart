@@ -1,4 +1,8 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/HomePage.dart';
+import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/widgets/tool_bar.dart';
 
 void main() {
@@ -17,8 +21,10 @@ void main() {
             ),
           ),
           child: ToolBar(
-            onConsult: (e) {},
             onLogin: () {},
+            manager: PageManager(
+              defaultPage: HomePage(),
+            ),
           ),
         ),
       ),

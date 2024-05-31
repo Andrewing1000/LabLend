@@ -5,7 +5,8 @@ import 'dart:core';
 import 'package:frontend/models/Request.dart';
 import 'package:dio/dio.dart';
 import 'package:frontend/models/UserManager.dart';
-import 'package:frontend/services/frame_adapter.dart';
+import 'package:frontend/screens/main_frame.dart';
+import 'package:frontend/services/ContextMessageService.dart';
 import 'Inventory.dart';
 import 'item.dart';
 import 'LoanService.dart';
@@ -15,21 +16,17 @@ import 'package:flutter/material.dart';
 
 class Session {
   static final SessionManager manager = SessionManager();
+  final Widget mainFrame = SessionManager.mainFrame;
+  final RequestHandler requestHandler = SessionManager.httpHandler;
+
   final User user;
   final DateTime loginTime;
-  final Widget mainFrame = manager.mainFrame;
-  final RequestHandler requestHandler;
 
-  Session({required this.user, required this.loginTime}):
-  requestHandler = SessionManager.httpHandler{
-    FrameAdapter adapter = user.getFrameAdapter();
-    adapter.setUpFrame(mainFrame);
-  }
+  Session({required this.user, required this.loginTime});
 
   void logOut(){
     manager.logOut();
   }
-
 
   Future<bool> sessionCheck() async {
     return await manager.sessionCheck();
@@ -61,7 +58,7 @@ class AnonymousSession extends Session{
 
 
 class SessionManager with ChangeNotifier {
-  bool _isOnline = false;
+  static bool _isOnline = false;
   static SessionManager manager = SessionManager._inner();
   static Session _session = AnonymousSession();
   static RequestHandler httpHandler = RequestHandler();
@@ -70,7 +67,8 @@ class SessionManager with ChangeNotifier {
   static Inventory inventory = Inventory();
   static LoanService loanService = LoanService();
 
-  Widget mainFrame = Container();
+  static ContextMessageService messageService = ContextMessageService();
+  static MainFrame mainFrame = MainFrame(messageService: messageService);
 
   SessionManager._inner(){
     connectionCheck();
@@ -82,31 +80,23 @@ class SessionManager with ChangeNotifier {
   }
 
   static Session get session => _session;
-
-  static set session(Session session){
-    _session = session;
-  }
-
   bool get isOnline => _isOnline;
-
   ///
   ///
   ///
   /// Notify MainFrame
   void errorNotification({required String error, Map<String, dynamic>? details}){
-    print(error);
-
-    if(details == null){
-      return;
+    String message = "$error \n";
+    if(details != null){
+      for(String key in details!.keys){
+        message += "$key: $details[key].toString()\n";
+      }
     }
-
-    for(String key in details!.keys){
-      print(key + ": " + details[key].toString());
-    }
+    messageService.notify(message: message);
   }
 
   void notification({required String notification}){
-    print(notification);
+    messageService.notify(message: notification);
   }
 
   void confirmNotification(){
@@ -137,6 +127,14 @@ class SessionManager with ChangeNotifier {
     _isOnline = true;
   }
 
+  Future<bool> connectionCheck() async{
+    isOnline = await httpHandler.connectionCheck();
+    if(!isOnline){
+      errorNotification(error : 'Sin conección');
+    }
+    return isOnline;
+  }
+
   Future<bool> sessionCheck() async{
     try{
       var response = await httpHandler.getRequest('/user/me/');
@@ -145,24 +143,12 @@ class SessionManager with ChangeNotifier {
       }
       return false;
     }on DioException catch (e){
-      session = AnonymousSession();
+      _session = AnonymousSession();
     }
 
     errorNotification(error: 'Inicie sesión');
     return false;
   }
-
-
-  Future<bool> connectionCheck() async{
-    isOnline = await httpHandler.connectionCheck();
-
-    if(!isOnline){
-      errorNotification(error : 'Sin conección');
-    }
-
-    return isOnline;
-  }
-
 
 
   ///
@@ -175,6 +161,7 @@ class SessionManager with ChangeNotifier {
     if(_session is!  AnonymousSession){
       if(session?.user.email == email){
         if(await sessionCheck()){
+          notification(notification: "Ya ha iniciado seción.");
           return _session;
         }
       }

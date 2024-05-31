@@ -3,11 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/main_frame.dart';
-import 'package:frontend/screens/main_frame_vertical.dart';
+
 import 'models/Loan.dart';
 import 'models/item.dart';
 import 'models/User.dart';
-import 'screens/home_screen.dart';
 
 Future<void> main() async {
   runApp(MyApp());
@@ -25,6 +24,19 @@ Future<void> main() async {
   ///Obtener usuario por el email
   //User? user = await SessionManager.userManager.getUser("admin2@example.com");
 
+  //dummyItem.create();
+  /*
+  User admin2 = AdminUser(email: "admin4@gmail.com", name: "admini2");
+  admin2.create(password: "#123#AndresHinojosa#123");
+
+  Loan loan = Loan(
+      id: 1,
+      usuario: session.user.email,
+      fechaPrestamo: DateTime.now(),
+      fechaDevolucion: DateTime.now().add(Duration(hours: 3)),
+      devuelto: false,
+      items: [PrestamoItem(item: dummyItem, cantidad: 1)]);
+*/
   ///
   ///
   ///
@@ -133,7 +145,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: VerticalMainFrame(),
+        body: SessionManager.mainFrame,
       ),
     );
   }

@@ -1,20 +1,25 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:frontend/models/User.dart';
+import 'package:frontend/screens/PageBase.dart';
+import 'package:frontend/widgets/DropDownFilter.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/widgets/barra_busqueda.dart';
 import 'package:frontend/widgets/cicular_button.dart';
 
-class ToolBar extends StatefulWidget {
-  static double height = 130;
-  Function(String query) onConsult;
-  bool searchEnabled;
-  Function onLogin;
+import '../models/Session.dart';
 
-  ToolBar(
-      {super.key,
-      required this.onConsult,
-      required this.onLogin,
-      this.searchEnabled = true});
+class ToolBar extends StatefulWidget{
+  static double height = 130;
+  PageManager manager;
+  Function onLogin;
+  ToolBar({
+    super.key,
+    required this.manager,
+    required this.onLogin,
+  });
 
   @override
   State<ToolBar> createState() {
@@ -52,197 +57,105 @@ class ToolBarState extends State<ToolBar> {
           end: Alignment.bottomRight,
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              CircularButton.static(
-                normalIcon: Icons.arrow_back_ios_new,
-                size: 25,
-                isSelected: true,
-                onPressed: () {
-                  setState(() {});
-                },
-              ),
-              Container(
-                width: 10,
-              ),
-              CircularButton.static(
-                normalIcon: Icons.arrow_forward_ios,
-                size: 25,
-                isSelected: true,
-                onPressed: () {
-                  setState(() {});
-                },
-              ),
-              Container(
-                width: 10,
-              ),
-              if (widget.searchEnabled)
-                Expanded(
-                    child: BarraBusqueda(
-                        controller: searchBarController,
-                        onChange: (e) {
-                          widget.onConsult(e);
-                        },
-                        onSearch: (e) {})),
-              Container(
-                width: 10,
-              ),
-              Spacer(),
-              CircularButton.animated(
-                normalIcon: Icons.notifications_none_outlined,
-                selectedIcon: Icons.notifications,
-                size: 25,
-                isSelected: true,
-                onPressed: () {
-                  setState(() {});
-                },
-              ),
-              Container(
-                width: 10,
-              ),
-              CircularButton.animated(
-                normalIcon: Icons.login,
-                size: 25,
-                isSelected: true,
-                onPressed: () {
-                  setState(() {
-                    widget.onLogin();
-                  });
-                },
-              ),
-            ],
-          ),
-          Container(
-            height: 20,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Container(
-                width: 100,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(170),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    hint: Text(
-                      "  Category",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    value: _selectedOption,
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.white),
-                    dropdownColor: Colors.black,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedOption = newValue;
-                      });
-                    },
-                    items:
-                        _options.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child:
-                            Text(value, style: TextStyle(color: Colors.white)),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              Container(
-                width: 10,
-              ),
-              Container(
-                width: 100,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(170),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    hint: Text(
-                      "  Category",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    value: _selectedOption,
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.white),
-                    dropdownColor: Colors.black,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedOption = newValue;
-                      });
-                    },
-                    items:
-                        _options.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child:
-                            Text(value, style: TextStyle(color: Colors.white)),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              Container(
-                width: 10,
-              ),
-              Container(
-                width: 100,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(170),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    hint: Text(
-                      "  Category",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    value: _selectedOption,
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.white),
-                    dropdownColor: Colors.black,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedOption = newValue;
-                      });
-                    },
-                    items:
-                        _options.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child:
-                            Text(value, style: TextStyle(color: Colors.white)),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-            ],
-          )
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PageManager>.value(value: widget.manager),
         ],
+        child: Consumer<PageManager>(
+            builder: (context, manager, child) {
+              var page = manager.currentPage;
+              if(manager.currentPage is BrowsablePage){
+                page = page as BrowsablePage;
+              }
+
+              var activateBar = false;
+              if(page is BrowsablePage){
+                activateBar = page.searchEnabled;
+                searchBarController.text = page.searchField.value;
+              }
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      CircularButton.static(
+                        normalIcon: Icons.arrow_back_ios_new,
+                        isAvailable: manager.isLastAvailable,
+                        size: 25,
+                        isSelected: true,
+                        onPressed: (){
+                          manager.toLast();
+                        },
+                      ),
+                      Container(width: 10,),
+                      CircularButton.static(
+                        normalIcon: Icons.arrow_forward_ios,
+                        isAvailable: manager.isNextAvailable,
+                        size: 25,
+                        isSelected: true,
+                        onPressed: (){
+                          setState(() {
+                            manager.toNext();
+                          });
+                        },
+                      ),
+                      Container(width: 10,),
+
+                      if(activateBar)
+                        Expanded(
+                          child: BarraBusqueda(
+                              controller: searchBarController,
+                              onChange: (String value){
+                                if(page is BrowsablePage){
+                                  page.searchField.value = value;
+                                }
+                              },
+                              onSearch: (e){})
+                        ),
+
+                      Container(width: 10,),
+                      Spacer(),
+
+                      if(SessionManager.session.user is! VisitorUser) CircularButton.animated(
+                        normalIcon: Icons.notifications_none_outlined,
+                        selectedIcon: Icons.notifications,
+                        size: 25,
+                        isSelected: true,
+                        onPressed: (){
+                          setState(() {
+                            throw UnimplementedError();
+                            ///Implementar
+                          });
+                        },
+                      ),
+
+                      Container(width: 10,),
+                      CircularButton.animated(
+                        normalIcon: Icons.login,
+                        size: 25,
+                        isSelected: true,
+                        onPressed: (){
+                          setState(() {
+                            widget.onLogin();
+                          });
+                        },
+                      ),
+
+                    ],
+                  ),
+                  Container(height: 20,),
+                  if(page is BrowsablePage) Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: page.filters.items.map((Filter item){
+                      return DropDownFilter(filter: item);
+                    }).toList(),
+                  )
+                ],
+              );
+            },
+          ),
       ),
     );
   }
