@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/HomePage.dart';
+import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/widgets/tool_bar.dart';
 
 
@@ -14,7 +16,7 @@ void main(){
               end: Alignment(0, 0.2),
             ),
           ),
-        child: ToolBar(onConsult: (e){}, onLogin: (){},),
+        child: ToolBar(onLogin: (){}, manager: PageManager(defaultPage: HomePage()),),
         ),
       ),
     ),
