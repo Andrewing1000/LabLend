@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/main_frame.dart';
-import 'package:frontend/screens/main_frame_vertical.dart';
+
 import 'models/Loan.dart';
 import 'models/item.dart';
 import 'models/User.dart';
@@ -141,7 +141,7 @@ class MyApp extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return MaterialApp(
       home: Scaffold(
-        body: VerticalMainFrame(),
+        body: SessionManager.mainFrame,
       ),
     );
   }

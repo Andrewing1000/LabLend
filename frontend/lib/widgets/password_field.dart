@@ -20,6 +20,7 @@ class _PasswordFieldState extends State<PasswordField> {
   bool _isObscured = true; // Estado para controlar si la contraseña está oculta
   String? _errorMessage;
 
+
   void _validate() {
     setState(() {
       if (widget.controller.text.isEmpty) {

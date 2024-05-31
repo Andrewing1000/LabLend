@@ -1,23 +1,26 @@
 import "dart:ui";
 
-import "package:flutter/cupertino.dart";
+
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
+import 'package:provider/provider.dart';
+
+import "package:frontend/models/Session.dart";
+import "package:frontend/screens/HomePage.dart";
 import "package:frontend/screens/home_screen.dart";
-import "package:frontend/screens/previews/login_recuperado_test.dart";
-import "package:frontend/screens/previews/login_test.dart";
+import "package:frontend/services/ContextMessageService.dart";
 import "package:frontend/widgets/navbar.dart";
-import "package:frontend/widgets/pagesViews/welcome_page.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
-import "../widgets/pagesViews/search_page.dart";
-import "../widgets/tool_bar.dart";
+import "../services/PageManager.dart";
 
-import "../widgets/notification.dart";
+
+
+import "LoginPage.dart";
+import "PageContainer.dart";
 
 class MainFrame extends StatefulWidget {
-  static GlobalKey<VerticalNavbarState> vNavBarKey = GlobalKey();
-  MainFrame({super.key});
+  ContextMessageService messageService;
+  MainFrame({super.key, required this.messageService});
 
   @override
   State<MainFrame> createState() {
@@ -26,63 +29,41 @@ class MainFrame extends StatefulWidget {
 }
 
 class MainFrameState extends State<MainFrame> {
+  double maxWidth = double.infinity;
+  double maxHeight = double.infinity;
+
   bool onFrontier1 = false;
   bool onFrontier2 = false;
   bool grabbing1 = false;
   bool grabbing2 = false;
-
-  double maxWidth = double.infinity;
-  double maxHeight = double.infinity;
-
   ResizeController sizeLeft = ResizeController();
   ResizeController sizeRight = ResizeController();
-  VerticalNavbar navBar;
-
-  ScrollController homeScrollController = ScrollController();
 
   bool onLogin = false;
+  bool onPasswordReset = false;
 
-  Widget loginPage = LoginScreen(
-    onSubmit: () {},
-  );
-  Widget passResetPage = RecuperarContrasenaScreen();
-  Widget welcomePage = const WelcomePage();
-  Widget? homePage;
-  Widget? searchPage;
-  Widget page = HomeScreen(scrollController: ScrollController());
-  Widget? sidePanel;
+  HomePage homePage = HomePage();
+  Widget sidePanel = Container(); /// Implementar
+  late PageManager pageManager;
+  late VerticalNavbar navBar;
 
-  MainFrameState()
-      : navBar = VerticalNavbar(
-          key: MainFrame.vNavBarKey,
-          iconSize: 30,
-          items: const [],
-        ),
-        super() {
-    homePage = HomeScreen(scrollController: homeScrollController);
-    searchPage = SearchPage(query: "");
-    page = homePage!;
-    loginPage = LoginScreen(onSubmit: loginSuccess);
 
+  MainFrameState() {
+    pageManager = PageManager(defaultPage: homePage);
+    HomeScreen hs = HomeScreen(scrollController: ScrollController(), manager: pageManager);
     final List<NavItem> items = [
       NavItem(
           iconNormal: Icons.home_outlined,
           iconSelected: Icons.home,
           onPressed: () {
-            switchPage(this.homePage);
-            setState(() {
-              homeScrollController.animateTo(
-                  homeScrollController.position.minScrollExtent,
-                  duration: Duration(milliseconds: 400),
-                  curve: Curves.easeIn);
-            });
+            pageManager.setPage(homePage);
           },
           title: "Home"),
       NavItem(
           iconNormal: Icons.search_sharp,
           iconSelected: Icons.search,
           onPressed: () {
-            switchPage(this.searchPage);
+            pageManager.setPage(hs);
           },
           title: "Search"),
 
@@ -90,35 +71,12 @@ class MainFrameState extends State<MainFrame> {
           iconNormal: Icons.info_outline,
           iconSelected: Icons.info,
           onPressed: () {
-            switchPage(this.homePage);
-            setState(() {
-              homeScrollController.animateTo(
-                  homeScrollController.position.maxScrollExtent,
-                  duration: Duration(milliseconds: 400),
-                  curve: Curves.easeIn);
-            });
+
           },
           title: "Search"),
     ];
 
-    navBar =
-        VerticalNavbar(key: MainFrame.vNavBarKey, iconSize: 30, items: items);
-  }
-
-  void loginSuccess() {
-    setState() {
-      onLogin = false;
-    }
-  }
-
-  void switchPage(Widget? page) {
-    if (page == null) {
-      return;
-    }
-
-    setState(() {
-      this.page = page;
-    });
+    navBar = VerticalNavbar(iconSize: 30, items: items);
   }
 
   void performResize(double dx) {
@@ -222,34 +180,23 @@ class MainFrameState extends State<MainFrame> {
                   ),
                   Expanded(
                     child: ResizablePanel(
-                        //controller: sizeRight,
-                        stops: [ResizeRange(start: 0, end: double.infinity)],
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(21, 21, 21, 1.0),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Stack(
-                            children: [
-                              page,
-                              ToolBar(
-                                onConsult: (e) {
-                                  setState(
-                                    () {
-                                      searchPage = SearchPage(query: e);
-                                      page = searchPage!;
-                                    },
-                                  );
-                                },
-                                onLogin: () {
-                                  setState(() {
-                                    onLogin = true;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        )),
+                      //controller: sizeRight,
+                      stops: [ResizeRange(start: 0, end: double.infinity)],
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(21, 21, 21, 1.0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: PageContainer(
+                          onLogin: (){
+                            setState(() {
+                              onLogin = true;
+                            });
+                          },
+                          manager: pageManager,
+                        ),
+                      )
+                    ),
                   ),
                   MouseRegion(
                     cursor: SystemMouseCursors.grab,
@@ -290,29 +237,53 @@ class MainFrameState extends State<MainFrame> {
                             color: const Color.fromRGBO(21, 21, 21, 1.0),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: sidePanel)),
+                          child: sidePanel)
+                  ),
                 ],
               ),
             ),
-            if (onLogin)
+            if (onLogin || onPasswordReset)
               GestureDetector(
                 onTapDown: (e) {
                   setState(() {
                     onLogin = false;
+                    onPasswordReset = false;
                   });
                 },
-                child: Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                    child: Container(
-                      color: onLogin
-                          ? Colors.black.withOpacity(0.2)
-                          : Colors.transparent,
-                    ),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                  child: Container(
+                    color: onLogin
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.transparent,
                   ),
                 ),
               ),
-            if (onLogin) loginPage,
+            if (onLogin) LoginScreen(
+              onSubmit: (email, password){
+                SessionManager().login(email, password);
+              },
+              onPasswordReset: (){
+                setState(() {
+                  onPasswordReset = true;
+                });
+              },
+            ),
+
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: widget.messageService),
+              ],
+              child: Consumer<ContextMessageService>(
+                builder: (context, messageService, child){
+                  final messageView = messageService.notification;
+                  if(messageView != null && messageService.displaying){
+                    return messageView;
+                  }
+                  return Container();
+                },
+              ),
+            )
           ],
         ),
       );

@@ -3,38 +3,32 @@ import 'package:provider/provider.dart';
 import '../models/Session.dart';
 import '../services/PageManager.dart';
 
-abstract class PageBase extends StatelessWidget {
-  final Session session;
-  final PageManager manager;
+abstract class PageBase extends StatefulWidget {
+  PageManager? manager;
   final Widget? child;
+  final bool disposable;
 
-  PageBase({Key? key, required this.session, required this.manager, this.child}) : super(key: key);
+  PageBase({
+    Key? key,
+    required this.manager,
+    this.child,
+    this.disposable = false}):
+  super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(child: child);
-  }
-
-// void discard(){
-//   manager.discard(this);
-// }
-//
-// void replace(PageBase page){
-//   manager.replace(page);
-// }
+  PageBase onDispose();
+  PageBase onSet();
 }
 
 abstract class BrowsablePage extends PageBase {
+  final bool searchEnabled;
   final SearchField searchField = SearchField();
   final FilterList filters = FilterList();
-  final Widget Function(BuildContext, SearchField, FilterList, Widget?) rebuild;
 
   BrowsablePage({
     super.key,
-    required super.session,
+    this.searchEnabled = true,
     required super.manager,
     List<Filter> filters = const [],
-    required this.rebuild,
   }) {
     for (Filter filter in filters) {
       this.filters.add(filter);
@@ -42,20 +36,31 @@ abstract class BrowsablePage extends PageBase {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => searchField),
-        ChangeNotifierProvider(create: (context) => filters),
-      ],
-      child: Consumer2<SearchField, FilterList>(
-        builder: (context, searchField, filters, child) {
-          return rebuild(context, searchField, filters, child);
-        },
-      ),
-    );
+  State<BrowsablePage> createState(){
+    return BrowsablePageState();
   }
+
+  Widget build(BuildContext context, SearchField searchFiled, FilterList filters, Widget? child);
 }
+
+class BrowsablePageState extends State<BrowsablePage>{
+
+  @override
+  Widget build(BuildContext context) {
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: widget.searchField),
+          ChangeNotifierProvider.value(value: widget.filters),
+        ],
+        child: Consumer2<SearchField, FilterList>(
+          builder: (context, searchField, filters, child) {
+            return widget.build(context, searchField, filters, child);
+          },
+        ),
+      );
+    }
+}
+
 
 class SearchField extends ChangeNotifier {
   String _value = '';
@@ -117,6 +122,10 @@ abstract class Filter<T> extends ChangeNotifier {
 
   Set<T> getSelected() => _selected;
 
+  bool isSelected(T item){
+    return _selected.contains(item);
+  }
+
   void addList(FilterList list) {
     _listListeners.add(list);
   }
@@ -152,6 +161,8 @@ abstract class MultipleFilter<T> extends Filter<T> {
 
 class FilterList extends ChangeNotifier {
   final List<Filter> _filters = [];
+
+  List<Filter> get items => _filters;
 
   FilterList({List<Filter> filters = const []}) {
     for (Filter filter in filters) {

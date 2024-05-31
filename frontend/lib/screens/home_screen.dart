@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend/widgets/card.dart';
 import 'package:frontend/widgets/card_section.dart';
 import 'package:frontend/widgets/horizontal_card.dart';
 import '../widgets/horizontal_section.dart';
 import '../widgets/notification.dart';
 import '../widgets/pagesViews/footer_page.dart';
+import 'PageBase.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends PageBase{
   final ScrollController scrollController;
 
-  HomeScreen({super.key, required this.scrollController});
+  HomeScreen({super.key, required this.scrollController, required super.manager});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
+
+  @override
+  PageBase onDispose() {
+    return this;
+  }
+
+  @override
+  PageBase onSet() {
+    return this;
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -81,7 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
 
+
+
   void _toggleNotification(String message) {
+
     setState(() {
       _notificationMessage = message;
       _showNotification = true;
@@ -100,36 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              controller: widget.scrollController,
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 200,
-                  ),
-                  HorizontalCardSection(
-                    items: hcItems,
-                  ), // Sección nueva
-                  CardSection(items: cItems),
-                  CardSection(items: cItems),
-                  //const Footer(),
-                ],
-              ),
-            ),
-            // Mostrar la notificación si _showNotification es verdadero
-            if (_showNotification)
-              NotificationWidget(
-                message: _notificationMessage,
-              ),
-          ],
-        ),
-      ),
-    );
+    return Container();
   }
 }

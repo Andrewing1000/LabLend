@@ -98,7 +98,7 @@ class CircularButtonState extends State<CircularButton>{
                   color: Colors.transparent,
                   child: InkWell(
                     radius: 0.6*widget.size,
-                    splashColor:  Colors.white.withAlpha(100),
+                    splashColor: widget.isAvailable? Colors.white.withAlpha(100) : Colors.transparent,
                     highlightColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     onTap: (){
