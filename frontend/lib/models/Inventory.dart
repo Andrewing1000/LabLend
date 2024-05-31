@@ -60,6 +60,7 @@ class Inventory {
     List<int>? categoryIds,
     int? brandId,
     String? namePattern,
+    
   }) async {
     if (!await isReady()) {
       return [];
