@@ -167,7 +167,7 @@ abstract class MultipleFilter<T> extends Filter<T> {
   }) : super(multiple: true);
 }
 
-class FilterList extends ChangeNotifier {
+dsclass FilterList extends ChangeNotifier {
   final List<Filter> _filters = [];
 
   List<Filter> get items => _filters;
