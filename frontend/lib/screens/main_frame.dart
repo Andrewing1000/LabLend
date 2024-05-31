@@ -19,6 +19,7 @@ import "../services/PageManager.dart";
 import "LoginPage.dart";
 import "PageContainer.dart";
 import "SearchItemPage.dart";
+import "SearchUserPage.dart";
 
 class MainFrame extends StatefulWidget {
   ContextMessageService messageService;
@@ -46,6 +47,7 @@ class MainFrameState extends State<MainFrame> {
 
   HomePage homePage = HomePage();
   SearchItemPage searchPage = SearchItemPage();
+  SearchUserPage searchUserPage = SearchUserPage();
   CreateItemScreen createItemPage = CreateItemScreen();
   CreateUserScreen createUserPage = CreateUserScreen();
 
@@ -69,6 +71,14 @@ class MainFrameState extends State<MainFrame> {
           iconSelected: Icons.search,
           onPressed: () {
             pageManager.setPage(searchPage);
+          },
+          title: "Search"),
+
+      NavItem(
+          iconNormal: Icons.view_agenda_outlined,
+          iconSelected: Icons.view_agenda,
+          onPressed: () {
+            pageManager.setPage(searchUserPage);
           },
           title: "Search"),
 

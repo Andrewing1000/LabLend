@@ -48,7 +48,7 @@ abstract class BrowsablePage extends PageBase {
     return BrowsablePageState();
   }
 
-  Widget build(BuildContext context, SearchField searchFiled, FilterList filters, Widget? child);
+  Widget build(BuildContext context, SearchField searchField, FilterList filters, Widget? child);
 }
 
 class BrowsablePageState extends State<BrowsablePage>{
