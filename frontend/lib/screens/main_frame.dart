@@ -19,6 +19,7 @@ import "../services/PageManager.dart";
 import "LoginPage.dart";
 import "PageContainer.dart";
 import "SearchItemPage.dart";
+import "SearchLoanPage.dart";
 import "SearchUserPage.dart";
 
 class MainFrame extends StatefulWidget {
@@ -45,9 +46,11 @@ class MainFrameState extends State<MainFrame> {
   bool onLogin = false;
   bool onPasswordReset = false;
 
+  late PageContainer pageContainer;
   HomePage homePage = HomePage();
   SearchItemPage searchPage = SearchItemPage();
   SearchUserPage searchUserPage = SearchUserPage();
+  SearchLoanPage searchLoanPage = SearchLoanPage();
   CreateItemScreen createItemPage = CreateItemScreen();
   CreateUserScreen createUserPage = CreateUserScreen();
 
@@ -58,6 +61,11 @@ class MainFrameState extends State<MainFrame> {
 
   MainFrameState() {
     pageManager = PageManager(defaultPage: homePage);
+    pageContainer = PageContainer(
+        manager: pageManager,
+        onLogin: (){
+          setState(() {onLogin = true;});
+        });
     final List<NavItem> items = [
       NavItem(
           iconNormal: Icons.home_outlined,
@@ -81,7 +89,13 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(searchUserPage);
           },
           title: "Search"),
-
+      NavItem(
+          iconNormal: Icons.history_toggle_off_outlined,
+          iconSelected: Icons.history,
+          onPressed: () {
+            pageManager.setPage(searchLoanPage);
+          },
+          title: "Search"),
       NavItem(
           iconNormal: Icons.info_outline,
           iconSelected: Icons.info,
@@ -218,14 +232,7 @@ class MainFrameState extends State<MainFrame> {
                           color: const Color.fromRGBO(21, 21, 21, 1.0),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: PageContainer(
-                          onLogin: (){
-                            setState(() {
-                              onLogin = true;
-                            });
-                          },
-                          manager: pageManager,
-                        ),
+                        child: pageContainer,
                       )
                     ),
                   ),

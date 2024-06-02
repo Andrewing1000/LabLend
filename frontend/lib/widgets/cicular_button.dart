@@ -10,6 +10,7 @@ class CircularButton extends StatefulWidget{
   final bool isAvailable;
   final bool isAnimated;
   final Function? onPressed;
+  final Color backgroundColor;
 
   const CircularButton.animated({super.key,
     required this.normalIcon,
@@ -18,7 +19,9 @@ class CircularButton extends StatefulWidget{
     required this.size,
     this.isAvailable = true,
     required this.onPressed,
-    this.isAnimated = true});
+    this.isAnimated = true,
+    this.backgroundColor = Colors.black,
+  });
 
   const CircularButton.static({super.key,
     required this.normalIcon,
@@ -27,7 +30,9 @@ class CircularButton extends StatefulWidget{
     required this.size,
     this.isAvailable = true,
     required this.onPressed,
-    this.isAnimated = false});
+    this.isAnimated = false,
+    this.backgroundColor = Colors.black,
+  });
 
   @override
   State<CircularButton> createState(){
@@ -91,7 +96,7 @@ class CircularButtonState extends State<CircularButton>{
 
               child: CircleAvatar(
                 radius: 0.8*widget.size,
-                backgroundColor: Colors.black,
+                backgroundColor: widget.backgroundColor,
                 foregroundColor: Colors.transparent,
 
                 child: Material(

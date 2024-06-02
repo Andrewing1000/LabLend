@@ -66,7 +66,7 @@ class Inventory {
     }
 
     var queryParameters = {
-      if (categoryIds != null) 'categories': categoryIds.join(','),
+      if (categoryIds != null && categoryIds.isNotEmpty) 'categories' : categoryIds.map((id) => id.toString()).toList(),
       if (brandId != null) 'marca': brandId.toString(),
       if (namePattern != null) 'name': namePattern,
     };

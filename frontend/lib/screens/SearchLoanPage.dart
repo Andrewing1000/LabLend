@@ -3,35 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/card.dart';
+import '../models/Loan.dart';
 import '../models/User.dart';
 import '../models/item.dart';
 
-class SearchUserPage extends BrowsablePage {
+class SearchLoanPage extends BrowsablePage {
 
-  ActiveFilter activeFilter = ActiveFilter();
-  RoleFilter roleFilter = RoleFilter();
+  ReturnedFilter returnedFilter = ReturnedFilter();
+  DateFilter fromDateFilter = DateFilter(attributeName: "Desde");
+  DateFilter toDateFilter = DateFilter(attributeName: "Hasta");
 
-  SearchUserPage({super.key}) {
-    filterSet.add(activeFilter);
-    filterSet.add(roleFilter);
+  SearchLoanPage({super.key}) {
+    filterSet.add(returnedFilter);
+    filterSet.add(fromDateFilter);
+    filterSet.add(toDateFilter);
   }
 
-  Future<List<User>> _fetchItems(String? pattern) async {
+  Future<List<Loan>> _fetchItems(String? pattern) async {
 
-    bool? isActive;
-    if(activeFilter.getSelected().isNotEmpty){
-      isActive = activeFilter.getSelected().first == "Activo";
+    bool? isReturned;
+    if(returnedFilter.getSelected().isNotEmpty){
+      isReturned = returnedFilter.getSelected().first == "Devuelto";
     }
 
-    bool? isAdmin;
-    if(roleFilter.getSelected().isNotEmpty){
-      isAdmin = roleFilter.getSelected().first == Role.adminRole;
-    }
-
-    return await SessionManager.userManager.getUserList(
+    return await SessionManager.loanService.getLoanList(
       email: pattern,
-      isActive: isActive,
-      isAdmin: isAdmin,
+      devuelto: isReturned,
+      startDate: fromDateFilter.getSelected().first,
+      endDate: toDateFilter.getSelected().first,
     );
   }
 
@@ -42,18 +41,18 @@ class SearchUserPage extends BrowsablePage {
       pattern = searchField.value;
     }
 
-    return FutureBuilder<List<User>>(
+    return FutureBuilder<List<Loan>>(
       future: _fetchItems(pattern),
-      builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<Loan>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: Colors.white,));
+          return const Center(child: CircularProgressIndicator(color: Colors.white,));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No se encontraron items',
+          return const Center(child: Text('No se encontraron items',
             style: TextStyle(color: Colors.white),));
         } else {
-          List<User> items = snapshot.data!;
+          List<Loan> items = snapshot.data!;
           return CustomScrollView(
             slivers: <Widget>[
               SliverPadding(
@@ -68,8 +67,8 @@ class SearchUserPage extends BrowsablePage {
                   delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                       return CustomCard(
-                        title: items[index].email,
-                        subtitle: items[index].name ?? "",
+                        title: items[index].usuario,
+                        subtitle: items[index].devuelto.toString() ?? "",
                       );
                     },
                     childCount: items.length, // Number of items in the grid
@@ -94,8 +93,8 @@ class SearchUserPage extends BrowsablePage {
   }
 }
 
-class ActiveFilter extends SingleFilter<String> {
-  ActiveFilter() : super(attributeName: "Estado");
+class ReturnedFilter extends SingleFilter<String> {
+  ReturnedFilter() : super(attributeName: "Estado");
 
   @override
   String getRepresentation(String item) {
@@ -104,20 +103,7 @@ class ActiveFilter extends SingleFilter<String> {
 
   @override
   Future<List<String>> retrieveItems() async {
-    return ["Activo", "Inactivo"];
+    return ["Devuelto", "Pendiente"];
   }
 }
 
-class RoleFilter extends Filter<Role> {
-  RoleFilter() : super(attributeName: "Rol", multiple: true);
-
-  @override
-  String getRepresentation(Role item) {
-    return item.name;
-  }
-
-  @override
-  Future<List<Role>> retrieveItems() async {
-    return [Role.adminRole, Role.assistantRole];
-  }
-}

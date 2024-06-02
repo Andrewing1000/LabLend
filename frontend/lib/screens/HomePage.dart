@@ -27,13 +27,13 @@ class HomePage extends PageBase{
   }
 
   @override
-  Future<PageBase> onDispose() async {
-    return this;
+  void onDispose() async {
+    return;
   }
 
   @override
-  Future<PageBase> onSet() async {
-    return this;
+  void onSet() {
+    return;
   }
 
   void toTop(){

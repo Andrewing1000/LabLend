@@ -44,6 +44,7 @@ class PageManager extends ChangeNotifier{
     disposePage();
     lastQueue.addLast(nextQueue.first);
     nextQueue.removeFirst();
+    currentPage.onSet();
     notifyListeners();
   }
 
@@ -58,6 +59,7 @@ class PageManager extends ChangeNotifier{
 
     nextQueue.addFirst(lastQueue.last);
     lastQueue.removeLast();
+    currentPage.onSet();
     notifyListeners();
   }
 
@@ -76,10 +78,10 @@ class PageManager extends ChangeNotifier{
 
     nextQueue.clear();
     lastQueue.addLast(page);
-    page.onSet();
     while(lastQueue.length > PageManager.maxLength){
       lastQueue.removeFirst();
     }
+    currentPage.onSet();
     notifyListeners();
   }
 
@@ -89,6 +91,7 @@ class PageManager extends ChangeNotifier{
     }
     lastQueue.last.onDispose();
     lastQueue.removeLast();
+    currentPage.onSet();
     notifyListeners();
   }
 
@@ -103,6 +106,7 @@ class PageManager extends ChangeNotifier{
     lastQueue.last.onDispose();
     lastQueue.removeLast();
     lastQueue.addLast(page);
+    currentPage.onSet();
     notifyListeners();
   }
 }
