@@ -44,7 +44,10 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
       context: context,
       builder: (context) {
         return Container(
-          color: Colors.black,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.black,
+          ),
           child: ListView.builder(
             itemCount: cartItems.length,
             itemBuilder: (context, index) {
@@ -143,7 +146,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                     //primary: Colors.green,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
-                  child: Text('Agregar a la lista de compras',
+                  child: Text('Prestar',
                       style: TextStyle(fontSize: 16)),
                 ),
               ],

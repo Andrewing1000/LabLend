@@ -4,12 +4,13 @@ import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/item.dart';
+import '../services/SelectedItemContext.dart';
 
 class SearchItemPage extends BrowsablePage {
   BrandFilter brandFilter = BrandFilter();
   CategoryFilter categoryFilter = CategoryFilter();
-
-  SearchItemPage({super.key}) {
+  SelectedItemContext selectedItem;
+  SearchItemPage({super.key, required this.selectedItem}) {
     filterSet.add(brandFilter);
     filterSet.add(categoryFilter);
   }
@@ -57,6 +58,9 @@ class SearchItemPage extends BrowsablePage {
                       return CustomCard(
                         title: items[index].nombre,
                         subtitle: items[index].description ?? "",
+                        onTap: (){
+                          selectedItem.setItem(items[index]);
+                        },
                       );
                     },
                     childCount: items.length, // Number of items in the grid

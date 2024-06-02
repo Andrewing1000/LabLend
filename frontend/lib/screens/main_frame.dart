@@ -4,6 +4,7 @@ import "dart:ui";
 import "package:flutter/material.dart";
 import "package:frontend/screens/create_item_screen.dart";
 import "package:frontend/screens/create_user.dart";
+import "package:frontend/widgets/item_info.dart";
 import 'package:provider/provider.dart';
 
 import "package:frontend/models/Session.dart";
@@ -12,10 +13,12 @@ import "package:frontend/services/ContextMessageService.dart";
 import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
+import "../models/item.dart";
 import "../services/PageManager.dart";
 
 
 
+import "../services/SelectedItemContext.dart";
 import "LoginPage.dart";
 import "PageContainer.dart";
 import "SearchItemPage.dart";
@@ -46,20 +49,29 @@ class MainFrameState extends State<MainFrame> {
   bool onLogin = false;
   bool onPasswordReset = false;
 
-  late PageContainer pageContainer;
-  HomePage homePage = HomePage();
-  SearchItemPage searchPage = SearchItemPage();
-  SearchUserPage searchUserPage = SearchUserPage();
-  SearchLoanPage searchLoanPage = SearchLoanPage();
-  CreateItemScreen createItemPage = CreateItemScreen();
-  CreateUserScreen createUserPage = CreateUserScreen();
+  static final SelectedItemContext selectedItem = SelectedItemContext();
+  HomePage homePage;
+  SearchItemPage searchPage;
+  SearchUserPage searchUserPage;
+  SearchLoanPage searchLoanPage;
+  CreateItemScreen createItemPage;
+  CreateUserScreen createUserPage;
 
   Widget sidePanel = Container(); /// Implementar
   late PageManager pageManager;
+  late PageContainer pageContainer;
   late VerticalNavbar navBar;
 
 
-  MainFrameState() {
+  MainFrameState():
+        homePage = HomePage(selectedItem: selectedItem),
+        searchPage = SearchItemPage(selectedItem: selectedItem),
+        searchUserPage = SearchUserPage(),
+        searchLoanPage = SearchLoanPage(),
+        createItemPage = CreateItemScreen(),
+        createUserPage = CreateUserScreen()
+
+  {
     pageManager = PageManager(defaultPage: homePage);
     pageContainer = PageContainer(
         manager: pageManager,
@@ -264,18 +276,27 @@ class MainFrameState extends State<MainFrame> {
                   ResizablePanel(
                       controller: sizeRight,
                       stops: [
-                        ResizeRange(start: 100, end: 200),
                         ResizeRange.point(300.0),
                         ResizeRange.point(400.0),
                         ResizeRange(start: 400.0, end: 600.0)
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
-                      child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(21, 21, 21, 1.0),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: sidePanel)
+                      child: MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider.value(value: selectedItem),
+                        ],
+                        child: Consumer<SelectedItemContext>(
+                          builder: (context, selectedItem, child) {
+                            return Container(
+                                decoration: BoxDecoration(
+                                  color: const Color.fromRGBO(21, 21, 21, 1.0),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: selectedItem.isSet()? ItemInfoWidget(item: selectedItem.item!,) : Container(),
+                            );
+                          }
+                        ),
+                      )
                   ),
                 ],
               ),
