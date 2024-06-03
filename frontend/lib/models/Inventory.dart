@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 
 class Inventory {
   static var manager = SessionManager();
-  var session = SessionManager.session;
+  var session = manager.session;
   var requestHandler;
 
   Inventory() {

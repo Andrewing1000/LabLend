@@ -5,13 +5,24 @@ import '../widgets/string_field.dart';
 
 
 
-class LoginScreen extends StatelessWidget {
-  final TextEditingController userController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class LoginScreen extends StatefulWidget {
   final Function(String email, String password) onSubmit;
   final Function() onPasswordReset;
 
-  LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset});
+  LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset}) {
+    print("Se crea uno nuevo");
+  }
+
+  @override
+  State<StatefulWidget> createState() {
+    return LoginPageState();
+  }
+}
+
+
+class LoginPageState extends State<LoginScreen>{
+  final TextEditingController userController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +57,7 @@ class LoginScreen extends StatelessWidget {
                   print("Usuario: ${userController.text}");
                   print("Contraseña: ${passwordController.text}");
 
-                  onSubmit(userController.text, passwordController.text);
+                  widget.onSubmit(userController.text, passwordController.text);
                 } else {
                   print("Todos los campos son obligatorios.");
                 }
@@ -56,7 +67,7 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
-                onPasswordReset();
+                widget.onPasswordReset();
                 print("Recuperar contraseña");
               },
               child: const Text(

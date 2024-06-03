@@ -19,6 +19,17 @@ class SearchLoanPage extends BrowsablePage {
     filterSet.add(toDateFilter);
   }
 
+  @override
+  void onSet(){
+    Role role = SessionManager().session.user.role;
+    searchEnabled = role == Role.adminRole;
+  }
+
+  @override
+  void onDispose() async {
+    return;
+  }
+
   Future<List<Loan>> _fetchItems(String? pattern) async {
 
     bool? isReturned;
@@ -26,17 +37,21 @@ class SearchLoanPage extends BrowsablePage {
       isReturned = returnedFilter.getSelected().first == "Devuelto";
     }
 
+    var startDate = fromDateFilter.getSelected();
+    var endDate = toDateFilter.getSelected();
+
     return await SessionManager.loanService.getLoanList(
       email: pattern,
       devuelto: isReturned,
-      startDate: fromDateFilter.getSelected().first,
-      endDate: toDateFilter.getSelected().first,
+      startDate: startDate.isNotEmpty? startDate.first: null,
+      endDate: endDate.isNotEmpty? endDate.first: null,
     );
   }
 
   @override
   Widget build(BuildContext context, SearchField searchField, FilterList filters, Widget? child) {
     String? pattern;
+
     if (searchField.value.isNotEmpty) {
       pattern = searchField.value;
     }
@@ -80,16 +95,6 @@ class SearchLoanPage extends BrowsablePage {
         }
       },
     );
-  }
-
-  @override
-  void onDispose() async {
-    return;
-  }
-
-  @override
-  void onSet() {
-    return;
   }
 }
 

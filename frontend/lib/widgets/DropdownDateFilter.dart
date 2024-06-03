@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/PageBase.dart';
 
+import 'cicular_button.dart';
+
 class DropdownDateFilter extends StatefulWidget {
   final DateTime? initialDate;
   final DateTime firstDate;
@@ -39,14 +41,18 @@ class CustomDatePickerState extends State<DropdownDateFilter> {
 
     );
     if(picked == null || picked == _selectedDate){
-      _selectedDate = null;
-      widget.filter.clearSelected();
+      if(_selectedDate == null) return;
+      setState(() {
+        _selectedDate = null;
+        widget.filter.clearSelected();
+      });
       return;
     }
+
     setState(() {
         _selectedDate = picked;
+        widget.filter.select(picked);
       });
-      widget.filter.select(picked);
       return;
   }
 
@@ -64,7 +70,7 @@ class CustomDatePickerState extends State<DropdownDateFilter> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return Container(
-              width: 150,
+              width: 180,
               height: 30,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -72,10 +78,24 @@ class CustomDatePickerState extends State<DropdownDateFilter> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Icon(Icons.calendar_today, color: Colors.white.withAlpha(150)),
-                  Container(width: 30,),
+                  Container(width: 20,),
                   if(_selectedDate != null) Text(
                     "${_selectedDate?.toLocal()}".split(' ')[0],
                     style: TextStyle(color: Colors.white.withAlpha(150)),
+                  ),
+                  Container(width: 20,),
+                  if(_selectedDate != null) CircularButton.static(
+                    isSelected: true,
+                    normalIcon: Icons.close,
+                    size: 20,
+                    iconColor: Colors.white.withAlpha(150),
+                    backgroundColor: Colors.grey[850]!,
+                    onPressed: (){
+                      setState(() {
+                        _selectedDate = null;
+                        widget.filter.clearSelected();
+                      });
+                    },
                   ),
                 ],
               ),

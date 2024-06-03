@@ -20,7 +20,7 @@ abstract class PageBase extends StatefulWidget {
 }
 
 abstract class BrowsablePage extends PageBase {
-  final bool searchEnabled;
+  bool searchEnabled;
   final SearchField searchField = SearchField();
   final FilterList filterSet = FilterList();
 
@@ -122,6 +122,7 @@ abstract class Filter<T> extends ChangeNotifier {
 
   void clearSelected() {
     _selected.clear();
+    notifyListListeners();
     notifyListeners();
   }
 

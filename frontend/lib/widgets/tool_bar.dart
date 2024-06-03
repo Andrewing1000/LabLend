@@ -35,9 +35,10 @@ class ToolBarState extends State<ToolBar>{
     return MultiProvider(
         providers: [
           ChangeNotifierProvider<PageManager>.value(value: widget.manager),
+          ChangeNotifierProvider<SessionManager>.value(value: SessionManager(),),
         ],
-        child: Consumer<PageManager>(
-          builder: (context, manager, child) {
+        child: Consumer2<PageManager, SessionManager>(
+          builder: (context, manager, sessionManager, child) {
             var page = manager.currentPage;
             if(manager.currentPage is BrowsablePage){
               page = page as BrowsablePage;
@@ -101,7 +102,7 @@ class ToolBarState extends State<ToolBar>{
                       Container(width: 10,),
                       const Spacer(),
 
-                      if(SessionManager.session.user is! VisitorUser) CircularButton.animated(
+                      if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
                         normalIcon: Icons.notifications_none_outlined,
                         selectedIcon: Icons.notifications,
                         size: 25,

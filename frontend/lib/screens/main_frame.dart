@@ -13,6 +13,7 @@ import "package:frontend/services/ContextMessageService.dart";
 import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
+import "../models/User.dart";
 import "../models/item.dart";
 import "../services/PageManager.dart";
 
@@ -51,7 +52,7 @@ class MainFrameState extends State<MainFrame> {
 
   static final SelectedItemContext selectedItem = SelectedItemContext();
   HomePage homePage;
-  SearchItemPage searchPage;
+  SearchItemPage searchItemPage;
   SearchUserPage searchUserPage;
   SearchLoanPage searchLoanPage;
   CreateItemScreen createItemPage;
@@ -65,7 +66,7 @@ class MainFrameState extends State<MainFrame> {
 
   MainFrameState():
         homePage = HomePage(selectedItem: selectedItem),
-        searchPage = SearchItemPage(selectedItem: selectedItem),
+        searchItemPage = SearchItemPage(selectedItem: selectedItem),
         searchUserPage = SearchUserPage(),
         searchLoanPage = SearchLoanPage(),
         createItemPage = CreateItemScreen(),
@@ -85,52 +86,46 @@ class MainFrameState extends State<MainFrame> {
           onPressed: () {
             pageManager.setPage(homePage);
           },
-          title: "Home"),
+          title: "Home",
+          permissions: [Role.adminRole, Role.assistantRole, Role.visitorRole],
+      ),
       NavItem(
-          iconNormal: Icons.search_sharp,
-          iconSelected: Icons.search,
+          iconNormal: Icons.biotech_outlined,
+          iconSelected: Icons.biotech,
           onPressed: () {
-            pageManager.setPage(searchPage);
+            pageManager.setPage(searchItemPage);
           },
-          title: "Search"),
+          title: "Search",
+          permissions: [Role.adminRole, Role.assistantRole, Role.visitorRole],
+      ),
 
       NavItem(
-          iconNormal: Icons.view_agenda_outlined,
-          iconSelected: Icons.view_agenda,
+          iconNormal: Icons.people_outline,
+          iconSelected: Icons.people,
           onPressed: () {
             pageManager.setPage(searchUserPage);
           },
-          title: "Search"),
+          title: "Search",
+          permissions: [Role.adminRole],
+      ),
       NavItem(
-          iconNormal: Icons.history_toggle_off_outlined,
-          iconSelected: Icons.history,
+          iconNormal: Icons.swap_horiz_outlined,
+          iconSelected: Icons.swap_horiz,
           onPressed: () {
             pageManager.setPage(searchLoanPage);
           },
-          title: "Search"),
+          title: "Search",
+          permissions: [Role.adminRole, Role.assistantRole],
+      ),
       NavItem(
           iconNormal: Icons.info_outline,
           iconSelected: Icons.info,
           onPressed: () {
 
           },
-          title: "Search"),
-
-      NavItem(
-          iconNormal: Icons.people_outline,
-          iconSelected: Icons.people,
-          onPressed: (){
-            pageManager.setPage(createUserPage);
-          },
-          title: "Create User"),
-
-      NavItem(
-          iconNormal: Icons.add_circle_outline_outlined,
-          iconSelected: Icons.add_circle,
-          onPressed: (){
-            pageManager.setPage(createItemPage);
-          },
-          title: "Create User"),
+          title: "Search",
+          permissions: [Role.adminRole, Role.assistantRole],
+      ),
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);
@@ -321,6 +316,11 @@ class MainFrameState extends State<MainFrame> {
             if (onLogin) LoginScreen(
               onSubmit: (email, password){
                 SessionManager().login(email, password);
+                if(SessionManager().session.user.email == email){
+                  setState(() {
+                    onLogin = false;
+                  });
+                }
               },
               onPasswordReset: (){
                 setState(() {
