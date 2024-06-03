@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/Session.dart';
 
 import '../widgets/password_field.dart';
 import '../widgets/string_field.dart';
@@ -9,9 +10,7 @@ class LoginScreen extends StatefulWidget {
   final Function(String email, String password) onSubmit;
   final Function() onPasswordReset;
 
-  LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset}) {
-    print("Se crea uno nuevo");
-  }
+  LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset});
 
   @override
   State<StatefulWidget> createState() {
@@ -59,7 +58,7 @@ class LoginPageState extends State<LoginScreen>{
 
                   widget.onSubmit(userController.text, passwordController.text);
                 } else {
-                  print("Todos los campos son obligatorios.");
+                  SessionManager().errorNotification(error: "Todos los campos son requeridos");
                 }
               },
               child: Text("Iniciar Sesión"),

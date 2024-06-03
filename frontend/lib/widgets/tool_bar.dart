@@ -14,10 +14,12 @@ class ToolBar extends StatefulWidget{
   static double height = 130;
   PageManager manager;
   Function onLogin;
+  Function onLogout;
   ToolBar({
     super.key,
     required this.manager,
     required this.onLogin,
+    required this.onLogout,
   });
 
   @override
@@ -50,99 +52,135 @@ class ToolBarState extends State<ToolBar>{
               searchBarController.text = page.searchField.value;
             }
 
-            return Container(
-              padding: EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-              color: page is BrowsablePage? const Color.fromRGBO(21, 21, 21, 1.0) : Colors.indigo,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10)),
+                  color: page is BrowsablePage?
+                    const Color.fromRGBO(21, 21, 21, 1.0):
+                    Colors.indigo,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularButton.static(
-                        normalIcon: Icons.arrow_back_ios_new,
-                        isAvailable: manager.isLastAvailable,
-                        size: 25,
-                        isSelected: true,
-                        onPressed: (){
-                          manager.toLast();
-                        },
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          CircularButton.static(
+                            normalIcon: Icons.arrow_back_ios_new,
+                            isAvailable: manager.isLastAvailable,
+                            size: 25,
+                            isSelected: true,
+                            onPressed: (){
+                              manager.toLast();
+                            },
+                          ),
+                          Container(width: 10,),
+                          CircularButton.static(
+                            normalIcon: Icons.arrow_forward_ios,
+                            isAvailable: manager.isNextAvailable,
+                            size: 25,
+                            isSelected: true,
+                            onPressed: (){
+                              setState(() {
+                                manager.toNext();
+                              });
+                            },
+                          ),
+                          Container(width: 10,),
+
+                          if(activateBar)
+                            Expanded(
+                              child: BarraBusqueda(
+                                  controller: searchBarController,
+                                  onChange: (String value){
+                                    if(page is BrowsablePage){
+                                      page.searchField.value = value;
+                                    }
+                                  },
+                                  onSearch: (e){})
+                            ),
+
+                          Container(width: 10,),
+                          const Spacer(),
+
+                          if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
+                            normalIcon: Icons.notifications_none_outlined,
+                            selectedIcon: Icons.notifications,
+                            size: 25,
+                            isSelected: true,
+                            onPressed: (){
+                              setState(() {
+                                throw UnimplementedError();
+                                ///Implementar
+                              });
+                            },
+                          ),
+
+                          Container(width: 10,),
+                          CircularButton.animated(
+                            normalIcon: sessionManager.session.user is VisitorUser?
+                              Icons.person:
+                              Icons.logout,
+                            size: 25,
+                            isSelected: true,
+                            onPressed: () async {
+                              if(sessionManager.session.user is VisitorUser){
+                                await widget.onLogin();
+                              }
+                              else{
+                                await widget.onLogout();
+                              }
+                            },
+                          ),
+
+                        ],
                       ),
-                      Container(width: 10,),
-                      CircularButton.static(
-                        normalIcon: Icons.arrow_forward_ios,
-                        isAvailable: manager.isNextAvailable,
-                        size: 25,
-                        isSelected: true,
-                        onPressed: (){
-                          setState(() {
-                            manager.toNext();
-                          });
-                        },
+                      Container(height: 20,),
+                      if(page is BrowsablePage) Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: page.filterSet.filters.map((Filter item){
+                          return Row(
+                            children: [
+                              item is DateFilter? DropdownDateFilter(filter:item): DropDownFilter(filter: item),
+                              Container(width: 30,),
+                            ],
+                          );
+                        }).toList(),
                       ),
-                      Container(width: 10,),
-
-                      if(activateBar)
-                        Expanded(
-                          child: BarraBusqueda(
-                              controller: searchBarController,
-                              onChange: (String value){
-                                if(page is BrowsablePage){
-                                  page.searchField.value = value;
-                                }
-                              },
-                              onSearch: (e){})
-                        ),
-
-                      Container(width: 10,),
-                      const Spacer(),
-
-                      if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
-                        normalIcon: Icons.notifications_none_outlined,
-                        selectedIcon: Icons.notifications,
-                        size: 25,
-                        isSelected: true,
-                        onPressed: (){
-                          setState(() {
-                            throw UnimplementedError();
-                            ///Implementar
-                          });
-                        },
-                      ),
-
-                      Container(width: 10,),
-                      CircularButton.animated(
-                        normalIcon: Icons.login,
-                        size: 25,
-                        isSelected: true,
-                        onPressed: (){
-                          setState(() {
-                            widget.onLogin();
-                          });
-                        },
-                      ),
-
                     ],
                   ),
-                  Container(height: 20,),
-                  if(page is BrowsablePage) Row(
+                ),
+                if(!sessionManager.isOnline) Container(
+                  color: Colors.white,
+                  child: Row(
                     mainAxisSize: MainAxisSize.max,
-                    children: page.filterSet.filters.map((Filter item){
-                      return Row(
-                        children: [
-                          item is DateFilter? DropdownDateFilter(filter:item): DropDownFilter(filter: item),
-                          Container(width: 30,),
-                        ],
-                      );
-                    }).toList(),
-                  )
-                ],
-              ),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        child: const Text("Modo offline",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             );
           },
         ),

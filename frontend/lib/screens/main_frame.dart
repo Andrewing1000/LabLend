@@ -2,6 +2,7 @@ import "dart:ui";
 
 
 import "package:flutter/material.dart";
+import "package:frontend/screens/PasswordReset.dart";
 import "package:frontend/screens/create_item_screen.dart";
 import "package:frontend/screens/create_user.dart";
 import "package:frontend/widgets/item_info.dart";
@@ -78,7 +79,10 @@ class MainFrameState extends State<MainFrame> {
         manager: pageManager,
         onLogin: (){
           setState(() {onLogin = true;});
-        });
+        },
+        onLogout: () async {
+          await SessionManager().logOut();
+        },);
     final List<NavItem> items = [
       NavItem(
           iconNormal: Icons.home_outlined,
@@ -129,6 +133,7 @@ class MainFrameState extends State<MainFrame> {
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);
+    print("Se creo la wea otra vez");
   }
 
   void performResize(double dx) {
@@ -144,12 +149,14 @@ class MainFrameState extends State<MainFrame> {
   }
 
   void endResize() {
-    setState(() {
-      grabbing1 = false;
-      grabbing2 = false;
-      sizeLeft.commitUpdate();
-      sizeRight.commitUpdate();
-    });
+    if(grabbing1 || grabbing2){
+      setState(() {
+        grabbing1 = false;
+        grabbing2 = false;
+        sizeLeft.commitUpdate();
+        sizeRight.commitUpdate();
+      });
+    }
   }
 
   @override
@@ -314,20 +321,23 @@ class MainFrameState extends State<MainFrame> {
                 ),
               ),
             if (onLogin) LoginScreen(
-              onSubmit: (email, password){
-                SessionManager().login(email, password);
-                if(SessionManager().session.user.email == email){
+              onSubmit: (email, password) async {
+                  await SessionManager().login(email, password);
+                  if(SessionManager().session.user.email == email){
                   setState(() {
-                    onLogin = false;
-                  });
+                  onLogin = false;
+                    });
                 }
               },
               onPasswordReset: (){
                 setState(() {
+                  onLogin = false;
                   onPasswordReset = true;
                 });
               },
             ),
+            if(onPasswordReset) RecuperarContrasenaScreen(),
+
 
             MultiProvider(
               providers: [

@@ -9,12 +9,14 @@ import '../services/PageManager.dart';
 class PageContainer extends StatefulWidget{
   PageManager manager;
   Function onLogin;
+  Function onLogout;
 
 
   PageContainer({
     super.key,
     required this.manager,
     required this.onLogin,
+    required this.onLogout,
   });
 
 
@@ -36,7 +38,10 @@ class PageContainerState extends State<PageContainer>{
         builder: (context, manager, snapshot) {
           return Stack(
             children: [
-              ToolBar(manager: manager, onLogin: widget.onLogin),
+              ToolBar(
+                  manager: manager,
+                  onLogin: widget.onLogin,
+                  onLogout: widget.onLogout),
               Column(
                 children: [
                   Container(

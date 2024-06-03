@@ -197,12 +197,9 @@ class RequestHandler {
   Future<bool> connectionCheck() async {
     try {
       final response = await _dio.get('/health_check');
-
-      // If we reach here, it means the server responded, regardless of the status code.
       print("Server is up and responded with status code: ${response.statusCode}");
       return true;
     } catch (e) {
-      // If there is an error, it means the server did not respond or there was another issue.
       print("Error during connection check: $e");
       return false;
     }

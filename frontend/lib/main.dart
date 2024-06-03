@@ -6,6 +6,8 @@ import 'models/Loan.dart';
 import 'models/item.dart';
 import 'models/User.dart';
 
+import 'package:provider/provider.dart';
+
 Future<void> main() async {
   runApp(MyApp());
   var manager = SessionManager();
@@ -142,7 +144,17 @@ class MyApp extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return MaterialApp(
       home: Scaffold(
-        body: SessionManager.mainFrame,
+        body: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: SessionManager()),
+          ],
+          child: Consumer<SessionManager>(
+            builder: (context, sessionManager, child){
+              print("------------------------------------------------->Rascal");
+              return SessionManager.mainFrame;
+            },
+          ),
+        )
       ),
     );
   }

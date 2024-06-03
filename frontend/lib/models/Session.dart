@@ -118,12 +118,18 @@ class SessionManager with ChangeNotifier {
   ///
   ///Online status manager
   Future<bool> connectionCheck() async{
-    var connectionRes = await httpHandler.connectionCheck();
-    if(connectionRes == isOnline){return isOnline;}
-    isOnline = connectionRes;
-    if(!isOnline){
-      errorNotification(error : 'Sin conección');
+
+    var connectionRes;
+    try{
+      connectionRes = await httpHandler.connectionCheck();
+      if(!isOnline) errorNotification(error : 'Sin conección');
+      if(connectionRes == isOnline) return isOnline;
+      isOnline = connectionRes;
+    }catch (e){
+      isOnline = false;
     }
+
+    if(!isOnline) errorNotification(error : 'Sin conección');
     return isOnline;
   }
 
@@ -223,6 +229,8 @@ class SessionManager with ChangeNotifier {
 
     if(response.statusCode == 200){
       errorNotification(error : 'Sesión cerrada');
+      print("Hasta aqui llegamos");
+      mainFrame = MainFrame(messageService: messageService);
       _session = AnonymousSession();
     }
     else if(response.statusCode == 412){
@@ -230,6 +238,8 @@ class SessionManager with ChangeNotifier {
       _session = AnonymousSession();
     }
     else{
+      print("Hasta aqui llegamos");
+      mainFrame = MainFrame(messageService: messageService);
       errorNotification(error :'Sesión cerrada');
       _session = AnonymousSession();
     }
