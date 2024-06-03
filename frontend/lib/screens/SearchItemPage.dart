@@ -24,7 +24,8 @@ class SearchItemPage extends BrowsablePage {
   }
 
   @override
-  Widget build(BuildContext context, SearchField searchField, FilterList filters, Widget? child) {
+  Widget build(BuildContext context, SearchField searchField,
+      FilterList filters, Widget? child) {
     String? pattern;
     if (searchField.value.isNotEmpty) {
       pattern = searchField.value;
@@ -51,10 +52,11 @@ class SearchItemPage extends BrowsablePage {
                     maxCrossAxisExtent: 200.0, // Maximum width of each item
                     mainAxisSpacing: 10.0, // Spacing between rows
                     crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio: .5, // Optional: You can adjust this if needed
+                    childAspectRatio:
+                        .5, // Optional: You can adjust this if needed
                   ),
                   delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
+                    (BuildContext context, int index) {
                       return CustomCard(
                         title: items[index].nombre,
                         subtitle: items[index].description ?? "",
