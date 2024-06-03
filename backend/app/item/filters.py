@@ -5,7 +5,9 @@ from item.models import Item, Category, Brand
 import logging
 
 class ItemFilter(filters.FilterSet):
-    categories = filters.ModelMultipleChoiceFilter(queryset=Category.objects.all(), field_name='categories__id', to_field_name='id')
+    categories = filters.ModelMultipleChoiceFilter(queryset=Category.objects.all(),
+                                                    field_name='categories__id',
+                                                    to_field_name='id')
     marca = filters.ModelChoiceFilter(queryset=Brand.objects.all(), field_name='marca_id', to_field_name='id')
     name = filters.CharFilter(method='filter_by_name')
 

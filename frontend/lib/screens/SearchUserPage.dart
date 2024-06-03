@@ -3,22 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/card.dart';
+import '../models/User.dart';
 import '../models/item.dart';
 
-class SearchItemPage extends BrowsablePage {
-  BrandFilter brandFilter = BrandFilter(items: []);
-  CategoryFilter categoryFilter = CategoryFilter(items: []);
+class SearchUserPage extends BrowsablePage {
+  ActiveFilter activeFilter = ActiveFilter();
+  RoleFilter roleFilter = RoleFilter();
 
-  SearchItemPage({super.key}) {
-    //filters.add(brandFilter);
-    //filters.add(categoryFilter);
+  SearchUserPage({super.key}) {
+    filterSet.add(activeFilter);
+    filterSet.add(roleFilter);
   }
 
-  Future<List<Item>> _fetchItems(String? pattern) async {
-    return await SessionManager.inventory.getItems(
-      namePattern: pattern,
-      //categoryIds: categoryFilter.items.map((cat) => cat.id).toList(),
-      //brandId: brandFilter.items.isNotEmpty ? brandFilter.items.first.id : null,
+  Future<List<User>> _fetchItems(String? pattern) async {
+    bool? isActive;
+    if (activeFilter.getSelected().isNotEmpty) {
+      isActive = activeFilter.getSelected().first == "Activo";
+    }
+
+    bool? isAdmin;
+    if (roleFilter.getSelected().isNotEmpty) {
+      isAdmin = roleFilter.getSelected().first == Role.adminRole;
+    }
+
+    return await SessionManager.userManager.getUserList(
+      email: pattern,
+      isActive: isActive,
+      isAdmin: isAdmin,
     );
   }
 
@@ -30,9 +41,9 @@ class SearchItemPage extends BrowsablePage {
       pattern = searchField.value;
     }
 
-    return FutureBuilder<List<Item>>(
+    return FutureBuilder<List<User>>(
       future: _fetchItems(pattern),
-      builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
               child: CircularProgressIndicator(
@@ -42,15 +53,12 @@ class SearchItemPage extends BrowsablePage {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
-            child: Text(
-              'No se encontraron items',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-          );
+              child: Text(
+            'No se encontraron items',
+            style: TextStyle(color: Colors.white),
+          ));
         } else {
-          List<Item> items = snapshot.data!;
+          List<User> items = snapshot.data!;
           return CustomScrollView(
             slivers: <Widget>[
               SliverPadding(
@@ -66,8 +74,8 @@ class SearchItemPage extends BrowsablePage {
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                       return CustomCard(
-                        title: items[index].nombre,
-                        subtitle: items[index].description ?? "",
+                        title: items[index].email,
+                        subtitle: items[index].name ?? "",
                       );
                     },
                     childCount: items.length, // Number of items in the grid
@@ -82,37 +90,40 @@ class SearchItemPage extends BrowsablePage {
   }
 
   @override
-  Future<PageBase> onDispose() async {
-    return this;
+  void onDispose() async {
+    return;
+  }
+
+  @override
+  void onSet() {
+    return;
   }
 }
 
-class BrandFilter extends Filter<Brand> {
-  BrandFilter({required super.items})
-      : super(attributeName: "Marca", multiple: false);
+class ActiveFilter extends SingleFilter<String> {
+  ActiveFilter() : super(attributeName: "Estado");
 
   @override
-  String getRepresentation(Brand item) {
-    return item.marca;
+  String getRepresentation(String item) {
+    return item;
   }
 
   @override
-  Future<List<Brand>> retrieveItems() async {
-    return await SessionManager.inventory.getBrands();
+  Future<List<String>> retrieveItems() async {
+    return ["Activo", "Inactivo"];
   }
 }
 
-class CategoryFilter extends Filter<Category> {
-  CategoryFilter({required super.items})
-      : super(attributeName: "Categoría", multiple: true);
+class RoleFilter extends Filter<Role> {
+  RoleFilter() : super(attributeName: "Rol", multiple: true);
 
   @override
-  String getRepresentation(Category item) {
-    return item.nombre;
+  String getRepresentation(Role item) {
+    return item.name;
   }
 
   @override
-  Future<List<Category>> retrieveItems() async {
-    return await SessionManager.inventory.getCategories();
+  Future<List<Role>> retrieveItems() async {
+    return [Role.adminRole, Role.assistantRole];
   }
 }

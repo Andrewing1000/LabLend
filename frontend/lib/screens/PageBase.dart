@@ -15,14 +15,14 @@ abstract class PageBase extends StatefulWidget {
     this.disposable = false}):
   super(key: key);
 
-  Future<PageBase> onDispose();
-  Future<PageBase> onSet();
+  void onDispose();
+  void onSet();
 }
 
 abstract class BrowsablePage extends PageBase {
-  final bool searchEnabled;
+  bool searchEnabled;
   final SearchField searchField = SearchField();
-  final FilterList filters = FilterList();
+  final FilterList filterSet = FilterList();
 
   BrowsablePage({
     super.key,
@@ -31,16 +31,8 @@ abstract class BrowsablePage extends PageBase {
     List<Filter> filters = const [],
   }) {
     for (Filter filter in filters) {
-      this.filters.add(filter);
+      this.filterSet.add(filter);
     }
-  }
-
-  @override
-  Future<PageBase> onSet() async {
-    for(Filter filter in filters.items){
-      await filter.getItems();
-    }
-    return this;
   }
 
   @override
@@ -48,7 +40,7 @@ abstract class BrowsablePage extends PageBase {
     return BrowsablePageState();
   }
 
-  Widget build(BuildContext context, SearchField searchFiled, FilterList filters, Widget? child);
+  Widget build(BuildContext context, SearchField searchField, FilterList filters, Widget? child);
 }
 
 class BrowsablePageState extends State<BrowsablePage>{
@@ -58,7 +50,7 @@ class BrowsablePageState extends State<BrowsablePage>{
       return MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: widget.searchField),
-          ChangeNotifierProvider.value(value: widget.filters),
+          ChangeNotifierProvider.value(value: widget.filterSet),
         ],
         child: Consumer2<SearchField, FilterList>(
           builder: (context, searchField, filters, child) {
@@ -82,27 +74,32 @@ class SearchField extends ChangeNotifier {
 }
 
 abstract class Filter<T> extends ChangeNotifier {
-  List<T> items;
-  Set<T> _selected;
+  List<T> _items;
+  Set<T> _selected = {};
   final String attributeName;
   final bool multiple;
   final List<FilterList> _listListeners = [];
 
   Filter({
     required this.attributeName,
-    required this.items,
+    List<T>? items = null,
     required this.multiple,
-    Set<T> selected = const {},
-  }) : _selected = selected;
+    Set<T>? selected,
+  }):
+    _items = items?? <T>[],
+    _selected = selected?? <T>{};
+
+  List<T> get items => _items;
 
   Future<List<T>> getItems() async {
-    items = await retrieveItems();
+    _items = await retrieveItems();
     for (T item in _selected) {
       if (!items.contains(item)) {
         deselect(item);
       }
     }
-    notifyListeners();
+    //notifyListListeners();
+    //notifyListeners();
     return items;
   }
 
@@ -125,6 +122,7 @@ abstract class Filter<T> extends ChangeNotifier {
 
   void clearSelected() {
     _selected.clear();
+    notifyListListeners();
     notifyListeners();
   }
 
@@ -156,21 +154,44 @@ abstract class Filter<T> extends ChangeNotifier {
 abstract class SingleFilter<T> extends Filter<T> {
   SingleFilter({
     required super.attributeName,
-    required super.items,
+    super.items,
   }) : super(multiple: false);
 }
 
 abstract class MultipleFilter<T> extends Filter<T> {
   MultipleFilter({
     required super.attributeName,
-    required super.items,
+    super.items,
   }) : super(multiple: true);
 }
 
-dsclass FilterList extends ChangeNotifier {
+class DateFilter extends SingleFilter<DateTime>{
+  DateFilter({required super.attributeName,});
+
+  @override
+  Future<List<DateTime>> retrieveItems() async {
+    return [];
+  }
+
+  @override
+  void select(DateTime item){
+    clearSelected();
+    _selected.add(item);
+
+    notifyListListeners();
+    notifyListeners();
+  }
+
+  @override
+  String getRepresentation(DateTime item){
+    return item.toIso8601String();
+  }
+}
+
+class FilterList extends ChangeNotifier {
   final List<Filter> _filters = [];
 
-  List<Filter> get items => _filters;
+  List<Filter> get filters => _filters;
 
   FilterList({List<Filter> filters = const []}) {
     for (Filter filter in filters) {

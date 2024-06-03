@@ -4,6 +4,7 @@ import "dart:ui";
 import "package:flutter/material.dart";
 import "package:frontend/screens/create_item_screen.dart";
 import "package:frontend/screens/create_user.dart";
+import "package:frontend/widgets/item_info.dart";
 import 'package:provider/provider.dart';
 
 import "package:frontend/models/Session.dart";
@@ -12,13 +13,18 @@ import "package:frontend/services/ContextMessageService.dart";
 import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
+import "../models/User.dart";
+import "../models/item.dart";
 import "../services/PageManager.dart";
 
 
 
+import "../services/SelectedItemContext.dart";
 import "LoginPage.dart";
 import "PageContainer.dart";
 import "SearchItemPage.dart";
+import "SearchLoanPage.dart";
+import "SearchUserPage.dart";
 
 class MainFrame extends StatefulWidget {
   ContextMessageService messageService;
@@ -44,18 +50,35 @@ class MainFrameState extends State<MainFrame> {
   bool onLogin = false;
   bool onPasswordReset = false;
 
-  HomePage homePage = HomePage();
-  SearchItemPage searchPage = SearchItemPage();
-  CreateItemScreen createItemPage = CreateItemScreen();
-  CreateUserScreen createUserPage = CreateUserScreen();
+  static final SelectedItemContext selectedItem = SelectedItemContext();
+  HomePage homePage;
+  SearchItemPage searchItemPage;
+  SearchUserPage searchUserPage;
+  SearchLoanPage searchLoanPage;
+  CreateItemScreen createItemPage;
+  CreateUserScreen createUserPage;
 
   Widget sidePanel = Container(); /// Implementar
   late PageManager pageManager;
+  late PageContainer pageContainer;
   late VerticalNavbar navBar;
 
 
-  MainFrameState() {
+  MainFrameState():
+        homePage = HomePage(selectedItem: selectedItem),
+        searchItemPage = SearchItemPage(selectedItem: selectedItem),
+        searchUserPage = SearchUserPage(),
+        searchLoanPage = SearchLoanPage(),
+        createItemPage = CreateItemScreen(),
+        createUserPage = CreateUserScreen()
+
+  {
     pageManager = PageManager(defaultPage: homePage);
+    pageContainer = PageContainer(
+        manager: pageManager,
+        onLogin: (){
+          setState(() {onLogin = true;});
+        });
     final List<NavItem> items = [
       NavItem(
           iconNormal: Icons.home_outlined,
@@ -63,38 +86,46 @@ class MainFrameState extends State<MainFrame> {
           onPressed: () {
             pageManager.setPage(homePage);
           },
-          title: "Home"),
+          title: "Home",
+          permissions: [Role.adminRole, Role.assistantRole, Role.visitorRole],
+      ),
       NavItem(
-          iconNormal: Icons.search_sharp,
-          iconSelected: Icons.search,
+          iconNormal: Icons.biotech_outlined,
+          iconSelected: Icons.biotech,
           onPressed: () {
-            pageManager.setPage(searchPage);
+            pageManager.setPage(searchItemPage);
           },
-          title: "Search"),
+          title: "Search",
+          permissions: [Role.adminRole, Role.assistantRole, Role.visitorRole],
+      ),
 
+      NavItem(
+          iconNormal: Icons.people_outline,
+          iconSelected: Icons.people,
+          onPressed: () {
+            pageManager.setPage(searchUserPage);
+          },
+          title: "Search",
+          permissions: [Role.adminRole],
+      ),
+      NavItem(
+          iconNormal: Icons.swap_horiz_outlined,
+          iconSelected: Icons.swap_horiz,
+          onPressed: () {
+            pageManager.setPage(searchLoanPage);
+          },
+          title: "Search",
+          permissions: [Role.adminRole, Role.assistantRole],
+      ),
       NavItem(
           iconNormal: Icons.info_outline,
           iconSelected: Icons.info,
           onPressed: () {
 
           },
-          title: "Search"),
-
-      NavItem(
-          iconNormal: Icons.people_outline,
-          iconSelected: Icons.people,
-          onPressed: (){
-            pageManager.setPage(createUserPage);
-          },
-          title: "Create User"),
-
-      NavItem(
-          iconNormal: Icons.add_circle_outline_outlined,
-          iconSelected: Icons.add_circle,
-          onPressed: (){
-            pageManager.setPage(createItemPage);
-          },
-          title: "Create User"),
+          title: "Search",
+          permissions: [Role.adminRole, Role.assistantRole],
+      ),
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);
@@ -208,14 +239,7 @@ class MainFrameState extends State<MainFrame> {
                           color: const Color.fromRGBO(21, 21, 21, 1.0),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: PageContainer(
-                          onLogin: (){
-                            setState(() {
-                              onLogin = true;
-                            });
-                          },
-                          manager: pageManager,
-                        ),
+                        child: pageContainer,
                       )
                     ),
                   ),
@@ -247,18 +271,27 @@ class MainFrameState extends State<MainFrame> {
                   ResizablePanel(
                       controller: sizeRight,
                       stops: [
-                        ResizeRange(start: 100, end: 200),
                         ResizeRange.point(300.0),
                         ResizeRange.point(400.0),
                         ResizeRange(start: 400.0, end: 600.0)
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
-                      child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(21, 21, 21, 1.0),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: sidePanel)
+                      child: MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider.value(value: selectedItem),
+                        ],
+                        child: Consumer<SelectedItemContext>(
+                          builder: (context, selectedItem, child) {
+                            return Container(
+                                decoration: BoxDecoration(
+                                  color: const Color.fromRGBO(21, 21, 21, 1.0),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: selectedItem.isSet()? ItemInfoWidget(item: selectedItem.item!,) : Container(),
+                            );
+                          }
+                        ),
+                      )
                   ),
                 ],
               ),
@@ -283,6 +316,11 @@ class MainFrameState extends State<MainFrame> {
             if (onLogin) LoginScreen(
               onSubmit: (email, password){
                 SessionManager().login(email, password);
+                if(SessionManager().session.user.email == email){
+                  setState(() {
+                    onLogin = false;
+                  });
+                }
               },
               onPasswordReset: (){
                 setState(() {

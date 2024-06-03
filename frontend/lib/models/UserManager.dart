@@ -2,9 +2,10 @@ import 'Session.dart';
 import 'User.dart';
 import 'package:dio/dio.dart';
 
+
 class UserManager {
   static var manager = SessionManager();
-  var session = SessionManager.session; 
+  var session = manager.session;
   var requestHandler;
 
   UserManager() {

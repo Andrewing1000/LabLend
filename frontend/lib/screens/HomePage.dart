@@ -1,23 +1,28 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
 import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
+
+import '../services/SelectedItemContext.dart';
 import '../widgets/card.dart';
 import '../widgets/card_section.dart';
 import '../widgets/horizontal_card.dart';
 import '../widgets/horizontal_section.dart';
 import 'PageBase.dart';
 
-class HomePage extends PageBase{
+class HomePage extends PageBase {
   ScrollController? scrollController;
-  HomeSections sections = HomeSections();
-
-  HomePage({super.key,
-    super.manager,
-    super.child,
-    this.scrollController}):
-  super(disposable: false){
+  late HomeSections sections;
+  SelectedItemContext selectedItem;
+  HomePage(
+      {super.key,
+      super.manager,
+      super.child,
+      this.scrollController,
+      required this.selectedItem})
+      : super(disposable: false) {
+    sections = HomeSections(selectedItem: selectedItem);
     scrollController ??= ScrollController();
   }
 
@@ -27,40 +32,35 @@ class HomePage extends PageBase{
   }
 
   @override
-  Future<PageBase> onDispose() async {
-    return this;
+  void onDispose() async {
+    return;
   }
 
   @override
-  Future<PageBase> onSet() async {
-    return this;
+  void onSet() {
+    return;
   }
 
-  void toTop(){
-    scrollController?.animateTo(
-    scrollController!.position.minScrollExtent,
-    duration: const Duration(milliseconds: 400),
-    curve: Curves.decelerate);
+  void toTop() {
+    scrollController?.animateTo(scrollController!.position.minScrollExtent,
+        duration: const Duration(milliseconds: 400), curve: Curves.decelerate);
   }
 
-  void toBottom(){
-    scrollController?.animateTo(
-    scrollController!.position.maxScrollExtent,
-    duration: const Duration(milliseconds: 400),
-    curve: Curves.decelerate);
+  void toBottom() {
+    scrollController?.animateTo(scrollController!.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 400), curve: Curves.decelerate);
   }
 }
 
-class HomePageState extends State<HomePage>{
+class HomePageState extends State<HomePage> {
   List<Widget> sectionList = [];
-  
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<HomeSections>.value(value: widget.sections),
       ],
-
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Container(
@@ -71,7 +71,8 @@ class HomePageState extends State<HomePage>{
                 physics: CustomScrollPhysics(scrollSpeedFactor: 0),
                 controller: widget.scrollController,
                 child: Consumer<HomeSections>(
-                  builder: (BuildContext context, HomeSections value, Widget? child) {
+                  builder: (BuildContext context, HomeSections value,
+                      Widget? child) {
                     return Column(
                       children: value.sections,
                     );
@@ -86,9 +87,10 @@ class HomePageState extends State<HomePage>{
   }
 }
 
-class HomeSections extends ChangeNotifier{
+class HomeSections extends ChangeNotifier {
   List<Widget> sections;
-  HomeSections({this.sections = const []}){
+  SelectedItemContext selectedItem;
+  HomeSections({this.sections = const [], required this.selectedItem}) {
     List<HorizontalCard> hcItems = [
       HorizontalCard(title: "Opcion1"),
       HorizontalCard(title: "Opcion2"),
@@ -161,18 +163,18 @@ class HomeSections extends ChangeNotifier{
 
     set(body);
   }
-  
-  void set(List<Widget> sections){
+
+  void set(List<Widget> sections) {
     this.sections = sections;
     notifyListeners();
   }
-  
-  void add(Widget section){
+
+  void add(Widget section) {
     sections.add(section);
     notifyListeners();
   }
-  
-  void remove(Widget section){
+
+  void remove(Widget section) {
     sections.remove(section);
     notifyListeners();
   }
