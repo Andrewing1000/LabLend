@@ -4,21 +4,22 @@ import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/item.dart';
+import '../services/SelectedItemContext.dart';
 
 class SearchItemPage extends BrowsablePage {
-  BrandFilter brandFilter = BrandFilter(items: []);
-  CategoryFilter categoryFilter = CategoryFilter(items: []);
-
-  SearchItemPage({super.key}) {
-    //filters.add(brandFilter);
-    //filters.add(categoryFilter);
+  BrandFilter brandFilter = BrandFilter();
+  CategoryFilter categoryFilter = CategoryFilter();
+  SelectedItemContext selectedItem;
+  SearchItemPage({super.key, required this.selectedItem}) {
+    filterSet.add(brandFilter);
+    filterSet.add(categoryFilter);
   }
 
   Future<List<Item>> _fetchItems(String? pattern) async {
     return await SessionManager.inventory.getItems(
       namePattern: pattern,
-      //categoryIds: categoryFilter.items.map((cat) => cat.id).toList(),
-      //brandId: brandFilter.items.isNotEmpty ? brandFilter.items.first.id : null,
+      categoryIds: categoryFilter.getSelected().map((cat) => cat.id).toList(),
+      brandId: brandFilter.getSelected().isNotEmpty ? brandFilter.getSelected().first.id : null,
     );
   }
 
@@ -34,21 +35,12 @@ class SearchItemPage extends BrowsablePage {
       future: _fetchItems(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-              child: CircularProgressIndicator(
-            color: Colors.white,
-          ));
+          return const Center(child: CircularProgressIndicator(color: Colors.white,));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-            child: Text(
-              'No se encontraron items',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-          );
+          return const Center(child: Text('No se encontraron items',
+          style: TextStyle(color: Colors.white),));
         } else {
           List<Item> items = snapshot.data!;
           return CustomScrollView(
@@ -68,6 +60,9 @@ class SearchItemPage extends BrowsablePage {
                       return CustomCard(
                         title: items[index].nombre,
                         subtitle: items[index].description ?? "",
+                        onTap: (){
+                          selectedItem.setItem(items[index]);
+                        },
                       );
                     },
                     childCount: items.length, // Number of items in the grid
@@ -82,14 +77,18 @@ class SearchItemPage extends BrowsablePage {
   }
 
   @override
-  Future<PageBase> onDispose() async {
-    return this;
+  void onDispose() async {
+    return;
+  }
+
+  @override
+  void onSet() {
+    return;
   }
 }
 
-class BrandFilter extends Filter<Brand> {
-  BrandFilter({required super.items})
-      : super(attributeName: "Marca", multiple: false);
+class BrandFilter extends SingleFilter<Brand>{
+  BrandFilter({super.items}) : super(attributeName: "Marca");
 
   @override
   String getRepresentation(Brand item) {
@@ -102,9 +101,8 @@ class BrandFilter extends Filter<Brand> {
   }
 }
 
-class CategoryFilter extends Filter<Category> {
-  CategoryFilter({required super.items})
-      : super(attributeName: "Categoría", multiple: true);
+class CategoryFilter extends MultipleFilter<Category> {
+  CategoryFilter({super.items}) : super(attributeName: "Categoría");
 
   @override
   String getRepresentation(Category item) {

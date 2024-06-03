@@ -22,8 +22,14 @@ class Session {
 
   Session({required this.user, required this.loginTime});
 
+
+  void logIn(String password){
+    manager.login(user.email, password);
+  }
   void logOut(){
-    manager.logOut();
+    if(manager.session == this){
+      manager.logOut();
+    }
   }
 
   Future<bool> sessionCheck() async {
@@ -56,29 +62,34 @@ class AnonymousSession extends Session{
 
 
 class SessionManager with ChangeNotifier {
-  static bool _isOnline = false;
-  static SessionManager manager = SessionManager._inner();
-  static Session _session = AnonymousSession();
-  static RequestHandler httpHandler = RequestHandler();
+  static SessionManager _manager = SessionManager._inner();
 
+  static RequestHandler httpHandler = RequestHandler();
   static UserManager userManager = UserManager();
   static Inventory inventory = Inventory();
   static LoanService loanService = LoanService();
-
   static ContextMessageService messageService = ContextMessageService();
   static MainFrame mainFrame = MainFrame(messageService: messageService);
+
+  Session _session = AnonymousSession();
+  bool _isOnline = false;
 
   SessionManager._inner(){
     connectionCheck();
   }
 
   factory SessionManager(){
-    manager ??= SessionManager._inner();
-    return manager;
+    _manager ??= SessionManager._inner();
+    return _manager;
   }
 
-  static Session get session => _session;
+  Session get session => _session;
+
   bool get isOnline => _isOnline;
+  set isOnline(bool online){
+    _isOnline = online;
+    notifyListeners();
+  }
   ///
   ///
   ///
@@ -87,7 +98,7 @@ class SessionManager with ChangeNotifier {
     String message = "$error \n";
     if(details != null){
       for(String key in details!.keys){
-        message += "$key: $details[key].toString()\n";
+        message += "$key: $details\n";
       }
     }
     messageService.notify(message: message);
@@ -106,27 +117,10 @@ class SessionManager with ChangeNotifier {
   ///
   ///
   ///Online status manager
-  set isOnline(bool online){
-    if(online){
-      _setOnline();
-      return;
-    }
-    _setOffline();
-    return;
-  }
-
-  void _setOffline(){
-    //implement
-    _isOnline = false;
-  }
-
-  void _setOnline(){
-    //implement
-    _isOnline = true;
-  }
-
   Future<bool> connectionCheck() async{
-    isOnline = await httpHandler.connectionCheck();
+    var connectionRes = await httpHandler.connectionCheck();
+    if(connectionRes == isOnline){return isOnline;}
+    isOnline = connectionRes;
     if(!isOnline){
       errorNotification(error : 'Sin conección');
     }
@@ -139,12 +133,13 @@ class SessionManager with ChangeNotifier {
       if(response.statusCode == 200){
         return true;
       }
-      return false;
     }on DioException catch (e){
-      _session = AnonymousSession();
+      print(e.stackTrace);
     }
 
+    _session = AnonymousSession();
     errorNotification(error: 'Inicie sesión');
+    notifyListeners();
     return false;
   }
 
@@ -156,15 +151,15 @@ class SessionManager with ChangeNotifier {
   Future<Session> login(String email, String password) async {
     if(!(await connectionCheck())){return AnonymousSession();};
 
-    if(_session is!  AnonymousSession){
-      if(session?.user.email == email){
-        if(await sessionCheck()){
+    if(_session is! AnonymousSession){
+      if(await sessionCheck()){
+        if(_session?.user.email == email){
           notification(notification: "Ya ha iniciado seción.");
           return _session;
         }
-      }
-      else{
-        logOut();
+        else{
+          if(session is! AnonymousSession) await httpHandler.postRequest('/user/logout/');
+        }
       }
     }
 
@@ -184,6 +179,7 @@ class SessionManager with ChangeNotifier {
 
       notification(notification : 'Sesión iniciada');
       _session = Session(user: user, loginTime: DateTime.now());
+      notifyListeners();
       return _session;
 
     } on DioException catch(e){
@@ -238,6 +234,7 @@ class SessionManager with ChangeNotifier {
       _session = AnonymousSession();
     }
 
+    notifyListeners();
     return _session;
   }
 }

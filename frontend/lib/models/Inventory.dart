@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 
 class Inventory {
   static var manager = SessionManager();
-  var session = SessionManager.session;
+  var session = manager.session;
   var requestHandler;
 
   Inventory() {
@@ -67,7 +67,7 @@ class Inventory {
     }
 
     var queryParameters = {
-      if (categoryIds != null) 'categories': categoryIds.join(','),
+      if (categoryIds != null && categoryIds.isNotEmpty) 'categories' : categoryIds.map((id) => id.toString()).toList(),
       if (brandId != null) 'marca': brandId.toString(),
       if (namePattern != null) 'name': namePattern,
     };

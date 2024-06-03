@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
+import '../services/SelectedItemContext.dart';
 import '../widgets/card.dart';
 import '../widgets/card_section.dart';
 import '../widgets/horizontal_card.dart';
@@ -11,13 +12,15 @@ import 'PageBase.dart';
 
 class HomePage extends PageBase{
   ScrollController? scrollController;
-  HomeSections sections = HomeSections();
-
+  late HomeSections sections;
+  SelectedItemContext selectedItem;
   HomePage({super.key,
     super.manager,
     super.child,
-    this.scrollController}):
-  super(disposable: false){
+    this.scrollController,
+    required this.selectedItem}):
+      super(disposable: false){
+    sections = HomeSections(selectedItem : selectedItem);
     scrollController ??= ScrollController();
   }
 
@@ -27,13 +30,13 @@ class HomePage extends PageBase{
   }
 
   @override
-  Future<PageBase> onDispose() async {
-    return this;
+  void onDispose() async {
+    return;
   }
 
   @override
-  Future<PageBase> onSet() async {
-    return this;
+  void onSet() {
+    return;
   }
 
   void toTop(){
@@ -88,7 +91,8 @@ class HomePageState extends State<HomePage>{
 
 class HomeSections extends ChangeNotifier{
   List<Widget> sections;
-  HomeSections({this.sections = const []}){
+  SelectedItemContext selectedItem;
+  HomeSections({this.sections = const [], required this.selectedItem}){
     List<HorizontalCard> hcItems = [
       HorizontalCard(title: "Opcion1"),
       HorizontalCard(title: "Opcion2"),
@@ -104,6 +108,7 @@ class HomeSections extends ChangeNotifier{
       CustomCard(
         title: "Maquina 1",
         subtitle: 'Maquina',
+
       ),
       CustomCard(
         title: "Pizarra",

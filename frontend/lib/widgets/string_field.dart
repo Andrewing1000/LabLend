@@ -53,6 +53,7 @@ class _StringFieldState extends State<StringField> {
           ),
         ),
         onChanged: (text) {
+          print("blefuscu");
           _validate();
         },
       ),

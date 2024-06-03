@@ -8,6 +8,7 @@ import 'package:frontend/widgets/barra_busqueda.dart';
 import 'package:frontend/widgets/cicular_button.dart';
 
 import '../models/Session.dart';
+import 'DropdownDateFilter.dart';
 
 class ToolBar extends StatefulWidget{
   static double height = 130;
@@ -31,30 +32,32 @@ class ToolBarState extends State<ToolBar>{
   TextEditingController searchBarController = TextEditingController();
   @override
   Widget build(BuildContext context){
-    return Container(
-      padding: EdgeInsets.all(20),
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-        color: Colors.indigo,
-      ),
-      child: MultiProvider(
+    return MultiProvider(
         providers: [
           ChangeNotifierProvider<PageManager>.value(value: widget.manager),
+          ChangeNotifierProvider<SessionManager>.value(value: SessionManager(),),
         ],
-        child: Consumer<PageManager>(
-            builder: (context, manager, child) {
-              var page = manager.currentPage;
-              if(manager.currentPage is BrowsablePage){
-                page = page as BrowsablePage;
-              }
+        child: Consumer2<PageManager, SessionManager>(
+          builder: (context, manager, sessionManager, child) {
+            var page = manager.currentPage;
+            if(manager.currentPage is BrowsablePage){
+              page = page as BrowsablePage;
+            }
 
-              var activateBar = false;
-              if(page is BrowsablePage){
-                activateBar = page.searchEnabled;
-                searchBarController.text = page.searchField.value;
-              }
-              return Column(
+            var activateBar = false;
+            if(page is BrowsablePage){
+              activateBar = page.searchEnabled;
+              searchBarController.text = page.searchField.value;
+            }
+
+            return Container(
+              padding: EdgeInsets.all(20),
+              width: double.infinity,
+              decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+              color: page is BrowsablePage? const Color.fromRGBO(21, 21, 21, 1.0) : Colors.indigo,
+              ),
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
@@ -97,9 +100,9 @@ class ToolBarState extends State<ToolBar>{
                         ),
 
                       Container(width: 10,),
-                      Spacer(),
+                      const Spacer(),
 
-                      if(SessionManager.session.user is! VisitorUser) CircularButton.animated(
+                      if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
                         normalIcon: Icons.notifications_none_outlined,
                         selectedIcon: Icons.notifications,
                         size: 25,
@@ -129,15 +132,20 @@ class ToolBarState extends State<ToolBar>{
                   Container(height: 20,),
                   if(page is BrowsablePage) Row(
                     mainAxisSize: MainAxisSize.max,
-                    children: page.filters.items.map((Filter item){
-                      return DropDownFilter(filter: item);
+                    children: page.filterSet.filters.map((Filter item){
+                      return Row(
+                        children: [
+                          item is DateFilter? DropdownDateFilter(filter:item): DropDownFilter(filter: item),
+                          Container(width: 30,),
+                        ],
+                      );
                     }).toList(),
                   )
                 ],
-              );
-            },
-          ),
-      ),
+              ),
+            );
+          },
+        ),
     );
   }
 }
