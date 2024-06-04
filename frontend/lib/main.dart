@@ -144,18 +144,17 @@ class MyApp extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return MaterialApp(
       home: Scaffold(
-        body: MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: SessionManager()),
-          ],
-          child: Consumer<SessionManager>(
-            builder: (context, sessionManager, child){
-              print("------------------------------------------------->Rascal");
-              return SessionManager.mainFrame;
-            },
-          ),
-        )
-      ),
+          body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: SessionManager()),
+        ],
+        child: Consumer<SessionManager>(
+          builder: (context, sessionManager, child) {
+            print("------------------------------------------------->Rascal");
+            return SessionManager.mainFrame;
+          },
+        ),
+      )),
     );
   }
 }

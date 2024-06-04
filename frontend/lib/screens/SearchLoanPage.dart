@@ -21,7 +21,9 @@ class SearchLoanPage extends BrowsablePage {
 
   @override
   void onSet() {
-    Role role = SessionManager().session.user.role; // Acceder usuario actual
+    Role role = SessionManager().session.user.role;
+
+    ///Acceder usuario actual
     searchEnabled = role == Role.adminRole;
   }
 
@@ -61,35 +63,39 @@ class SearchLoanPage extends BrowsablePage {
       builder: (BuildContext context, AsyncSnapshot<List<Loan>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: Colors.white));
+              child: CircularProgressIndicator(
+            color: Colors.white,
+          ));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(
-            child: Text(
-              'No se encontraron préstamos',
-              style: TextStyle(color: Colors.white),
-            ),
-          );
+              child: Text(
+            'No se encontraron items',
+            style: TextStyle(color: Colors.white),
+          ));
         } else {
-          List<Loan> loans = snapshot.data!;
+          List<Loan> items = snapshot.data!;
           return CustomScrollView(
             slivers: <Widget>[
               SliverPadding(
                 padding: const EdgeInsets.all(10.0),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 400.0, // Maximum width of each item
+                    maxCrossAxisExtent: 200.0, // Maximum width of each item
                     mainAxisSpacing: 10.0, // Spacing between rows
                     crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio: 2.0, // Adjust this if needed
+                    childAspectRatio:
+                        .5, // Optional: You can adjust this if needed
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      Loan loan = loans[index];
+                      Loan loan = items[index];
                       return FutureBuilder<Item?>(
-                        future: SessionManager.inventory
-                            .getItemById(loan.items.first.itemId),
+                        future: SessionManager.inventory.getItemById(
+                            loan.items.isNotEmpty
+                                ? loan.items.first.itemId
+                                : -1),
                         builder: (context, itemSnapshot) {
                           if (itemSnapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -108,15 +114,13 @@ class SearchLoanPage extends BrowsablePage {
                             return LoanCard(
                               loan: loan,
                               item: item,
-                              onReturn: () {
-                                // Refresh the page after returning an item
-                              },
+                              onReturn: () {},
                             );
                           }
                         },
                       );
                     },
-                    childCount: loans.length, // Number of items in the grid
+                    childCount: items.length, // Number of items in the grid
                   ),
                 ),
               ),
@@ -139,21 +143,5 @@ class ReturnedFilter extends SingleFilter<String> {
   @override
   Future<List<String>> retrieveItems() async {
     return ["Devuelto", "Pendiente"];
-  }
-}
-
-class DateFilter extends SingleFilter<DateTime> {
-  DateFilter({required String attributeName})
-      : super(attributeName: attributeName);
-
-  @override
-  String getRepresentation(DateTime item) {
-    return item.toString();
-  }
-
-  @override
-  Future<List<DateTime>> retrieveItems() async {
-    // Return an empty list as this is just a filter by date range
-    return [];
   }
 }

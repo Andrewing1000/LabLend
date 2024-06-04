@@ -5,8 +5,8 @@ import '../models/item.dart';
 import '../models/Session.dart';
 
 class LoanCard extends StatefulWidget {
-  static double width = 200;
-  static double height = (8 / 7) * width;
+  static double width = 300;
+  static double height = 300;
 
   final Loan loan;
   final Item item;
@@ -51,7 +51,6 @@ class LoanCardState extends State<LoanCard> {
         ChangeNotifierProvider.value(value: widget.item),
       ],
       child: Consumer2<Loan, Item>(builder: (context, loan, item, child) {
-        // Evitar el acceso a una lista vacía
         var prestamoItem = loan.items.isNotEmpty
             ? loan.items.firstWhere((i) => i.itemId == item.id,
                 orElse: () => PrestamoItem(itemId: item.id, cantidad: 0))
@@ -84,7 +83,7 @@ class LoanCardState extends State<LoanCard> {
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
                         Container(
-                          height: LoanCard.height * 5.8 / 9,
+                          height: LoanCard.height * 0.4,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
                           ),
