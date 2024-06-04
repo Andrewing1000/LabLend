@@ -18,9 +18,6 @@ class RequestHandler {
       : _dio = Dio(
                   BaseOptions(
                     baseUrl: kIsWeb ? serverURL_web : serverURL_phone, // Adjust base URL for web
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
                   )
                 )
   {
@@ -96,6 +93,8 @@ class RequestHandler {
     ));
   }
 
+  Dio get dio => _dio;
+
   String? readCookie(String name) {
     String cookies = html.document.cookie ?? "";
     for (String cookie in cookies.split(";")) {
@@ -161,36 +160,59 @@ class RequestHandler {
 
   Future<Response> getRequest(String path,
       {Map<String, dynamic> query = const {}, Map<String, dynamic> extraH = const {}}) async {
+    Map<String, dynamic> headers = {};
+    headers.addAll(extraH);
+    headers.addAll({'Content-Type': 'application/json',},);
     return _dio.get(
       path,
       queryParameters: query,
-      options: Options(headers: extraH),
+      options: Options(headers: headers),
     );
   }
 
   Future<Response> postRequest(String path,
       {Map<String, dynamic> body = const {}}) async {
+    Map<String, dynamic> headers = {};
+    headers.addAll({'Content-Type': 'application/json',},);
     return _dio.post(
       path,
       data: json.encode(body),
+      options: Options(headers: headers),
+    );
+  }
+
+  Future<Response> deleteRequest(String path,
+      {Map<String, dynamic> body = const {}}) async {
+    Map<String, dynamic> headers = {};
+    headers.addAll({'Content-Type': 'application/json',},);
+    return _dio.delete(
+      path,
+      data: json.encode(body),
+      options: Options(headers: headers),
     );
   }
 
   Future<Response> putRequest(String path,
       {Map<String, dynamic> body = const {}, Map<String, dynamic>  query = const {}}) async {
+    Map<String, dynamic> headers = {};
+    headers.addAll({'Content-Type': 'application/json',},);
     return _dio.put(
       path,
       data: json.encode(body),
       queryParameters: query,
+      options: Options(headers: headers),
     );
   }
 
   Future<Response> patchRequest(String path,
       {Map<String, dynamic> body = const {}, Map<String, dynamic>  query = const {}}) async {
+    Map<String, dynamic> headers = {};
+    headers.addAll({'Content-Type': 'application/json',},);
     return _dio.patch(
       path,
       data: json.encode(body),
       queryParameters: query,
+      options: Options(headers: headers),
     );
   }
 

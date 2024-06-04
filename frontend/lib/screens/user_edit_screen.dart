@@ -60,12 +60,6 @@ class _EditUserScreenState extends State<EditUserScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                BannerWidget(
-                  imageUrl: "https://via.placeholder.com/150",
-                  title: "Gestión de Usuarios",
-                  subtitle: "Editar usuario",
-                  description: "Modifica los datos del usuario seleccionado.",
-                ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: user == null

@@ -53,7 +53,9 @@ class Item extends ChangeNotifier {
   String? link;
   String? serialNumber;
   int quantity;
+  int quantityOnLoan;
   Brand marca;
+  String? imagePath;
   List<Category> categories;
 
   Item({
@@ -63,8 +65,10 @@ class Item extends ChangeNotifier {
     this.link,
     this.serialNumber,
     required this.quantity,
+    required this.quantityOnLoan,
     required this.marca,
     required this.categories,
+    this.imagePath,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
@@ -74,11 +78,13 @@ class Item extends ChangeNotifier {
       description: json['description'],
       link: json['link'],
       serialNumber: json['serial_number'],
+      quantityOnLoan: json['quantity_on_loan'],
       quantity: json['quantity'],
       marca: Brand.fromJson(json['marca']),
       categories: (json['categories'] as List)
           .map((i) => Category.fromJson(i))
           .toList(),
+      imagePath: json['image'],
     );
   }
 
@@ -90,20 +96,22 @@ class Item extends ChangeNotifier {
       'link': link,
       'serial_number': serialNumber,
       'quantity': quantity,
+      'quantity_on_loan' : quantityOnLoan,
       'marca': marca.toJson(),
       'categories': categories.map((c) => c.toJson()).toList(),
     };
   }
 
-  void create() {
-    SessionManager.inventory.createItem(this);
+  Future<void> create() async {
+    await SessionManager.inventory.createItem(this);
   }
 
-  void update(Item newItem) {
-    SessionManager.inventory.updateItem(this, newItem);
+  Future<void> update(Item newItem) async {
+    await SessionManager.inventory.updateItem(this, newItem);
   }
 
   void updateItem(Item newItem) {
+    id = newItem.id;
     nombre = newItem.nombre;
     description = newItem.description;
     link = newItem.link;
@@ -111,6 +119,7 @@ class Item extends ChangeNotifier {
     quantity = newItem.quantity;
     marca = newItem.marca;
     categories = newItem.categories;
+    imagePath = newItem.imagePath;
     notifyListeners();
   }
 }

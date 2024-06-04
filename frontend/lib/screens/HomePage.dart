@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
+import '../models/item.dart';
 import '../services/SelectedItemContext.dart';
 import '../widgets/card.dart';
 import '../widgets/card_section.dart';
@@ -104,55 +105,55 @@ class HomeSections extends ChangeNotifier{
       HorizontalCard(title: "Opcion4"),
     ];
 
+    Item item = Item(
+      id: 1,
+      nombre: 'El cojudo',
+      description: 'This is an example item for testing purposes',
+      link: 'http://example.com/example-item',
+      serialNumber: 'SN1234567890',
+      quantity: 50,
+      marca: Brand(id: 1, marca: "tabaco"),
+      categories: [],
+      quantityOnLoan: 1,
+    );
+
+
     List<CustomCard> cItems = [
       CustomCard(
-        title: "Maquina 1",
-        subtitle: 'Maquina',
-
+        item: item,
       ),
       CustomCard(
-        title: "Pizarra",
-        subtitle: 'Pizarra',
+          item: item,
       ),
       CustomCard(
-        title: "Marron",
-        subtitle: 'Pizarra',
+        item: item,
       ),
       CustomCard(
-        title: "MAquina 2",
-        subtitle: 'Maquina 2',
+        item: item,
       ),
       CustomCard(
-        title: "Maquina 1",
-        subtitle: 'Maquina',
+        item: item,
       ),
       CustomCard(
-        title: "Pizarra",
-        subtitle: 'Pizarra',
+        item: item,
       ),
       CustomCard(
-        title: "Marron",
-        subtitle: 'Pizarra',
+        item: item,
       ),
       CustomCard(
-        title: "MAquina 2",
-        subtitle: 'Maquina 2',
+        item: item,
       ),
       CustomCard(
-        title: "Maquina 1",
-        subtitle: 'Maquina',
+        item: item,
       ),
       CustomCard(
-        title: "Pizarra",
-        subtitle: 'Pizarra',
+        item: item,
       ),
       CustomCard(
-        title: "Marron",
-        subtitle: 'Pizarra',
+        item: item,
       ),
       CustomCard(
-        title: "MAquina 2",
-        subtitle: 'Maquina 2',
+        item: item,
       ),
     ];
 

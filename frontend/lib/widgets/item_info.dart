@@ -55,7 +55,9 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
               return Card(
                 color: Colors.grey[900],
                 child: ListTile(
-                  leading: Image.network("/assets/images/place_holder.png"),
+                  leading: Image.network(item.imagePath != null?
+                    item.imagePath! :
+                  "assets/images/place_holder.png",),
                   title:
                       Text(item.nombre, style: TextStyle(color: Colors.white)),
                   subtitle: Text(item.description ?? 'Sin descripción',
@@ -82,7 +84,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
             children: [
               Container(
                 width: double.infinity,
-                height: 150,
+                height: 330,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [dominantColor, dominantColor.withOpacity(0.7)],
@@ -92,10 +94,10 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                 ),
                 child: Opacity(
                   opacity: 0.3,
-                  child: Image.network(
-                    "/assets/images/place_holder.png",
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.network(widget.item.imagePath != null?
+                    widget.item.imagePath! :
+                    "assets/images/place_holder.png",
+                  fit: BoxFit.cover,),
                 ),
               ),
               Padding(

@@ -81,12 +81,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                BannerWidget(
-                  imageUrl: "assets/images/place_holder.png",
-                  title: "Gestión de Usuarios",
-                  subtitle: "Crea un nuevo usuario",
-                  description: "Añade un nuevo usuario al sistema.",
-                ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: UserForm(

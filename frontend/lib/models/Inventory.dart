@@ -1,16 +1,14 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'item.dart';
 import 'Session.dart';
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 
 class Inventory {
   static var manager = SessionManager();
   var session = manager.session;
-  var requestHandler;
-
-  Inventory() {
-    requestHandler = session.requestHandler;
-  }
+  var requestHandler =SessionManager.httpHandler;
 
   Future<List<Brand>> getBrands() async {
     if (!await isReady()) {
@@ -144,6 +142,9 @@ class Inventory {
 
     try {
       var response = await requestHandler.postRequest('/item/items/', body: item.toJson());
+
+      Item newItem = Item.fromJson(response.data);
+      item.updateItem(newItem);
       manager.notification(notification: 'Ítem creado con éxito');
       return Item.fromJson(response.data);
     } on DioException catch (e) {
@@ -151,6 +152,48 @@ class Inventory {
       return null;
     }
   }
+
+
+  Future<void> uploadImage(Item item, Uint8List imageBytes, String fileExtension) async {
+    String mimeType;
+
+    switch (fileExtension.toLowerCase()) {
+      case 'jpeg':
+      case 'jpg':
+        mimeType = 'image/jpeg';
+        break;
+      case 'png':
+        mimeType = 'image/png';
+        break;
+      default:
+        throw UnsupportedError('Unsupported file type: $fileExtension');
+    }
+
+    FormData formData = FormData.fromMap({
+      'image': MultipartFile.fromBytes(
+        imageBytes,
+        filename: 'upload.$fileExtension',
+        contentType: MediaType('image', fileExtension),
+      ),
+    });
+
+
+    try {
+      final dio = requestHandler.dio;
+      final response = await dio.post('/item/items/${item.id}/upload-image/', data: formData);
+
+      if (response.statusCode == 200) {
+        manager.notification(notification: 'La imagen se ha subido exitosamente');
+      } else {
+        manager.errorNotification(error: "No se pudo agregar la imagen");
+      }
+    } on DioException catch (e) {
+      print(e.stackTrace);
+      manager.errorNotification(error: "No se pudo agregar la imagen", details: e.response?.data);
+    }
+  }
+
+
 
   Future<Item?> updateItem(Item item, Item newItem) async {
     if (!await isReady()) {

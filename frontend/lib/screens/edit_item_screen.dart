@@ -84,12 +84,6 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 else
                   Column(
                     children: [
-                      BannerWidget(
-                        imageUrl: 'assets/images/place_holder.png',
-                        title: _item!.nombre,
-                        subtitle: _item!.marca.marca,
-                        description: _item!.description ?? '',
-                      ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: ItemDetailsForm(item: _item!),

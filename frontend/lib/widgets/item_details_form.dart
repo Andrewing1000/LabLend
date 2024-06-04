@@ -62,6 +62,7 @@ class _ItemDetailsFormState extends State<ItemDetailsForm> {
       link: _linkController.text,
       serialNumber: _serialNumberController.text,
       quantity: int.parse(_quantityController.text),
+      quantityOnLoan: 2,
       marca: Brand(id: widget.item.marca.id, marca: _marcaController.text),
       categories: widget.item.categories, // No cambiamos las categorías aquí
     ));

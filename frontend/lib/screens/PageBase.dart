@@ -6,7 +6,7 @@ import '../services/PageManager.dart';
 abstract class PageBase extends StatefulWidget {
   PageManager? manager;
   final Widget? child;
-  final bool disposable;
+  bool disposable;
 
   PageBase({
     Key? key,

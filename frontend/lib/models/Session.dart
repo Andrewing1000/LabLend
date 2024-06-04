@@ -122,14 +122,14 @@ class SessionManager with ChangeNotifier {
     var connectionRes;
     try{
       connectionRes = await httpHandler.connectionCheck();
-      if(!isOnline) errorNotification(error : 'Sin conección');
+      if(!isOnline) errorNotification(error : 'Sin conexión');
       if(connectionRes == isOnline) return isOnline;
       isOnline = connectionRes;
     }catch (e){
       isOnline = false;
     }
 
-    if(!isOnline) errorNotification(error : 'Sin conección');
+    if(!isOnline) errorNotification(error : 'Sin conexión');
     return isOnline;
   }
 

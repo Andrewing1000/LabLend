@@ -31,6 +31,7 @@ Future<void> main() async {
     link: 'http://example.com/example-item',
     serialNumber: 'SN1234567890',
     quantity: 50,
+    quantityOnLoan: 3,
     marca: dummyBrand,
     categories: dummyCategories,
   );

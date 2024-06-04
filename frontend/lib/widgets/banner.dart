@@ -1,8 +1,12 @@
+
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
+import 'dart:typed_data' as DartData;
 class BannerWidget extends StatefulWidget {
-  final String imageUrl;
+  final DartData.Uint8List imageUrl;
   final String title;
   final String subtitle;
   final String description;
@@ -30,7 +34,7 @@ class _BannerWidgetState extends State<BannerWidget> {
 
   Future<void> _updatePalette() async {
     final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-      NetworkImage(widget.imageUrl),
+      MemoryImage(widget.imageUrl),
     );
     setState(() {
       dominantColor = generator.dominantColor?.color ?? Colors.black;
@@ -41,7 +45,6 @@ class _BannerWidgetState extends State<BannerWidget> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 300,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [dominantColor, dominantColor.withOpacity(0.7)],
@@ -51,15 +54,6 @@ class _BannerWidgetState extends State<BannerWidget> {
       ),
       child: Stack(
         children: [
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.3,
-              child: Image.network(
-                widget.imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -74,37 +68,7 @@ class _BannerWidgetState extends State<BannerWidget> {
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
-                        blurRadius: 10.0,
-                        color: Colors.black,
-                        offset: Offset(2.0, 2.0),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  widget.subtitle,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 18,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
-                        color: Colors.black,
-                        offset: Offset(2.0, 2.0),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  widget.description,
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 16,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
+                        blurRadius: 5.0,
                         color: Colors.black,
                         offset: Offset(2.0, 2.0),
                       ),

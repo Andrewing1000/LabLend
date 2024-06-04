@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/User.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/DropDownFilter.dart';
+import 'package:frontend/widgets/edit_item_form.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/widgets/barra_busqueda.dart';

@@ -17,11 +17,12 @@ class SearchLoanPage extends BrowsablePage {
     filterSet.add(returnedFilter);
     filterSet.add(fromDateFilter);
     filterSet.add(toDateFilter);
+    //disposable = true;
   }
 
   @override
   void onSet(){
-    Role role = SessionManager().session.user.role;
+    Role role = SessionManager().session.user.role; ///Acceder usuario actual
     searchEnabled = role == Role.adminRole;
   }
 
@@ -82,8 +83,17 @@ class SearchLoanPage extends BrowsablePage {
                   delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                       return CustomCard(
-                        title: items[index].usuario,
-                        subtitle: items[index].devuelto.toString() ?? "",
+                        item : Item(
+                          id: 1,
+                          nombre: 'El cojudo',
+                          description: 'This is an example item for testing purposes',
+                          link: 'http://example.com/example-item',
+                          serialNumber: 'SN1234567890',
+                          quantity: 50,
+                          marca: Brand(id: 1, marca: "tabaco"),
+                          categories: [],
+                          quantityOnLoan: 1,
+                        ),
                       );
                     },
                     childCount: items.length, // Number of items in the grid

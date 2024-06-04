@@ -153,6 +153,7 @@ class _EditItemFormState extends State<EditItemForm> {
               link: linkController.text,
               serialNumber: serialNumberController.text,
               quantity: int.parse(quantityController.text),
+              quantityOnLoan: 2,
               marca: selectedBrand,
               categories: selectedCategories,
             );

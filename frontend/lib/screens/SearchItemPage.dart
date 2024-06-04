@@ -2,15 +2,20 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
+import 'package:frontend/screens/create_item_screen.dart';
+import 'package:frontend/screens/user_edit_screen.dart';
 import 'package:frontend/widgets/card.dart';
+import '../models/User.dart';
 import '../models/item.dart';
+import '../services/PageManager.dart';
 import '../services/SelectedItemContext.dart';
 
 class SearchItemPage extends BrowsablePage {
   BrandFilter brandFilter = BrandFilter();
   CategoryFilter categoryFilter = CategoryFilter();
   SelectedItemContext selectedItem;
-  SearchItemPage({super.key, required this.selectedItem}) {
+  SearchItemPage({super.key,
+    required this.selectedItem,}) {
     filterSet.add(brandFilter);
     filterSet.add(categoryFilter);
   }
@@ -43,32 +48,54 @@ class SearchItemPage extends BrowsablePage {
           style: TextStyle(color: Colors.white),));
         } else {
           List<Item> items = snapshot.data!;
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverPadding(
-                padding: const EdgeInsets.all(10.0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200.0, // Maximum width of each item
-                    mainAxisSpacing: 10.0, // Spacing between rows
-                    crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio:
-                        .5, // Optional: You can adjust this if needed
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return CustomCard(
-                        title: items[index].nombre,
-                        subtitle: items[index].description ?? "",
-                        onTap: (){
-                          selectedItem.setItem(items[index]);
+          return Stack(
+            children: [
+              CustomScrollView(
+                slivers: <Widget>[
+                  SliverPadding(
+                    padding: const EdgeInsets.all(10.0),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200.0, // Maximum width of each item
+                        mainAxisSpacing: 10.0, // Spacing between rows
+                        crossAxisSpacing: 10.0, // Spacing between columns
+                        childAspectRatio:
+                            .5, // Optional: You can adjust this if needed
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return CustomCard(
+                            item: items[index],
+                            onTap: (){
+                              selectedItem.setItem(items[index]);
+                            },
+                          );
                         },
-                      );
-                    },
-                    childCount: items.length, // Number of items in the grid
+                        childCount: items.length, // Number of items in the grid
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if(SessionManager().session.user.role == Role.adminRole)
+                Align(
+                  alignment: Alignment(1, 1),
+                  child: Container(
+                    padding: EdgeInsets.all(30),
+                    child: FloatingActionButton(
+                      backgroundColor: Colors.orange,
+                      child: Icon(Icons.add, color: Colors.black,),
+                      shape: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200),
+                      ),
+                      //label: Text("Agregar"),
+                      onPressed: (){
+                          if(manager != null){
+                            manager?.setPage(CreateItemScreen());
+                          }
+                      }),
                   ),
                 ),
-              ),
             ],
           );
         }
