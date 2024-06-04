@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/item.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/models/Loan.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 class ItemInfoWidget extends StatefulWidget {
@@ -14,8 +15,9 @@ class ItemInfoWidget extends StatefulWidget {
 
 class _ItemInfoWidgetState extends State<ItemInfoWidget> {
   int cartItemCount = 0;
-  List<Item> cartItems = [];
+  List<PrestamoItem> cartItems = [];
   Color dominantColor = Colors.black;
+  final sessionManager = SessionManager(); // Instancia de SessionManager
 
   @override
   void initState() {
@@ -35,7 +37,14 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
   void _addToCart() {
     setState(() {
       cartItemCount++;
-      cartItems.add(widget.item);
+      cartItems.add(PrestamoItem(itemId: widget.item.id, cantidad: 1));
+    });
+  }
+
+  void _removeFromCart(int index) {
+    setState(() {
+      cartItemCount--;
+      cartItems.removeAt(index);
     });
   }
 
@@ -44,31 +53,87 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
       context: context,
       builder: (context) {
         return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.black,
-          ),
-          child: ListView.builder(
-            itemCount: cartItems.length,
-            itemBuilder: (context, index) {
-              final item = cartItems[index];
-              return Card(
-                color: Colors.grey[900],
-                child: ListTile(
-                  leading: Image.network(item.imagePath != null?
-                    item.imagePath! :
-                  "assets/images/place_holder.png",),
-                  title:
-                      Text(item.nombre, style: TextStyle(color: Colors.white)),
-                  subtitle: Text(item.description ?? 'Sin descripción',
-                      style: TextStyle(color: Colors.white70)),
+          color: Colors.black,
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cartItems.length,
+                  itemBuilder: (context, index) {
+                    final cartItem = cartItems[index];
+                    return Card(
+                      color: Colors.grey[900],
+                      child: ListTile(
+                        leading:
+                            Image.network("/assets/images/place_holder.png"),
+                        title: Text(widget.item.nombre,
+                            style: TextStyle(color: Colors.white)),
+                        subtitle: Text(
+                            widget.item.description ?? 'Sin descripción',
+                            style: TextStyle(color: Colors.white70)),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _removeFromCart(index);
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: ElevatedButton(
+                  onPressed: _createLoan,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  child: Text('Confirmar Préstamo',
+                      style: TextStyle(fontSize: 16)),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
+  }
+
+  Future<void> _createLoan() async {
+    var session = sessionManager.session; // Acceso correcto a la sesión
+    var user = session.user.email;
+
+    Loan loan = Loan(
+      id: 1,
+      usuario: user,
+      fechaPrestamo: DateTime.now(),
+      fechaDevolucion: DateTime.now().add(Duration(days: 1)),
+      devuelto: false,
+      items: cartItems,
+    );
+
+    loan.create();
+
+    // Reducir la cantidad disponible en el inventario
+    for (var cartItem in cartItems) {
+      widget.item.quantity -= cartItem.cantidad;
+      widget.item.update(widget.item); // Actualizar el item en el inventario
+    }
+
+    // Limpiar el carrito
+    setState(() {
+      cartItems.clear();
+      cartItemCount = 0;
+    });
+
+    // Mostrar una notificación o mensaje de éxito
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Préstamo creado con éxito')),
+    );
+
+    // Cerrar el modal
+    Navigator.of(context).pop();
   }
 
   @override
@@ -84,7 +149,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
             children: [
               Container(
                 width: double.infinity,
-                height: 330,
+                height: 150,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [dominantColor, dominantColor.withOpacity(0.7)],
@@ -94,10 +159,10 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                 ),
                 child: Opacity(
                   opacity: 0.3,
-                  child: Image.network(widget.item.imagePath != null?
-                    widget.item.imagePath! :
-                    "assets/images/place_holder.png",
-                  fit: BoxFit.cover,),
+                  child: Image.network(
+                    "/assets/images/place_holder.png",
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               Padding(
@@ -135,7 +200,10 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
               children: [
                 // Información adicional del ítem con subtítulos en bold
                 _buildInfoRow('Marca', widget.item.marca.marca),
-                _buildInfoRow('Cantidad', widget.item.quantity.toString()),
+                _buildInfoRow(
+                    'Cantidad Total', widget.item.quantity.toString()),
+                _buildInfoRow('Cantidad Disponible',
+                    (widget.item.quantity - cartItemCount).toString()),
                 _buildInfoRow('Número de serie',
                     widget.item.serialNumber ?? 'No disponible'),
                 _buildInfoRow('Categorías',
@@ -145,10 +213,9 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                 ElevatedButton(
                   onPressed: _addToCart,
                   style: ElevatedButton.styleFrom(
-                    //primary: Colors.green,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
-                  child: Text('Prestar',
+                  child: Text('Agregar a la lista de compras',
                       style: TextStyle(fontSize: 16)),
                 ),
               ],
