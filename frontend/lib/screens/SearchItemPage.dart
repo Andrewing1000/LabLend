@@ -10,6 +10,7 @@ import '../models/item.dart';
 import '../services/PageManager.dart';
 import '../services/SelectedItemContext.dart';
 
+import "package:provider/provider.dart";
 class SearchItemPage extends BrowsablePage {
   BrandFilter brandFilter = BrandFilter();
   CategoryFilter categoryFilter = CategoryFilter();
@@ -48,55 +49,65 @@ class SearchItemPage extends BrowsablePage {
           style: TextStyle(color: Colors.white),));
         } else {
           List<Item> items = snapshot.data!;
-          return Stack(
-            children: [
-              CustomScrollView(
-                slivers: <Widget>[
-                  SliverPadding(
-                    padding: const EdgeInsets.all(10.0),
-                    sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 200.0, // Maximum width of each item
-                        mainAxisSpacing: 10.0, // Spacing between rows
-                        crossAxisSpacing: 10.0, // Spacing between columns
-                        childAspectRatio:
-                            .5, // Optional: You can adjust this if needed
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          return CustomCard(
-                            item: items[index],
-                            onTap: (){
-                              selectedItem.setItem(items[index]);
-                            },
-                          );
-                        },
-                        childCount: items.length, // Number of items in the grid
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if(SessionManager().session.user.role == Role.adminRole)
-                Align(
-                  alignment: Alignment(1, 1),
-                  child: Container(
-                    padding: EdgeInsets.all(30),
-                    child: FloatingActionButton(
-                      backgroundColor: Colors.orange,
-                      child: Icon(Icons.add, color: Colors.black,),
-                      shape: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200),
-                      ),
-                      //label: Text("Agregar"),
-                      onPressed: (){
-                          if(manager != null){
-                            manager?.setPage(CreateItemScreen());
-                          }
-                      }),
-                  ),
-                ),
+          return MultiProvider(
+
+            providers: [
+                  ChangeNotifierProvider.value(value: SessionManager()),
             ],
+            child: Consumer<SessionManager>(
+              builder: (context, sessionManager, child) {
+                return Stack(
+                  children: [
+                    CustomScrollView(
+                      slivers: <Widget>[
+                        SliverPadding(
+                          padding: const EdgeInsets.all(10.0),
+                          sliver: SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 200.0, // Maximum width of each item
+                              mainAxisSpacing: 10.0, // Spacing between rows
+                              crossAxisSpacing: 10.0, // Spacing between columns
+                              childAspectRatio:
+                                  .5, // Optional: You can adjust this if needed
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                return CustomCard(
+                                  item: items[index],
+                                  onTap: (){
+                                    selectedItem.setItem(items[index]);
+                                  },
+                                );
+                              },
+                              childCount: items.length, // Number of items in the grid
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if(sessionManager.session.user.role == Role.adminRole)
+                      Align(
+                        alignment: Alignment(1, 1),
+                        child: Container(
+                          padding: EdgeInsets.all(30),
+                          child: FloatingActionButton(
+                            backgroundColor: Colors.orange,
+                            child: Icon(Icons.add, color: Colors.black,),
+                            shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(200),
+                            ),
+                            //label: Text("Agregar"),
+                            onPressed: (){
+                                if(manager != null){
+                                  manager?.setPage(CreateItemScreen());
+                                }
+                            }),
+                        ),
+                      ),
+                  ],
+                );
+              }
+            ),
           );
         }
       },

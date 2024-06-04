@@ -66,6 +66,7 @@ abstract class User extends ChangeNotifier{
 
 
   void create({required String password}) {
+    print("------------------------->A");
     SessionManager.userManager.createUser(this, password);
     return;
   }

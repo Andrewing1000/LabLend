@@ -6,14 +6,14 @@ import 'package:palette_generator/palette_generator.dart';
 
 import 'dart:typed_data' as DartData;
 class BannerWidget extends StatefulWidget {
-  final DartData.Uint8List imageUrl;
+  final DartData.Uint8List? imageUrl;
   final String title;
   final String subtitle;
   final String description;
 
   const BannerWidget({
     Key? key,
-    required this.imageUrl,
+    this.imageUrl,
     required this.title,
     required this.subtitle,
     required this.description,
@@ -33,8 +33,13 @@ class _BannerWidgetState extends State<BannerWidget> {
   }
 
   Future<void> _updatePalette() async {
+    if(widget.imageUrl == null){
+      dominantColor = Colors.black;
+      return;
+    }
+
     final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-      MemoryImage(widget.imageUrl),
+      MemoryImage(widget.imageUrl!),
     );
     setState(() {
       dominantColor = generator.dominantColor?.color ?? Colors.black;

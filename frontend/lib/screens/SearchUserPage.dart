@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
+import 'package:frontend/screens/create_user.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/User.dart';
 import '../models/item.dart';
@@ -55,35 +56,59 @@ class SearchUserPage extends BrowsablePage {
             style: TextStyle(color: Colors.white),));
         } else {
           List<User> items = snapshot.data!;
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverPadding(
-                padding: const EdgeInsets.all(10.0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200.0, // Maximum width of each item
-                    mainAxisSpacing: 10.0, // Spacing between rows
-                    crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio: .5, // Optional: You can adjust this if needed
+          return Stack(
+            children: [
+              CustomScrollView(
+                slivers: <Widget>[
+                  SliverPadding(
+                    padding: const EdgeInsets.all(10.0),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200.0, // Maximum width of each item
+                        mainAxisSpacing: 10.0, // Spacing between rows
+                        crossAxisSpacing: 10.0, // Spacing between columns
+                        childAspectRatio: .5, // Optional: You can adjust this if needed
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                          return CustomCard(
+                            item: Item(
+                            id: 1,
+                            nombre: 'El cojudo',
+                            description: 'This is an example item for testing purposes',
+                            link: 'http://example.com/example-item',
+                            serialNumber: 'SN1234567890',
+                            quantity: 50,
+                            marca: Brand(id: 1, marca: "tabaco"),
+                            categories: [],
+                            quantityOnLoan: 1,
+                            ),
+                          );
+                        },
+                        childCount: items.length, // Number of items in the grid
+                      ),
+                    ),
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return CustomCard(
-                        item: Item(
-                        id: 1,
-                        nombre: 'El cojudo',
-                        description: 'This is an example item for testing purposes',
-                        link: 'http://example.com/example-item',
-                        serialNumber: 'SN1234567890',
-                        quantity: 50,
-                        marca: Brand(id: 1, marca: "tabaco"),
-                        categories: [],
-                        quantityOnLoan: 1,
-                        ),
-                      );
-                    },
-                    childCount: items.length, // Number of items in the grid
-                  ),
+                ],
+              ),
+
+              if(SessionManager().session.user.role == Role.adminRole)
+              Align(
+                alignment: Alignment(1, 1),
+                child: Container(
+                  padding: EdgeInsets.all(30),
+                  child: FloatingActionButton(
+                      backgroundColor: Colors.orange,
+                      child: Icon(Icons.add, color: Colors.black,),
+                      shape: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200),
+                      ),
+                      //label: Text("Agregar"),
+                      onPressed: (){
+                        if(manager != null){
+                          manager?.setPage(CreateUserScreen());
+                        }
+                      }),
                 ),
               ),
             ],

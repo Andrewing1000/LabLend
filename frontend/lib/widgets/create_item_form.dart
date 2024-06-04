@@ -110,6 +110,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                           return Container();
                         }
 
+                        selectedBrand = null;
                         List<Brand> brands = snapshot.data!;
 
                         return StatefulBuilder(
