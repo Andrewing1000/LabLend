@@ -70,6 +70,18 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
+    - assets/images/balanza_analitica.jpg
+    - assets/images/cables.jpg
+    - assets/images/centrifuga.jpg
+    - assets/images/espectro.jpg
+    - assets/images/microscopio.jpg
+    - assets/images/protoboard.jpg
+    - assets/images/caja_centrifuga.jpg
+    - assets/images/generador_de_funciones.jpg
+    - assets/images/generador_de_señales.jpg
+    - assets/images/motor_paso_a_paso.jpg
+    - assets/images/pinza_de_laboratorio.jpg
+
     - assets/images/background.png
 
   fonts:
