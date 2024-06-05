@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-
-import 'card.dart';
 
 class CardSection extends StatelessWidget {
-  List<CustomCard> items;
+  final List<Widget> items;
 
   CardSection({super.key, required this.items});
 
@@ -17,7 +14,7 @@ class CardSection extends StatelessWidget {
           height: 30,
         ),
         Text(
-          "Section",
+          "Instrumentos de Laboratorio",
           textAlign: TextAlign.start,
           style: TextStyle(fontSize: 30, color: Colors.white),
         ),
@@ -25,7 +22,7 @@ class CardSection extends StatelessWidget {
           height: 30,
         ),
         Container(
-          height: CustomCard.height,
+          height: 300, // Ajusta según sea necesario
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: items,

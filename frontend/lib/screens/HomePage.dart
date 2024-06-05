@@ -5,7 +5,7 @@ import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
 import '../services/SelectedItemContext.dart';
-import '../widgets/card.dart';
+import '../widgets/card_vista.dart';
 import '../widgets/card_section.dart';
 import '../widgets/horizontal_card.dart';
 import '../widgets/horizontal_section.dart';
@@ -15,6 +15,7 @@ class HomePage extends PageBase {
   ScrollController? scrollController;
   late HomeSections sections;
   SelectedItemContext selectedItem;
+
   HomePage(
       {super.key,
       super.manager,
@@ -93,88 +94,115 @@ class HomeSections extends ChangeNotifier {
 
   HomeSections({this.sections = const [], required this.selectedItem}) {
     List<HorizontalCard> hcItems = [
-      HorizontalCard(title: "Opción1"),
-      HorizontalCard(title: "Opción2"),
-      HorizontalCard(title: "Opción3"),
-      HorizontalCard(title: "Opción4"),
-      HorizontalCard(title: "Opción1"),
-      HorizontalCard(title: "Opción2"),
-      HorizontalCard(title: "Opción3"),
-      HorizontalCard(title: "Opción4"),
+      HorizontalCard(title: "Opción 1"),
+      HorizontalCard(title: "Opción 2"),
+      HorizontalCard(title: "Opción 3"),
+      HorizontalCard(title: "Opción 4"),
+      HorizontalCard(title: "Opción 1"),
+      HorizontalCard(title: "Opción 2"),
+      HorizontalCard(title: "Opción 3"),
+      HorizontalCard(title: "Opción 4"),
     ];
 
-    Item microscopio = Item(
-      id: 2,
-      nombre: 'Microscopio',
-      description:
-          'Un microscopio para el examen detallado de objetos pequeños.',
-      link: 'http://example.com/microscopio',
-      serialNumber: 'SN2345678901',
-      quantity: 20,
-      marca: Brand(id: 2, marca: 'CientíficaCo'),
-      categories: [],
-      quantityOnLoan: 2,
-    );
-
-    Item setTuboEnsayo = Item(
-      id: 3,
-      nombre: 'Set de Tubos de Ensayo',
-      description:
-          'Conjunto de tubos de ensayo para varios experimentos químicos.',
-      link: 'http://example.com/set-tubos-ensayo',
-      serialNumber: 'SN3456789012',
-      quantity: 100,
-      marca: Brand(id: 3, marca: 'EquipLab'),
-      categories: [],
-      quantityOnLoan: 10,
-    );
-
-    Item centrifuga = Item(
-      id: 4,
-      nombre: 'Centrífuga',
-      description:
-          'Una centrífuga para separar sustancias de diferentes densidades.',
-      link: 'http://example.com/centrifuga',
-      serialNumber: 'SN4567890123',
-      quantity: 5,
-      marca: Brand(id: 4, marca: 'SpinTech'),
-      categories: [],
-      quantityOnLoan: 1,
-    );
-
-    Item setVasosPrecipitados = Item(
-      id: 5,
-      nombre: 'Set de Vasos de Precipitados',
-      description:
-          'Conjunto de vasos de precipitados para mezclar y medir líquidos.',
-      link: 'http://example.com/set-vasos-precipitados',
-      serialNumber: 'SN5678901234',
-      quantity: 50,
-      marca: Brand(id: 5, marca: 'ChemTools'),
-      categories: [],
-      quantityOnLoan: 5,
-    );
-
-    Item mecheroBunsen = Item(
-      id: 6,
-      nombre: 'Mechero Bunsen',
-      description:
-          'Un mechero Bunsen para calentar sustancias durante experimentos.',
-      link: 'http://example.com/mechero-bunsen',
-      serialNumber: 'SN6789012345',
-      quantity: 15,
-      marca: Brand(id: 6, marca: 'HeatWave'),
-      categories: [],
-      quantityOnLoan: 3,
-    );
-
-    List<CustomCard> cItems = [
-      CustomCard(item: microscopio),
-      CustomCard(item: setTuboEnsayo),
-      CustomCard(item: centrifuga),
-      CustomCard(item: setVasosPrecipitados),
-      CustomCard(item: mecheroBunsen),
+    List<Item> items = [
+      Item(
+        id: 1,
+        nombre: 'Microscopio',
+        description: 'Microscopio de alta precisión para observación celular.',
+        link: 'http://example.com/microscopio',
+        serialNumber: 'SN1234567890',
+        quantity: 50,
+        marca: Brand(id: 1, marca: "OptiLab"),
+        categories: [],
+        quantityOnLoan: 1,
+      ),
+      Item(
+        id: 2,
+        nombre: 'Centrifuga',
+        description: 'Centrífuga para separación de muestras biológicas.',
+        link: 'http://example.com/centrifuga',
+        serialNumber: 'SN0987654321',
+        quantity: 20,
+        marca: Brand(id: 2, marca: "BioSpin"),
+        categories: [],
+        quantityOnLoan: 2,
+      ),
+      Item(
+        id: 3,
+        nombre: 'Espectro',
+        description: 'Espectrofotómetro para análisis de absorbancia.',
+        link: 'http://example.com/espectrofotometro',
+        serialNumber: 'SN1122334455',
+        quantity: 10,
+        marca: Brand(id: 3, marca: "SpectroTech"),
+        categories: [],
+        quantityOnLoan: 0,
+      ),
+      Item(
+        id: 4,
+        nombre: 'Balanza Analitica',
+        description: 'Balanza analítica de alta precisión.',
+        link: 'http://example.com/balanza',
+        serialNumber: 'SN2233445566',
+        quantity: 15,
+        marca: Brand(id: 4, marca: "WeighPro"),
+        categories: [],
+        quantityOnLoan: 1,
+      ),
+      Item(
+        id: 5,
+        nombre: 'Protoboard',
+        description:
+            'Protoboard para la conexion de clabes o diferentes elementos.',
+        link: 'http://example.com/balanza',
+        serialNumber: 'SN2233445566',
+        quantity: 15,
+        marca: Brand(id: 4, marca: "WeighPro"),
+        categories: [],
+        quantityOnLoan: 1,
+      ),
+      Item(
+        id: 5,
+        nombre: 'Cables',
+        description: 'Cables con diferentes usos.',
+        link: 'http://example.com/balanza',
+        serialNumber: 'SN2233445566',
+        quantity: 15,
+        marca: Brand(id: 4, marca: "WeighPro"),
+        categories: [],
+        quantityOnLoan: 1,
+      ),
+      Item(
+        id: 6,
+        nombre: 'Caja centrifuga',
+        description: 'Para ver el comportamiento centrifugo.',
+        link: 'http://example.com/balanza',
+        serialNumber: 'SN2233445566',
+        quantity: 15,
+        marca: Brand(id: 4, marca: "WeighPro"),
+        categories: [],
+        quantityOnLoan: 1,
+      ),
+      Item(
+        id: 7,
+        nombre: 'Motor Paso a Paso',
+        description: 'realizacion de circuitos.',
+        link: 'http://example.com/balanza',
+        serialNumber: 'SN2233445566',
+        quantity: 15,
+        marca: Brand(id: 4, marca: "WeighPro"),
+        categories: [],
+        quantityOnLoan: 1,
+      ),
     ];
+
+    List<CardVista> cItems = items
+        .map((item) => CardVista(
+              item: item,
+              imagePath:
+                  'assets/images/${item.nombre.toLowerCase().replaceAll(' ', '_')}.jpg',
+            ))
+        .toList();
 
     List<Widget> body = [
       HorizontalCardSection(items: hcItems),
