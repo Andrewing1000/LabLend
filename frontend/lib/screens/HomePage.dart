@@ -107,8 +107,8 @@ class HomeSections extends ChangeNotifier{
 
     Item item = Item(
       id: 1,
-      nombre: 'El cojudo',
-      description: 'This is an example item for testing purposes',
+      nombre: 'Lavadora',
+      description: 'Tafdsafsd dsfasd',
       link: 'http://example.com/example-item',
       serialNumber: 'SN1234567890',
       quantity: 50,

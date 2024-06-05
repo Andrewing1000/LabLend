@@ -5,6 +5,8 @@ import "package:flutter/material.dart";
 import "package:frontend/screens/PasswordReset.dart";
 import "package:frontend/screens/create_item_screen.dart";
 import "package:frontend/screens/create_user.dart";
+import "package:frontend/services/Cart.dart";
+import "package:frontend/widgets/CheckoutCartList.dart";
 import "package:frontend/widgets/item_info.dart";
 import 'package:provider/provider.dart';
 
@@ -51,38 +53,55 @@ class MainFrameState extends State<MainFrame> {
   bool onLogin = false;
   bool onPasswordReset = false;
 
-  static final SelectedItemContext selectedItem = SelectedItemContext();
-  HomePage homePage;
-  SearchItemPage searchItemPage;
-  SearchUserPage searchUserPage;
-  SearchLoanPage searchLoanPage;
-  CreateItemScreen createItemPage;
-  CreateUserScreen createUserPage;
+  late HomePage homePage;
+  late SearchItemPage searchItemPage;
+  late SearchUserPage searchUserPage;
+  late SearchLoanPage searchLoanPage;
+  late CreateItemScreen createItemPage;
+  late CreateUserScreen createUserPage;
+  late ItemInfoWidget sidePanel;
 
-  Widget sidePanel = Container(); /// Implementar
   late PageManager pageManager;
   late PageContainer pageContainer;
   late VerticalNavbar navBar;
+  late CheckoutCartList cartList;
 
+  SelectedItemContext selectedItem = SelectedItemContext();
+  CheckoutCart cart = CheckoutCart();
 
-  MainFrameState():
-        homePage = HomePage(selectedItem: selectedItem),
-        searchItemPage = SearchItemPage(selectedItem: selectedItem),
-        searchUserPage = SearchUserPage(),
-        searchLoanPage = SearchLoanPage(),
-        createItemPage = CreateItemScreen(),
-        createUserPage = CreateUserScreen()
-
+  MainFrameState()
   {
+    homePage = HomePage(selectedItem: selectedItem);
+    searchItemPage = SearchItemPage(selectedItem: selectedItem);
+    searchUserPage = SearchUserPage();
+    searchLoanPage = SearchLoanPage();
+    createItemPage = CreateItemScreen();
+    createUserPage = CreateUserScreen();
     pageManager = PageManager(defaultPage: homePage);
+    cartList = CheckoutCartList(cart: cart);
+
     pageContainer = PageContainer(
-        manager: pageManager,
-        onLogin: (){
-          setState(() {onLogin = true;});
-        },
-        onLogout: () async {
-          await SessionManager().logOut();
-        },);
+      manager: pageManager,
+      onLogin: (){
+        setState(() {onLogin = true;});
+      },
+      onLogout: () async {
+        await SessionManager().logOut();
+        pageManager.clear();
+      },
+      onCartLookup: (){
+        showModalBottomSheet(
+            context: context,
+            builder: (context){
+              return cartList;
+            });
+      },
+    );
+    sidePanel = ItemInfoWidget(
+        itemContext: selectedItem,
+        pageManager: pageManager,
+        cart: cart);
+
     final List<NavItem> items = [
       NavItem(
           iconNormal: Icons.home_outlined,
@@ -133,7 +152,7 @@ class MainFrameState extends State<MainFrame> {
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);
-    print("Se creo la wea otra vez");
+    //print("Se creo la wea otra vez");
   }
 
   void performResize(double dx) {
@@ -283,22 +302,14 @@ class MainFrameState extends State<MainFrame> {
                         ResizeRange(start: 400.0, end: 600.0)
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
-                      child: MultiProvider(
-                        providers: [
-                          ChangeNotifierProvider.value(value: selectedItem),
-                        ],
-                        child: Consumer<SelectedItemContext>(
-                          builder: (context, selectedItem, child) {
-                            return Container(
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(21, 21, 21, 1.0),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: selectedItem.isSet()? ItemInfoWidget(item: selectedItem.item!,) : Container(),
-                            );
-                          }
-                        ),
-                      )
+                      child: Container(
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: const Color.fromRGBO(21, 21, 21, 1.0),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: sidePanel,
+                      ),
                   ),
                 ],
               ),

@@ -26,7 +26,7 @@ class UserFilter(filters.FilterSet):
         return queryset.annotate(
             similarity=TrigramSimilarity('email', value)
         ).filter(
-            similarity__gt=0.1  # Adjust threshold as needed
+            similarity__gt=0.0  # Adjust threshold as needed
         ).order_by('-similarity')
 
     def filter_queryset(self, queryset):

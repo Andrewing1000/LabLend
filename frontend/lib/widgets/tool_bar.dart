@@ -16,11 +16,13 @@ class ToolBar extends StatefulWidget{
   PageManager manager;
   Function onLogin;
   Function onLogout;
+  Function onCartLookup;
   ToolBar({
     super.key,
     required this.manager,
     required this.onLogin,
     required this.onLogout,
+    required this.onCartLookup,
   });
 
   @override
@@ -113,6 +115,17 @@ class ToolBarState extends State<ToolBar>{
 
                           Container(width: 10,),
                           const Spacer(),
+
+                          if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
+                            normalIcon: Icons.shopping_cart_outlined,
+                            selectedIcon: Icons.shopping_cart,
+                            size: 25,
+                            isSelected: true,
+                            onPressed: (){
+                              widget.onCartLookup();
+                            },
+                          ),
+                          Container(width: 10,),
 
                           if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
                             normalIcon: Icons.notifications_none_outlined,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/screens/create_item_screen.dart';
+import 'package:frontend/screens/edit_item_screen.dart';
 import 'package:frontend/screens/user_edit_screen.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/User.dart';
@@ -76,6 +77,9 @@ class SearchItemPage extends BrowsablePage {
                                   item: items[index],
                                   onTap: (){
                                     selectedItem.setItem(items[index]);
+                                  },
+                                  onEdit: (){
+                                    manager?.setPage(EditItemScreen(item: items[index]));
                                   },
                                 );
                               },

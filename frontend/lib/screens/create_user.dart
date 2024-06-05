@@ -27,8 +27,8 @@ class CreateUserScreen extends PageBase{
 class _CreateUserScreenState extends State<CreateUserScreen> {
 
 
-  void _createUser(String email, String name, String password,
-      Role role, bool isActive) {
+  Future<void> _createUser(String email, String name, String password,
+      Role role, bool isActive) async {
     if (email.isEmpty || name.isEmpty || password.isEmpty) {
       SessionManager().errorNotification(error: "Tolos los campos son obligatorios");
       return;

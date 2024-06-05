@@ -154,7 +154,7 @@ class Inventory {
   }
 
 
-  Future<void> uploadImage(Item item, Uint8List imageBytes, String fileExtension) async {
+  Future<bool> uploadImage(Item item, Uint8List imageBytes, String fileExtension) async {
     String mimeType;
 
     switch (fileExtension.toLowerCase()) {
@@ -184,12 +184,15 @@ class Inventory {
 
       if (response.statusCode == 200) {
         manager.notification(notification: 'La imagen se ha subido exitosamente');
+        return true;
       } else {
         manager.errorNotification(error: "No se pudo agregar la imagen");
+        return false;
       }
     } on DioException catch (e) {
       print(e.stackTrace);
       manager.errorNotification(error: "No se pudo agregar la imagen", details: e.response?.data);
+      return false;
     }
   }
 

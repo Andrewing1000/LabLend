@@ -10,13 +10,14 @@ class PageContainer extends StatefulWidget{
   PageManager manager;
   Function onLogin;
   Function onLogout;
-
+  Function onCartLookup;
 
   PageContainer({
     super.key,
     required this.manager,
     required this.onLogin,
     required this.onLogout,
+    required this.onCartLookup,
   });
 
 
@@ -36,20 +37,17 @@ class PageContainerState extends State<PageContainer>{
       ],
       child: Consumer<PageManager>(
         builder: (context, manager, snapshot) {
-          return Stack(
+          return Column(
             children: [
               ToolBar(
                   manager: manager,
                   onLogin: widget.onLogin,
-                  onLogout: widget.onLogout),
-              Column(
-                children: [
-                  Container(
-                    height: ToolBar.height,
-                  ),
-                  Expanded(child: manager.currentPage),
-                ],
+                  onLogout: widget.onLogout,
+                  onCartLookup: widget.onCartLookup,
               ),
+
+                  Expanded(child: manager.currentPage),
+
             ],
           );
         }

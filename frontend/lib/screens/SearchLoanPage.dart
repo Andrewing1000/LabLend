@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
+import 'package:frontend/widgets/LoanCard.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/Loan.dart';
 import '../models/User.dart';
@@ -69,35 +70,101 @@ class SearchLoanPage extends BrowsablePage {
             style: TextStyle(color: Colors.white),));
         } else {
           List<Loan> items = snapshot.data!;
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverPadding(
-                padding: const EdgeInsets.all(10.0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200.0, // Maximum width of each item
-                    mainAxisSpacing: 10.0, // Spacing between rows
-                    crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio: .5, // Optional: You can adjust this if needed
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return CustomCard(
-                        item : Item(
-                          id: 1,
-                          nombre: 'El cojudo',
-                          description: 'This is an example item for testing purposes',
-                          link: 'http://example.com/example-item',
-                          serialNumber: 'SN1234567890',
-                          quantity: 50,
-                          marca: Brand(id: 1, marca: "tabaco"),
-                          categories: [],
-                          quantityOnLoan: 1,
+          return Column(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                    color: Colors.black,
+                    border: Border.symmetric(
+                      horizontal: BorderSide(
+                        color: Colors.white,
+                        width: 1,
+                      ),
+                    )
+                ),
+                padding: const EdgeInsets.fromLTRB(40.0, 20, 40, 20),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      flex: 3,
+                      fit: FlexFit.tight,
+                      child: Text(
+                        'Usuario',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w100,
+                          color: Colors.white,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    },
-                    childCount: items.length, // Number of items in the grid
-                  ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Flexible(
+                      flex: 3,
+                      fit: FlexFit.tight,
+                      child: Text(
+                        'Fecha Préstamo',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w100,
+                          color: Colors.white,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Flexible(
+                      flex: 3,
+                      fit: FlexFit.tight,
+                      child: Text(
+                        'Fecha Devolución',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w100,
+                          color: Colors.white,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Flexible(
+                      flex: 1,
+                      fit: FlexFit.tight,
+                      child: Text(
+                        'Estado',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w100,
+                          color: Colors.white,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverPadding(
+                      padding: const EdgeInsets.all(10.0),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index){
+                            return LoanCard(loan: items[index], onTap: (){
+                
+                            });
+                          },
+                          childCount: items.length,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

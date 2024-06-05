@@ -1,105 +1,117 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:frontend/models/item.dart';
-import 'package:frontend/models/Session.dart';
+import 'package:frontend/screens/PageBase.dart';
+import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/item_details_form.dart';
 import 'package:frontend/widgets/notification.dart';
-import 'package:frontend/widgets/banner.dart';
+import 'package:frontend/models/User.dart';
+//import 'package:frontend/models/User.dart';
+import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/string_field.dart';
 
-class ItemDetailsScreen extends StatefulWidget {
+import '../models/item.dart';
+import '../widgets/user_form.dart';
+
+class EditItemScreen extends PageBase{
+
+  Item item;
+  EditItemScreen({super.key, required this.item}):
+        super(disposable: true);
+
   @override
-  _ItemDetailsScreenState createState() => _ItemDetailsScreenState();
+  State<PageBase> createState() => EditItemScreenState();
+
+  @override
+  void onDispose() {
+    return;
+  }
+
+  @override
+  void onSet() {
+    return;
+  }
 }
 
-class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
-  Item? _item;
-  bool _showNotification = false;
-  String _notificationMessage = '';
-  final TextEditingController _idController = TextEditingController();
+class EditItemScreenState extends State<EditItemScreen> {
 
-  Future<void> _fetchItem() async {
-    final itemId = int.tryParse(_idController.text);
-    if (itemId == null) {
-      setState(() {
-        _notificationMessage = 'ID inválido';
-        _showNotification = true;
-      });
+
+  Future<void> _updateItem(Item newItem, Uint8List? imageBytes) async {
+    bool noEdits = true;
+    Item item = widget.item;
+    // Compare each field and update the newItem if necessary
+    if (newItem.nombre != item.nombre) {
+      noEdits = false;
+    }
+    if (newItem.description != item.description) {
+      noEdits = false;
+    }
+    if (newItem.link != item.link) {
+      noEdits = false;
+    }
+    if (newItem.serialNumber != item.serialNumber) {
+      noEdits = false;
+    }
+    if (newItem.quantity != item.quantity) {
+      noEdits = false;
+    }
+
+    // Compare brand by ID
+    if (newItem.marca.id != item.marca.id) {
+      noEdits = false;
+    }
+
+    // Compare categories by IDs
+    if (newItem.categories.length != item.categories.length ||
+        !newItem.categories.every((cat) => item.categories.any((origCat) => origCat.id == cat.id))) {
+      noEdits = false;
+    }
+
+    if(imageBytes != null){
+      noEdits = false;
+    }
+
+    if (noEdits) {
+      SessionManager().errorNotification(error: "No se registraron cambios");
       return;
     }
 
-    try {
-      Item? fetchedItem = await SessionManager.inventory.getItemById(itemId);
-      setState(() {
-        _item = fetchedItem;
-        if (_item == null) {
-          _notificationMessage = 'Ítem no encontrado';
-          _showNotification = true;
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _notificationMessage = 'Error al buscar el ítem';
-        _showNotification = true;
-      });
+    var res = await item.update(newItem);
+    var resIm = true;
+    if(imageBytes != null){
+      resIm = await SessionManager.inventory.uploadImage(item, imageBytes, 'png');
     }
 
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _showNotification = false;
-      });
-    });
+    if (res != null && resIm) {
+      widget.manager?.removePage();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text('Detalles del Ítem'),
-        backgroundColor: Colors.black,
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                if (_item == null)
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        StringField(
-                          controller: _idController,
-                          hintText: 'Ingrese el ID del Ítem',
-                          width: MediaQuery.of(context).size.width * 0.8,
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _fetchItem,
-                          child: Text('Buscar Ítem'),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: ItemDetailsForm(item: _item!),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Column(
+            children: [
+              const BannerWidget(
+                  imageUrl: null,
+                  title: "Edición de items",
+                  subtitle: "",
+                  description: ""),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: UpdateItemForm(
+                  item: widget.item,
+                  onFormSubmit: (item, imageBytes){
+                    _updateItem(item, imageBytes);
+                  },
+                )
+              ),
+            ],
           ),
-          if (_showNotification)
-            NotificationWidget(
-              message: _notificationMessage,
-              // alignment: Alignment.bottomCenter,
-            ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

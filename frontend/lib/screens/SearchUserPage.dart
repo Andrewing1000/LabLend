@@ -3,30 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/screens/create_user.dart';
+import 'package:frontend/screens/user_edit_screen.dart';
+import 'package:frontend/widgets/UserCard.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/User.dart';
 import '../models/item.dart';
 import '../services/PageManager.dart';
 
 class SearchUserPage extends BrowsablePage {
-
   ActiveFilter activeFilter = ActiveFilter();
   RoleFilter roleFilter = RoleFilter();
 
-  SearchUserPage({super.key,}){
+  SearchUserPage({super.key}) {
     filterSet.add(activeFilter);
     filterSet.add(roleFilter);
   }
 
   Future<List<User>> _fetchItems(String? pattern) async {
-
     bool? isActive;
-    if(activeFilter.getSelected().isNotEmpty){
+    if (activeFilter.getSelected().isNotEmpty) {
       isActive = activeFilter.getSelected().first == "Activo";
     }
 
     bool? isAdmin;
-    if(roleFilter.getSelected().isNotEmpty){
+    if (roleFilter.getSelected().isNotEmpty) {
       isAdmin = roleFilter.getSelected().first == Role.adminRole;
     }
 
@@ -48,69 +48,133 @@ class SearchUserPage extends BrowsablePage {
       future: _fetchItems(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: Colors.white,));
+          return Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          );
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No se encontraron items',
-            style: TextStyle(color: Colors.white),));
+          return Center(
+            child: Text(
+              'No se encontraron items',
+              style: TextStyle(color: Colors.white),
+            ),
+          );
         } else {
           List<User> items = snapshot.data!;
           return Stack(
             children: [
-              CustomScrollView(
-                slivers: <Widget>[
-                  SliverPadding(
-                    padding: const EdgeInsets.all(10.0),
-                    sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 200.0, // Maximum width of each item
-                        mainAxisSpacing: 10.0, // Spacing between rows
-                        crossAxisSpacing: 10.0, // Spacing between columns
-                        childAspectRatio: .5, // Optional: You can adjust this if needed
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                          return CustomCard(
-                            item: Item(
-                            id: 1,
-                            nombre: 'El cojudo',
-                            description: 'This is an example item for testing purposes',
-                            link: 'http://example.com/example-item',
-                            serialNumber: 'SN1234567890',
-                            quantity: 50,
-                            marca: Brand(id: 1, marca: "tabaco"),
-                            categories: [],
-                            quantityOnLoan: 1,
+              Column(
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      border: Border.symmetric(
+                        horizontal: BorderSide(
+                          color: Colors.white,
+                          width: 1,
+                        ),
+                      )
+                    ),
+                    padding: const EdgeInsets.fromLTRB(40.0, 20, 40, 20),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          flex: 3,
+                          fit: FlexFit.tight,
+                          child: Text(
+                            'Usuario',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white,
                             ),
-                          );
-                        },
-                        childCount: items.length, // Number of items in the grid
-                      ),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Flexible(
+                          flex: 3,
+                          fit: FlexFit.tight,
+                          child: Text(
+                            'Rol',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Flexible(
+                          flex: 2,
+                          fit: FlexFit.tight,
+                          child: Text(
+                            'Estado',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: <Widget>[
+                        SliverPadding(
+                          padding: const EdgeInsets.all(10.0),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                                  (BuildContext context, int index) {
+                                return UserCard(
+                                  user: items[index],
+                                  onTap: () {
+                                    manager?.setPage(EditUserScreen(
+                                      user: items[index],
+                                    ));
+                                  },
+                                );
+                              },
+                              childCount: items.length,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-
-              if(SessionManager().session.user.role == Role.adminRole)
-              Align(
-                alignment: Alignment(1, 1),
-                child: Container(
-                  padding: EdgeInsets.all(30),
-                  child: FloatingActionButton(
+              if (SessionManager().session.user.role == Role.adminRole)
+                Align(
+                  alignment: Alignment(1, 1),
+                  child: Container(
+                    padding: EdgeInsets.all(50),
+                    child: FloatingActionButton(
                       backgroundColor: Colors.orange,
-                      child: Icon(Icons.add, color: Colors.black,),
                       shape: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(200),
                       ),
-                      //label: Text("Agregar"),
-                      onPressed: (){
-                        if(manager != null){
+                      onPressed: () {
+                        if (manager != null) {
                           manager?.setPage(CreateUserScreen());
                         }
-                      }),
+                      },
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
             ],
           );
         }
@@ -143,8 +207,8 @@ class ActiveFilter extends SingleFilter<String> {
   }
 }
 
-class RoleFilter extends Filter<Role> {
-  RoleFilter() : super(attributeName: "Rol", multiple: true);
+class RoleFilter extends SingleFilter<Role> {
+  RoleFilter() : super(attributeName: "Rol");
 
   @override
   String getRepresentation(Role item) {

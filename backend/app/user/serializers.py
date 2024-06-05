@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['email', 'password', 'name', 'is_active', 'role_field']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
-            'email': {'read_only': True},
+            'email': {'required':False},
             'role_field': {'read_only': True},
             'is_active': {'read_only': True},
         }
@@ -66,10 +66,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ManageUserSerializer(UserSerializer):
 
+    role_field = serializers.SerializerMethodField()
+
     class Meta:
         model = get_user_model()
         fields = ['email', 'password', 'name', 'is_active', 'role_field']
-        extra_kwargs = {'password':{'write_only': True, 'min_length': 12},}
+        extra_kwargs = {'password':{'write_only': True, 'min_length': 12},
+                        'role_field': {'read_only': False},}
+
+    def to_internal_value(self, data):
+        external_field_value = data.pop('role_field', None)
+        internal_value = super().to_internal_value(data)
+        internal_value['role_field'] = external_field_value
+        return internal_value
 
 
     def create(self, validated_data):
@@ -85,6 +94,8 @@ class ManageUserSerializer(UserSerializer):
             else:
                 raise NotValidRole()
 
+        user.save()
+
         return user
 
 
@@ -92,6 +103,16 @@ class ManageUserSerializer(UserSerializer):
         """Update and return user."""
         role_name = validated_data.pop('role_field', None)
         user = super().update(instance, validated_data)
+
+        if role_name:
+            if(role_name == LAB_ASSIST):
+                user.role = getAssistantRole()
+            elif(role_name == LAB_ADMIN):
+                user.role = getAdminRole()
+            else:
+                raise NotValidRole()
+
+        user.save()
 
         return user
 
@@ -153,6 +174,7 @@ class  SessionSerializer(serializers.ModelSerializer):
         model = Session
         fields = ['id', 'login_time', 'logout_time']
         read_only_fields = ['id', 'login_time', 'logout_time']
+
 
 
 class HealthCheckSerializer(serializers.Serializer):

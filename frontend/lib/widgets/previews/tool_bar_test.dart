@@ -17,7 +17,16 @@ void main(){
               end: Alignment(0, 0.2),
             ),
           ),
-        child: ToolBar(onLogin: (){}, onLogout: (){}, manager: PageManager(defaultPage: HomePage(selectedItem: SelectedItemContext(),)),),
+        child: ToolBar(
+            onLogin: (){},
+            onLogout: (){},
+            onCartLookup: (){},
+            manager: PageManager(
+                defaultPage: HomePage(
+                  selectedItem: SelectedItemContext(),
+              )
+            ),
+          ),
         ),
       ),
     ),

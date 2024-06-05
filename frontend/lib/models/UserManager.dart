@@ -108,11 +108,13 @@ class UserManager {
         var response = await requestHandler.postRequest('/user/create/admin/',
             body: userData);
         manager.notification(notification: 'Administrador creado');
+        user.updateData(newUser: User.fromJson(response.data));
         return User.fromJson(response.data);
       } else if (user.role == Role.assistantRole) {
         var response =
             await requestHandler.postRequest('/user/create/', body: userData);
         manager.notification(notification: 'Asistente creado');
+        user.updateData(newUser: User.fromJson(response.data));
         return User.fromJson(response.data);
       } else {
         manager.errorNotification(error: 'Ingrese un rol válido');
@@ -137,9 +139,14 @@ class UserManager {
       return null;
     }
 
+    var data = newUser.toJson();
+    if(password!=null){
+      data['password'] = password;
+    }
+
     try {
       await requestHandler.patchRequest('/user/manage/',
-          body: newUser.toJson(), query: {'email': user.email});
+          body: data, query: {'email': user.email});
       user.updateData(newUser: newUser);
       manager.notification(notification: 'Información de usuario actualizada');
       return User.fromJson(newUser.toJson());

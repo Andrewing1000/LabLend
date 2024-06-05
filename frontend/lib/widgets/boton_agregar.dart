@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class BotonAgregar extends StatelessWidget {
   final VoidCallback onPressed;
-
+  final IconData icon;
   const BotonAgregar({
     Key? key,
+    required this.icon,
     required this.onPressed,
   }) : super(key: key);
 
@@ -27,7 +28,7 @@ class BotonAgregar extends StatelessWidget {
           ),
           child: Center(
             child: Icon(
-              Icons.add,
+              icon,
               color: Colors.grey,
               size: 24,
             ),
