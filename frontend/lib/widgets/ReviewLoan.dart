@@ -58,7 +58,7 @@ class Reviewloan extends StatelessWidget {
                   fit: FlexFit.tight,
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     color: Colors.white.withAlpha(30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -84,7 +84,7 @@ class Reviewloan extends StatelessWidget {
                           const Center(
                             child: Row(
                               children: [
-                                const Text("Devuelto",
+                                Text("Devuelto",
                                   style: TextStyle(
                                     color: Colors.white,
                                   ),

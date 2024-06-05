@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'map.dart';
 
 class FooterWidget extends StatelessWidget {
+  const FooterWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 600,
       child: Column(
@@ -15,7 +16,7 @@ class FooterWidget extends StatelessWidget {
             height: 400,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/background.png'),
+                image: const AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.3),
@@ -23,7 +24,7 @@ class FooterWidget extends StatelessWidget {
                 ),
               ),
             ),
-            child: Stack(
+            child: const Stack(
               children: [
                 Positioned(
                   left: 20,
@@ -51,7 +52,7 @@ class FooterWidget extends StatelessWidget {
             child: Container(
               color: Colors.black,
               padding: const EdgeInsets.all(20.0),
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
@@ -75,7 +76,7 @@ class FooterWidget extends StatelessWidget {
                     ],
                   ),
                   SizedBox(width: 20),
-                  MapWidget(),
+                  //MapWidget(),
                   SizedBox(width: 20),
                   Expanded(
                     child: FadeInText(
@@ -102,7 +103,7 @@ class SocialMediaIcon extends StatefulWidget {
   final String label;
   final String url;
 
-  const SocialMediaIcon({
+  const SocialMediaIcon({super.key, 
     required this.icon,
     required this.label,
     required this.url,
@@ -123,7 +124,7 @@ class _SocialMediaIconState extends State<SocialMediaIcon>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
@@ -173,7 +174,7 @@ class _SocialMediaIconState extends State<SocialMediaIcon>
                 child:
                     Icon(widget.icon, color: _colorAnimation.value, size: 30),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
                 widget.label,
                 style: TextStyle(
@@ -203,7 +204,7 @@ class FadeInText extends StatefulWidget {
   final String text;
   final TextStyle style;
 
-  const FadeInText({
+  const FadeInText({super.key, 
     required this.text,
     required this.style,
   });
@@ -221,7 +222,7 @@ class _FadeInTextState extends State<FadeInText>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
 

@@ -22,14 +22,14 @@ class HorizontalCardSection extends StatelessWidget {
             maxHeight = 4*(HorizontalCard.minHeight + spacing);
           }
 
-          return Container(
+          return SizedBox(
 
             width: double.infinity,
             height: height,
             child: GridView.builder(
               shrinkWrap: true,
 
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
                 mainAxisSpacing: spacing,

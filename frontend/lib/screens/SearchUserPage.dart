@@ -1,14 +1,10 @@
-import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/screens/create_user.dart';
 import 'package:frontend/screens/user_edit_screen.dart';
 import 'package:frontend/widgets/UserCard.dart';
-import 'package:frontend/widgets/card.dart';
 import '../models/User.dart';
-import '../models/item.dart';
-import '../services/PageManager.dart';
 
 class SearchUserPage extends BrowsablePage {
   ActiveFilter activeFilter = ActiveFilter();
@@ -48,7 +44,7 @@ class SearchUserPage extends BrowsablePage {
       future: _fetchItems(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(
               color: Colors.white,
             ),
@@ -58,7 +54,7 @@ class SearchUserPage extends BrowsablePage {
             child: Text('Error: ${snapshot.error}'),
           );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
+          return const Center(
             child: Text(
               'No se encontraron items',
               style: TextStyle(color: Colors.white),
@@ -89,7 +85,7 @@ class SearchUserPage extends BrowsablePage {
                           fit: FlexFit.tight,
                           child: Text(
                             'Usuario',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w100,
                               color: Colors.white,
@@ -102,7 +98,7 @@ class SearchUserPage extends BrowsablePage {
                           fit: FlexFit.tight,
                           child: Text(
                             'Rol',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w100,
                               color: Colors.white,
@@ -116,7 +112,7 @@ class SearchUserPage extends BrowsablePage {
                           fit: FlexFit.tight,
                           child: Text(
                             'Estado',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w100,
                               color: Colors.white,
@@ -155,9 +151,9 @@ class SearchUserPage extends BrowsablePage {
               ),
               if (SessionManager().session.user.role == Role.adminRole)
                 Align(
-                  alignment: Alignment(1, 1),
+                  alignment: const Alignment(1, 1),
                   child: Container(
-                    padding: EdgeInsets.all(50),
+                    padding: const EdgeInsets.all(50),
                     child: FloatingActionButton(
                       backgroundColor: Colors.orange,
                       shape: OutlineInputBorder(

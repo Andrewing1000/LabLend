@@ -7,11 +7,11 @@ class PasswordCreationField extends StatefulWidget {
   final double width; // Ancho del campo de texto
 
   const PasswordCreationField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.hintText,
     required this.width,
-  }) : super(key: key);
+  });
 
   // Método para verificar si la contraseña es válida
   bool isValid(String password) {
@@ -124,17 +124,17 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: widget.width, // Ancho del campo de texto
           child: TextField(
             controller: widget.controller,
             obscureText: _isObscured, // Controla la visibilidad del texto
-            style: TextStyle(color: Colors.white), // Estilo del texto
+            style: const TextStyle(color: Colors.white), // Estilo del texto
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.grey[900], // Color de fondo del campo de texto
               hintText: widget.hintText,
-              hintStyle: TextStyle(
+              hintStyle: const TextStyle(
                   color: Colors.white54), // Estilo del texto de sugerencia
               suffixIcon: IconButton(
                 icon: Icon(
@@ -152,8 +152,8 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
             ),
           ),
         ),
-        SizedBox(height: 10),
-        Container(
+        const SizedBox(height: 10),
+        SizedBox(
           width: widget.width, // Ancho de la barra de progreso
           child: LinearProgressIndicator(
             value: _strength, // Valor de la fuerza de la contraseña
@@ -165,12 +165,12 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
                     : Colors.green),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           "Fuerza: ${(_strength * 100).toInt()}%",
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           _isValid ? "Contraseña valida" : "Contraseña Invalida",
           style: TextStyle(

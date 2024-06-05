@@ -11,7 +11,7 @@ class PrestamoItemCard extends StatefulWidget {
   final CheckoutCart? cart;
   final bool editable;
 
-  PrestamoItemCard({
+  const PrestamoItemCard({
     super.key,
     required this.prestamoItem,
     this.cart,
@@ -122,7 +122,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                 ),
                               ),
                             ),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +130,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               children: [
                                 Text(
                                   item!.nombre,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -139,7 +139,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                 ),
                                 Text(
                                   item!.serialNumber ?? 'No serial number',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white54,
                                     fontSize: 12,
                                   ),
@@ -167,8 +167,8 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                   backgroundColor: isInCart
                                       ? Colors.orange
                                       : Colors.white,
-                                  shape: CircleBorder(),
-                                  padding: EdgeInsets.all(5),
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(5),
                                 ),
                                 child: Icon(
                                   size: 14,
@@ -179,7 +179,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               ),
                               Text(
                                 selectedQuantity.toString(),
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.white, fontSize: 14),
                               ),
                               ElevatedButton(
@@ -201,8 +201,8 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                   backgroundColor: isInCart
                                       ? Colors.orange
                                       : Colors.white,
-                                  shape: CircleBorder(),
-                                  padding: EdgeInsets.all(5),
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(5),
                                 ),
                                 child: Icon(Icons.add,
                                     size: 14,
@@ -218,10 +218,10 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 14),
                             ),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           if(widget.editable) IconButton(
                             onPressed: _removeItem,
-                            icon: Icon(Icons.delete, color: Colors.white),
+                            icon: const Icon(Icons.delete, color: Colors.white),
                           ),
                         ],
                       ),

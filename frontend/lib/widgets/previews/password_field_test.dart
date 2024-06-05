@@ -19,13 +19,13 @@ void main() {
                 hintText: "Contraseña",
                 width: 300, // Ancho del campo de texto
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Botón para imprimir la contraseña en consola (solo para pruebas)
               ElevatedButton(
                 onPressed: () {
                   print("Password: ${passwordController.text}");
                 },
-                child: Text("mostrar Constraseña"),
+                child: const Text("mostrar Constraseña"),
               ),
             ],
           ),

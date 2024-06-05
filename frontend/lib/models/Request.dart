@@ -11,7 +11,7 @@ import 'dart:html' as html;
 class RequestHandler {
   final Dio _dio;
   final CookieJar cookieJar = CookieJar();
-  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   String _csrfToken = ''; // Store CSRF token
 
   RequestHandler()

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/Cart.dart';
 import 'Session.dart';
-import 'User.dart';
-import 'item.dart';
 
 
 class Loan with ChangeNotifier {

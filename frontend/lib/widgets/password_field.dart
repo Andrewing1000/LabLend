@@ -6,11 +6,11 @@ class PasswordField extends StatefulWidget {
   final double width;
 
   const PasswordField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.hintText,
     required this.width,
-  }) : super(key: key);
+  });
 
   @override
   _PasswordFieldState createState() => _PasswordFieldState();
@@ -52,17 +52,17 @@ class _PasswordFieldState extends State<PasswordField> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width,
       child: TextField(
         controller: widget.controller,
         obscureText: _isObscured, // Controla la visibilidad del texto
-        style: TextStyle(color: Colors.white), // Estilo del texto
+        style: const TextStyle(color: Colors.white), // Estilo del texto
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.grey[900], // Color de fondo del campo de texto
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: Colors.white54), // Estilo del texto de sugerencia
+          hintStyle: const TextStyle(color: Colors.white54), // Estilo del texto de sugerencia
           suffixIcon: IconButton(
             icon: Icon(
               _isObscured ? Icons.visibility_off : Icons.visibility,

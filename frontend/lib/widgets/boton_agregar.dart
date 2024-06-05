@@ -4,10 +4,10 @@ class BotonAgregar extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;
   const BotonAgregar({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

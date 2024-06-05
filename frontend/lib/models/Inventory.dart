@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'item.dart';
 import 'Session.dart';
@@ -15,7 +14,7 @@ class Inventory {
       return [];
     }
 
-    var response;
+    Response response;
     try {
       response = await requestHandler.getRequest('/item/list/brands/');
     } on DioException catch (e) {
@@ -37,7 +36,7 @@ class Inventory {
       return [];
     }
 
-    var response;
+    Response response;
     try {
       response = await requestHandler.getRequest('/item/list/categories/');
     } on DioException catch (e) {
@@ -70,7 +69,7 @@ class Inventory {
       if (namePattern != null) 'name': namePattern,
     };
 
-    var response;
+    Response response;
     try {
       response = await requestHandler.getRequest('/item/list/items/', query: queryParameters);
     } on DioException catch (e) {
@@ -91,7 +90,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -112,7 +111,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -133,7 +132,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -202,7 +201,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -224,7 +223,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -245,7 +244,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -266,7 +265,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return false;
     }
     if (!await sessionCheck()) {

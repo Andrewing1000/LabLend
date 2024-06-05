@@ -7,10 +7,10 @@ class EditItemForm extends StatefulWidget {
   final Function(Item) onFormSubmit;
 
   const EditItemForm({
-    Key? key,
+    super.key,
     required this.item,
     required this.onFormSubmit,
-  }) : super(key: key);
+  });
 
   @override
   _EditItemFormState createState() => _EditItemFormState();
@@ -51,37 +51,37 @@ class _EditItemFormState extends State<EditItemForm> {
           hintText: 'Nombre del Item',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: descriptionController,
           hintText: 'Descripción',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: linkController,
           hintText: 'Link',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: serialNumberController,
           hintText: 'Número de Serie',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: quantityController,
           hintText: 'Cantidad',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         DropdownButton<Brand>(
           value: selectedBrand,
-          hint: Text("Selecciona una Marca",
+          hint: const Text("Selecciona una Marca",
               style: TextStyle(color: Colors.white)),
           dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           items: [
             Brand(id: 1, marca: 'Example Brand A'),
             Brand(id: 2, marca: 'Example Brand B'),
@@ -99,12 +99,12 @@ class _EditItemFormState extends State<EditItemForm> {
             });
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         DropdownButton<Category>(
-          hint: Text("Selecciona Categorías",
+          hint: const Text("Selecciona Categorías",
               style: TextStyle(color: Colors.white)),
           dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           items: [
             Category(
                 id: 1,
@@ -129,7 +129,7 @@ class _EditItemFormState extends State<EditItemForm> {
             });
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Wrap(
           spacing: 10,
           children: selectedCategories.map((category) {
@@ -143,7 +143,7 @@ class _EditItemFormState extends State<EditItemForm> {
             );
           }).toList(),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
             Item newItem = Item(
@@ -159,7 +159,7 @@ class _EditItemFormState extends State<EditItemForm> {
             );
             widget.onFormSubmit(newItem);
           },
-          child: Text('Actualizar Item'),
+          child: const Text('Actualizar Item'),
         ),
       ],
     );

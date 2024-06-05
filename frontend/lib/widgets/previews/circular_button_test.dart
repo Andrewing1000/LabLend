@@ -79,7 +79,7 @@ void main(){
     MaterialApp(
       home: Container(
         color: Colors.orange,
-        child: Test(),
+        child: const Test(),
       ),
     )
   );

@@ -56,34 +56,34 @@ class _UserFormState extends State<UserForm> {
           required: !updateMode,
           enabled: !updateMode,
           controller: emailController,
-          hintText: updateMode ? widget.user!.email! : 'Correo Electrónico',
+          hintText: updateMode ? widget.user!.email : 'Correo Electrónico',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           required: !updateMode,
           enabled: !(updateMode && widget.user!.superAdmin),
           controller: nameController,
-          hintText: updateMode ? widget.user!.name! : 'Nombre',
+          hintText: updateMode ? widget.user!.name : 'Nombre',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         PasswordCreationField(
           controller: passwordController,
           hintText: 'Contraseña',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         DropdownButton<Role>(
           value: selectedRole,
           dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           items: roles.map((Role role) {
             return DropdownMenuItem<Role>(
               value: role,
               child: Text(
                 role.name,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             );
           }).toList(),
@@ -93,7 +93,7 @@ class _UserFormState extends State<UserForm> {
             });
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         if(!((updateMode && widget.user!.superAdmin) ||
             (updateMode && widget.user!.email == SessionManager().session.user.email)))
@@ -109,13 +109,13 @@ class _UserFormState extends State<UserForm> {
               checkColor: Colors.white,
               activeColor: Colors.green,
             ),
-            Text(
+            const Text(
               'Activo',
               style: TextStyle(color: Colors.white),
             ),
           ],
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         BotonAgregar(
           icon: updateMode ? Icons.update : Icons.add,
           onPressed: () {

@@ -17,7 +17,6 @@ import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
 import "../models/User.dart";
-import "../models/item.dart";
 import "../services/PageManager.dart";
 
 
@@ -304,7 +303,7 @@ class MainFrameState extends State<MainFrame> {
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
                       child: Container(
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: const Color.fromRGBO(21, 21, 21, 1.0),
                             borderRadius: BorderRadius.circular(10),

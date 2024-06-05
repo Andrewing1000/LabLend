@@ -10,7 +10,7 @@ class LoginScreen extends StatefulWidget {
   final Function(String email, String password) onSubmit;
   final Function() onPasswordReset;
 
-  LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset});
+  const LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset});
 
   @override
   State<StatefulWidget> createState() {
@@ -41,13 +41,13 @@ class LoginPageState extends State<LoginScreen>{
               hintText: "email",
               width: 300, // Ancho del campo de texto
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             PasswordField(
               controller: passwordController,
               hintText: "Contraseña",
               width: 300, // Ancho del campo de texto
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Validar los campos
@@ -61,7 +61,7 @@ class LoginPageState extends State<LoginScreen>{
                   SessionManager().errorNotification(error: "Todos los campos son requeridos");
                 }
               },
-              child: Text("Iniciar Sesión"),
+              child: const Text("Iniciar Sesión"),
             ),
             const SizedBox(height: 10),
             GestureDetector(

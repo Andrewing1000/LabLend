@@ -4,14 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/item_details_form.dart';
-import 'package:frontend/widgets/notification.dart';
-import 'package:frontend/models/User.dart';
 //import 'package:frontend/models/User.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/widgets/string_field.dart';
 
 import '../models/item.dart';
-import '../widgets/user_form.dart';
 
 class EditItemScreen extends PageBase{
 

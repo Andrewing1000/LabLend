@@ -67,7 +67,7 @@ void main(){
       child: Column(
 
         children: [
-          SizedBox(height: 40,),
+          const SizedBox(height: 40,),
 
           VerticalNavbar(items: items, iconSize: 40,),
         ],

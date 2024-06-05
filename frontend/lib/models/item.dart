@@ -112,7 +112,7 @@ class Item extends ChangeNotifier {
   }
 
   Item clone(){
-    return Item.fromJson(this.toJson());
+    return Item.fromJson(toJson());
   }
 
   void updateItem(Item newItem) {

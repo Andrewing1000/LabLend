@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/PageBase.dart';
@@ -104,7 +103,7 @@ class DropDownFilterState extends State<DropDownFilter> {
 class DropdownMenuItem extends StatelessWidget{
   Filter filter;
   dynamic item;
-  DropdownMenuItem({required this.filter, required this.item});
+  DropdownMenuItem({super.key, required this.filter, required this.item});
   @override
   Widget build(BuildContext context){
     return GestureDetector(

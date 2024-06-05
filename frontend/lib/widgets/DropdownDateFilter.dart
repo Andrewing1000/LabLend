@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/PageBase.dart';
@@ -69,7 +68,7 @@ class CustomDatePickerState extends State<DropdownDateFilter> {
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return Container(
+            return SizedBox(
               width: 180,
               height: 30,
               child: Row(

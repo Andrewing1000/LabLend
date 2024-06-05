@@ -5,11 +5,12 @@ import 'package:frontend/models/Session.dart';
 import 'package:frontend/models/item.dart';
 import 'package:frontend/widgets/create_item_form.dart';
 import 'package:frontend/widgets/banner.dart';
-import 'package:frontend/widgets/notification.dart';
 
 import 'PageBase.dart';
 
 class CreateItemScreen extends PageBase{
+  CreateItemScreen({super.key});
+
   @override
   _CreateItemScreenState createState() => _CreateItemScreenState();
 
@@ -25,8 +26,8 @@ class CreateItemScreen extends PageBase{
 }
 
 class _CreateItemScreenState extends State<CreateItemScreen> {
-  bool _showNotification = false;
-  String _notificationMessage = '';
+  final bool _showNotification = false;
+  final String _notificationMessage = '';
 
   Future<void> _createItem(Item item, Uint8List? imageBytes) async {
     await item.create();

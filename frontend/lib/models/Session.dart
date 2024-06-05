@@ -6,10 +6,8 @@ import 'package:frontend/models/UserManager.dart';
 import 'package:frontend/screens/main_frame.dart';
 import 'package:frontend/services/ContextMessageService.dart';
 import 'Inventory.dart';
-import 'item.dart';
 import 'LoanService.dart';
 import 'User.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Session {
@@ -95,7 +93,7 @@ class SessionManager with ChangeNotifier {
   ///
   /// Notify MainFrame
   void errorNotification({required String error, Map<String, dynamic>? details}){
-    String message = "$error";
+    String message = error;
     if(details != null){
       String detail = formatDjangoErrors(details);
       message = "$message\n$detail";
@@ -118,7 +116,7 @@ class SessionManager with ChangeNotifier {
   ///Online status manager
   Future<bool> connectionCheck() async{
 
-    var connectionRes;
+    bool connectionRes;
     try{
       connectionRes = await httpHandler.connectionCheck();
       if(!isOnline) errorNotification(error : 'Sin conexión');
@@ -154,11 +152,11 @@ class SessionManager with ChangeNotifier {
   ///
   ///Login management
   Future<Session> login(String email, String password) async {
-    if(!(await connectionCheck())){return AnonymousSession();};
+    if(!(await connectionCheck())){return AnonymousSession();}
 
     if(_session is! AnonymousSession){
       if(await sessionCheck()){
-        if(_session?.user.email == email){
+        if(_session.user.email == email){
           notification(notification: "Ya ha iniciado seción.");
           return _session;
         }

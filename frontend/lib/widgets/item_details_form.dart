@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/models/Session.dart';
@@ -8,7 +7,6 @@ import 'package:frontend/widgets/string_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
 
-import 'banner.dart';
 import 'dart:typed_data' as DartData;
 
 class UpdateItemForm extends StatefulWidget {

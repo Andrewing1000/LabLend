@@ -1,14 +1,11 @@
-import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/screens/create_item_screen.dart';
 import 'package:frontend/screens/edit_item_screen.dart';
-import 'package:frontend/screens/user_edit_screen.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/User.dart';
 import '../models/item.dart';
-import '../services/PageManager.dart';
 import '../services/SelectedItemContext.dart';
 
 import "package:provider/provider.dart";
@@ -91,12 +88,11 @@ class SearchItemPage extends BrowsablePage {
                     ),
                     if(sessionManager.session.user.role == Role.adminRole)
                       Align(
-                        alignment: Alignment(1, 1),
+                        alignment: const Alignment(1, 1),
                         child: Container(
-                          padding: EdgeInsets.all(30),
+                          padding: const EdgeInsets.all(30),
                           child: FloatingActionButton(
                             backgroundColor: Colors.orange,
-                            child: Icon(Icons.add, color: Colors.black,),
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
                             ),
@@ -105,7 +101,8 @@ class SearchItemPage extends BrowsablePage {
                                 if(manager != null){
                                   manager?.setPage(CreateItemScreen());
                                 }
-                            }),
+                            },
+                            child: const Icon(Icons.add, color: Colors.black,)),
                         ),
                       ),
                   ],

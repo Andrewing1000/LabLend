@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/User.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/DropDownFilter.dart';
-import 'package:frontend/widgets/edit_item_form.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/widgets/barra_busqueda.dart';
@@ -63,7 +62,7 @@ class ToolBarState extends State<ToolBar>{
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       width: double.infinity,
                       decoration: BoxDecoration(
                       borderRadius: const BorderRadius.only(
@@ -200,8 +199,8 @@ class ToolBarState extends State<ToolBar>{
                 ),
 
                 Align(
-                  alignment: Alignment(0.5, 0.5),
-                  child: Container(
+                  alignment: const Alignment(0.5, 0.5),
+                  child: SizedBox(
                     height: ToolBar.height/1.5,
                     child: Image.asset('/images/ucb_logo.png',
                       ),

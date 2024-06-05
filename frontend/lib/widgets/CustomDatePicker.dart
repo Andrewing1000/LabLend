@@ -6,7 +6,7 @@ class CustomDatePicker extends StatefulWidget {
   final DateTime lastDate;
   final ValueChanged<DateTime?> onDateChanged;
 
-  CustomDatePicker({
+  const CustomDatePicker({super.key, 
     this.initialDate,
     required this.firstDate,
     required this.lastDate,
@@ -31,7 +31,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -50,18 +50,18 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                 });
               },
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  child: Text('CANCEL'),
+                  child: const Text('CANCEL'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

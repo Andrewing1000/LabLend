@@ -43,7 +43,7 @@ Future<void> main() async {
   runApp(MaterialApp(
     home: Scaffold(
       appBar: AppBar(
-        title: Text('Item Info Test'),
+        title: const Text('Item Info Test'),
         backgroundColor: Colors.black,
       ),
       body: ItemInfoWidget(

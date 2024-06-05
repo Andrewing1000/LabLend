@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
@@ -69,7 +67,7 @@ class HomePageState extends State<HomePage> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                physics: CustomScrollPhysics(scrollSpeedFactor: 0),
+                physics: const CustomScrollPhysics(scrollSpeedFactor: 0),
                 controller: widget.scrollController,
                 child: Consumer<HomeSections>(
                   builder: (BuildContext context, HomeSections value,
@@ -94,14 +92,14 @@ class HomeSections extends ChangeNotifier {
 
   HomeSections({this.sections = const [], required this.selectedItem}) {
     List<HorizontalCard> hcItems = [
-      HorizontalCard(title: "Opción 1"),
-      HorizontalCard(title: "Opción 2"),
-      HorizontalCard(title: "Opción 3"),
-      HorizontalCard(title: "Opción 4"),
-      HorizontalCard(title: "Opción 1"),
-      HorizontalCard(title: "Opción 2"),
-      HorizontalCard(title: "Opción 3"),
-      HorizontalCard(title: "Opción 4"),
+      const HorizontalCard(title: "Opción 1"),
+      const HorizontalCard(title: "Opción 2"),
+      const HorizontalCard(title: "Opción 3"),
+      const HorizontalCard(title: "Opción 4"),
+      const HorizontalCard(title: "Opción 1"),
+      const HorizontalCard(title: "Opción 2"),
+      const HorizontalCard(title: "Opción 3"),
+      const HorizontalCard(title: "Opción 4"),
     ];
 
     List<Item> items = [

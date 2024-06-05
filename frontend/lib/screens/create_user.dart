@@ -4,12 +4,13 @@ import 'package:frontend/screens/PageBase.dart';
 // import 'package:frontend/models/Session.dart'; // Comentado para ver solo la vista
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/user_form.dart';
-import 'package:frontend/widgets/notification.dart';
 
 import '../models/User.dart';
 // import 'package:frontend/models/user.dart'; // Comentado para ver solo la vista
 
 class CreateUserScreen extends PageBase{
+  CreateUserScreen({super.key});
+
   @override
   _CreateUserScreenState createState() => _CreateUserScreenState();
 
@@ -51,7 +52,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                BannerWidget(
+                const BannerWidget(
                     imageUrl: null,
                     title: "Registro de usuarios",
                     subtitle: "",

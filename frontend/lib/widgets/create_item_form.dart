@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,13 +7,11 @@ import 'package:frontend/widgets/icon_button.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:file_picker/file_picker.dart';
 
-import 'banner.dart';
 import 'dart:typed_data' as DartData;
 class CreateItemForm extends StatefulWidget {
   final Function(Item, DartData.Uint8List?) onFormSubmit;
 
-  const CreateItemForm({Key? key, required this.onFormSubmit})
-      : super(key: key);
+  const CreateItemForm({super.key, required this.onFormSubmit});
 
   @override
   _CreateItemFormState createState() => _CreateItemFormState();
@@ -30,8 +26,8 @@ class _CreateItemFormState extends State<CreateItemForm> {
 
   Brand? selectedBrand;
   List<Category> selectedCategories = [];
-  DartData.Uint8List? imageBytes = null;
-  DartData.Uint8List? placeHolderBytes = null;
+  DartData.Uint8List? imageBytes;
+  DartData.Uint8List? placeHolderBytes;
 
   Future<void> _loadImageBytes() async {
     final DartData.ByteData data = await rootBundle.load('assets/images/place_holder.png');
@@ -58,37 +54,37 @@ class _CreateItemFormState extends State<CreateItemForm> {
               children: [
                 Column(
                   children: [
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: nameController,
                       hintText: 'Nombre del Item',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: descriptionController,
                       hintText: 'Descripción',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: linkController,
                       hintText: 'Link',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: serialNumberController,
                       hintText: 'Número de Serie',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: quantityController,
                       hintText: 'Cantidad',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     FutureBuilder<List<Brand>>(
                       future: SessionManager.inventory.getBrands(),
                       builder: (context, AsyncSnapshot<List<Brand>> snapshot) {
@@ -109,10 +105,10 @@ class _CreateItemFormState extends State<CreateItemForm> {
                           builder: (context, setState) {
                             return DropdownButton<Brand>(
                               value: selectedBrand,
-                              hint: Text("Selecciona una Marca",
+                              hint: const Text("Selecciona una Marca",
                                   style: TextStyle(color: Colors.white)),
                               dropdownColor: Colors.grey[900],
-                              style: TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white),
                               items: brands.map((Brand brand) {
                                 return DropdownMenuItem<Brand>(
                                   value: brand,
@@ -130,7 +126,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       }
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     FutureBuilder<List<Category>>(
                       future: SessionManager.inventory.getCategories(),
                       builder: (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
@@ -152,7 +148,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                   hint: const Text("Selecciona Categorías",
                                       style: TextStyle(color: Colors.white)),
                                   dropdownColor: Colors.grey[900],
-                                  style: TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Colors.white),
                                   items: categories.map((Category category) {
                                     return DropdownMenuItem<Category>(
                                       value: category,
@@ -168,7 +164,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                     });
                                   },
                                 ),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                                 Wrap(
                                   spacing: 10,
                                   children: selectedCategories.map((category) {
@@ -190,7 +186,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                     ),
 
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
                         Item newItem = Item(
@@ -206,7 +202,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                         );
                         widget.onFormSubmit(newItem, imageBytes);
                       },
-                      child: Text('Crear Item'),
+                      child: const Text('Crear Item'),
                     ),
                   ],
                 ),

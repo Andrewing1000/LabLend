@@ -6,7 +6,7 @@ class LoanCard extends StatefulWidget {
   final Loan loan;
   final VoidCallback onTap;
 
-  LoanCard({required this.loan, required this.onTap});
+  const LoanCard({super.key, required this.loan, required this.onTap});
 
   @override
   _LoanCardState createState() => _LoanCardState();
@@ -43,7 +43,7 @@ class _LoanCardState extends State<LoanCard> {
               return Card(
                 color: isHovered ? Colors.grey[850] : Colors.black,
                 elevation: 5,
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
@@ -63,7 +63,7 @@ class _LoanCardState extends State<LoanCard> {
                           maxLines: 1,
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Flexible(
                         flex: 3,
                         fit: FlexFit.tight,
@@ -77,7 +77,7 @@ class _LoanCardState extends State<LoanCard> {
                           maxLines: 1,
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Flexible(
                         flex: 3,
                         fit: FlexFit.tight,
@@ -91,7 +91,7 @@ class _LoanCardState extends State<LoanCard> {
                           maxLines: 1,
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Flexible(
                         flex: 1,
                         fit: FlexFit.tight,

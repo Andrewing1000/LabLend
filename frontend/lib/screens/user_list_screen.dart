@@ -4,6 +4,8 @@ import 'package:frontend/models/User.dart';
 import 'package:frontend/widgets/user_card.dart';
 
 class UserListPage extends StatefulWidget {
+  const UserListPage({super.key});
+
   @override
   _UserListPageState createState() => _UserListPageState();
 }
@@ -26,7 +28,7 @@ class _UserListPageState extends State<UserListPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text("Usuarios"),
+        title: const Text("Usuarios"),
         backgroundColor: Colors.black,
       ),
       body: FutureBuilder<List<User>>(
@@ -38,7 +40,7 @@ class _UserListPageState extends State<UserListPage> {
           } else if (snapshot.hasError) {
             return Center(
                 child: Text('Error: ${snapshot.error}',
-                    style: TextStyle(color: Colors.white)));
+                    style: const TextStyle(color: Colors.white)));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Text(

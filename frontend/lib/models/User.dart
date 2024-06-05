@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:provider/provider.dart';
 
 
 
