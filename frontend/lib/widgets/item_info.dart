@@ -3,6 +3,9 @@ import 'package:frontend/models/item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/models/Loan.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:frontend/screens/edit_item_screen.dart';
+
+import '../models/User.dart'; // Asegúrate de importar la pantalla de edición
 
 class ItemInfoWidget extends StatefulWidget {
   final Item item;
@@ -87,6 +90,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                 child: ElevatedButton(
                   onPressed: _createLoan,
                   style: ElevatedButton.styleFrom(
+                    //primary: Colors.green,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
                   child: Text('Confirmar Préstamo',
@@ -115,13 +119,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
 
     loan.create();
 
-    // Reducir la cantidad disponible en el inventario
-    for (var cartItem in cartItems) {
-      widget.item.quantity -= cartItem.cantidad;
-      widget.item.update(widget.item); // Actualizar el item en el inventario
-    }
-
-    // Limpiar el carrito
+    // Vaciar el carrito después de crear el préstamo
     setState(() {
       cartItems.clear();
       cartItemCount = 0;
@@ -185,6 +183,15 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                         ],
                       ),
                     ),
+                    // Icono de editar solo para administradores
+                    if (sessionManager.session.user is AdminUser)
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          icon: Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {},
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -200,10 +207,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
               children: [
                 // Información adicional del ítem con subtítulos en bold
                 _buildInfoRow('Marca', widget.item.marca.marca),
-                _buildInfoRow(
-                    'Cantidad Total', widget.item.quantity.toString()),
-                _buildInfoRow('Cantidad Disponible',
-                    (widget.item.quantity - cartItemCount).toString()),
+                _buildInfoRow('Cantidad', widget.item.quantity.toString()),
                 _buildInfoRow('Número de serie',
                     widget.item.serialNumber ?? 'No disponible'),
                 _buildInfoRow('Categorías',
@@ -213,6 +217,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                 ElevatedButton(
                   onPressed: _addToCart,
                   style: ElevatedButton.styleFrom(
+                    //primary: Colors.green,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
                   child: Text('Agregar a la lista de compras',
