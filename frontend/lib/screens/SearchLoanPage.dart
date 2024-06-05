@@ -16,14 +16,11 @@ class SearchLoanPage extends BrowsablePage {
     filterSet.add(returnedFilter);
     filterSet.add(fromDateFilter);
     filterSet.add(toDateFilter);
-    //disposable = true;
   }
 
   @override
   void onSet() {
     Role role = SessionManager().session.user.role;
-
-    ///Acceder usuario actual
     searchEnabled = role == Role.adminRole;
   }
 
@@ -82,11 +79,10 @@ class SearchLoanPage extends BrowsablePage {
                 padding: const EdgeInsets.all(10.0),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200.0, // Maximum width of each item
+                    maxCrossAxisExtent: 400.0, // Maximum width of each item
                     mainAxisSpacing: 10.0, // Spacing between rows
                     crossAxisSpacing: 10.0, // Spacing between columns
-                    childAspectRatio:
-                        .5, // Optional: You can adjust this if needed
+                    childAspectRatio: 1.5, // Adjusted for better display
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
