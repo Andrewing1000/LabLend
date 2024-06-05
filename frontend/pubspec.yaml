@@ -49,9 +49,12 @@ dev_dependencies:
   dio_cookie_manager: ^3.1.1
   flutter_secure_storage: ^5.0.2
   font_awesome_flutter: ^10.7.0
+  flutter_inappwebview: ^5.3.2
   url_launcher: ^6.2.6
   file_picker: ^5.0.0
-  webview_flutter: ^2.0.10
+  flutter_webview_plugin: ^0.4.0
+  google_maps_flutter: ^2.0.6
+  webview_flutter: ^2.0.12
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
