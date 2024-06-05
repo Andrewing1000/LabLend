@@ -15,7 +15,7 @@ class UpdateItemForm extends StatefulWidget {
   final Item item;
   final Function(Item, DartData.Uint8List?) onFormSubmit;
 
-  const UpdateItemForm({
+  const   UpdateItemForm({
     super.key,
     required this.item,
     required this.onFormSubmit,

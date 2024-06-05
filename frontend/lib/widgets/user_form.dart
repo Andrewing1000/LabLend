@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/boton_agregar.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:frontend/widgets/password_creation_field.dart';
@@ -61,6 +62,7 @@ class _UserFormState extends State<UserForm> {
         SizedBox(height: 20),
         StringField(
           required: !updateMode,
+          enabled: !(updateMode && widget.user!.superAdmin),
           controller: nameController,
           hintText: updateMode ? widget.user!.name! : 'Nombre',
           width: MediaQuery.of(context).size.width * 0.8,
@@ -92,6 +94,9 @@ class _UserFormState extends State<UserForm> {
           },
         ),
         SizedBox(height: 20),
+
+        if(!((updateMode && widget.user!.superAdmin) ||
+            (updateMode && widget.user!.email == SessionManager().session.user.email)))
         Row(
           children: [
             Checkbox(

@@ -23,6 +23,7 @@ abstract class User extends ChangeNotifier{
   String name;
   bool isActive;
   Role role;
+  bool superAdmin = false;
 
   User({
         int? id,
@@ -30,8 +31,9 @@ abstract class User extends ChangeNotifier{
         required this.name,
         this.isActive = true,
         this.role = Role.assistantRole}){
-    if(name.isEmpty){
-      name = "Super User";
+    if(name.isEmpty || name == "Super User" || name == "SUPER_USER"){
+      name = "SUPER_USER";
+      superAdmin = true;
     }
   }
 

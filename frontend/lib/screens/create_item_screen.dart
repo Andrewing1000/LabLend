@@ -41,6 +41,12 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
           slivers: [
             SliverList.list(
               children: [
+                const BannerWidget(
+                  imageUrl: null,
+                  title: "Registrar item",
+                  subtitle: "",
+                  description: "",
+                ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: CreateItemForm(

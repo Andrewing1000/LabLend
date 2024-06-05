@@ -52,13 +52,6 @@ class _CreateItemFormState extends State<CreateItemForm> {
         }
         return Column(
           children: [
-            BannerWidget(
-              imageUrl: imageBytes != null? imageBytes! : placeHolderBytes!,
-              title: "Crear Nuevo Item",
-              subtitle: "Complete el formulario para crear un nuevo item",
-              description:
-              "Ingrese los datos del nuevo item en el laboratorio.",
-            ),
             Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
