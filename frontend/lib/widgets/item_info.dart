@@ -125,11 +125,6 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
       cartItemCount = 0;
     });
 
-    // Mostrar una notificación o mensaje de éxito
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Préstamo creado con éxito')),
-    );
-
     // Cerrar el modal
     Navigator.of(context).pop();
   }
