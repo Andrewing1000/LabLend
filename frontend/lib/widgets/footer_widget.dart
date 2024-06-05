@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'map.dart';
 
 class FooterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 600, // Aumenta la altura según sea necesario
+      height: 600,
       child: Column(
         children: [
           Container(
             width: double.infinity,
-            height: 400, // Ajusta la altura según sea necesario
+            height: 400,
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.3), // Efecto de opacidad
+                  Colors.black.withOpacity(0.3),
                   BlendMode.darken,
                 ),
               ),
@@ -74,12 +75,7 @@ class FooterWidget extends StatelessWidget {
                     ],
                   ),
                   SizedBox(width: 20),
-                  Image.asset(
-                    'assets/images/place_holder.png', // Imagen estática del mapa
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
+                  MapWidget(),
                   SizedBox(width: 20),
                   Expanded(
                     child: FadeInText(
@@ -193,7 +189,9 @@ class _SocialMediaIconState extends State<SocialMediaIcon>
   }
 
   void _launchURL(String url) async {
+    // ignore: deprecated_member_use
     if (await canLaunch(url)) {
+      // ignore: deprecated_member_use
       await launch(url);
     } else {
       throw 'Could not launch $url';
