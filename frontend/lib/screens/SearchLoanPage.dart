@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/LoanCard.dart';
+import 'package:frontend/widgets/ReviewLoan.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/Loan.dart';
 import '../models/User.dart';
@@ -157,7 +158,7 @@ class SearchLoanPage extends BrowsablePage {
                         delegate: SliverChildBuilderDelegate(
                           (context, index){
                             return LoanCard(loan: items[index], onTap: (){
-                
+                              _showLoanDetail(context, items[index]);
                             });
                           },
                           childCount: items.length,
@@ -171,6 +172,15 @@ class SearchLoanPage extends BrowsablePage {
           );
         }
       },
+    );
+  }
+
+  void _showLoanDetail(BuildContext context, Loan loan){
+    showModalBottomSheet(context: context,
+      backgroundColor: Colors.black,
+      builder: (context){
+        return Reviewloan(loan: loan);
+      }
     );
   }
 }

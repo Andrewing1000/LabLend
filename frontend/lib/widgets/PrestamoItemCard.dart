@@ -9,8 +9,13 @@ import 'horizontal_card.dart';
 class PrestamoItemCard extends StatefulWidget {
   final PrestamoItem prestamoItem;
   final CheckoutCart? cart;
+  final bool editable;
 
-  PrestamoItemCard({required this.prestamoItem, this.cart});
+  PrestamoItemCard({
+    super.key,
+    required this.prestamoItem,
+    this.cart,
+    this.editable = true});
 
   @override
   _PrestamoItemCardState createState() => _PrestamoItemCardState();
@@ -143,7 +148,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               ],
                             ),
                           ),
-                          Row(
+                          if(widget.editable)  Row(
                             children: [
                               ElevatedButton(
                                 onPressed: selectedQuantity > 1
@@ -207,8 +212,14 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               ),
                             ],
                           ),
+                          if(!widget.editable)
+                            Text(
+                              'Cantidad: ${selectedQuantity.toString()}',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14),
+                            ),
                           SizedBox(width: 16),
-                          IconButton(
+                          if(widget.editable) IconButton(
                             onPressed: _removeItem,
                             icon: Icon(Icons.delete, color: Colors.white),
                           ),

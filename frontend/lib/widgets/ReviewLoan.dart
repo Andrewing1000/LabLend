@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/services/Cart.dart';
 import 'package:provider/provider.dart';
 import '../models/Loan.dart';
 import 'PrestamoItemCard.dart';
@@ -46,6 +47,8 @@ class Reviewloan extends StatelessWidget {
                       final prestamoItem = loan.items[index];
                       return PrestamoItemCard(
                         prestamoItem: prestamoItem,
+                        cart: CheckoutCart(),
+                        editable: false,
                       );
                     },
                   ),
@@ -62,35 +65,38 @@ class Reviewloan extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        FloatingActionButton.extended(
+                        if(!loan.devuelto) FloatingActionButton.extended(
                             onPressed: (){
-
+                              SessionManager.loanService.updateDevuelto(loan, true);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
                             ),
                             backgroundColor: Colors.indigo,
                             icon: const Icon(Icons.check, size: 20, color: Colors.white,),
-                            label: const Text("Prestar", style: TextStyle(
+                            label: const Text("Devolver", style: TextStyle(
                               color: Colors.white,
-                            ),)
-                        ),
-
-                        FloatingActionButton.extended(
-                            onPressed: (){
-
-                            },
-                            shape: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(200),
-                            ),
-                            backgroundColor: Colors.white,
-                            icon: const Icon(Icons.clear, size: 20, color: Colors.black),
-                            label: const Text("Cancelar", style: TextStyle(
-                              color: Colors.black,
-                            )
+                              ),
                             )
                         ),
 
+                        if(loan.devuelto)
+                          const Center(
+                            child: Row(
+                              children: [
+                                const Text("Devuelto",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 10,),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.orange,
+                                ),
+                              ],
+                            )
+                          )
                       ],
                     ),
                   ),
