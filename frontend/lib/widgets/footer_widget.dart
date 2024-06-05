@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'map.dart';
 
 class FooterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 600,
+      height: 600, // Aumenta la altura según sea necesario
       child: Column(
         children: [
           Container(
             width: double.infinity,
-            height: 400,
+            height: 400, // Ajusta la altura según sea necesario
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.3),
+                  Colors.black.withOpacity(0.3), // Efecto de opacidad
                   BlendMode.darken,
                 ),
               ),
@@ -75,7 +74,11 @@ class FooterWidget extends StatelessWidget {
                     ],
                   ),
                   SizedBox(width: 20),
-                  MapWidget(),
+                  IconButton(
+                    icon: Icon(Icons.map, color: Colors.white, size: 30),
+                    onPressed: () =>
+                        _launchURL('https://maps.app.goo.gl/gnNShhurjLcXhvCi8'),
+                  ),
                   SizedBox(width: 20),
                   Expanded(
                     child: FadeInText(
@@ -94,6 +97,16 @@ class FooterWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _launchURL(String url) async {
+    // ignore: deprecated_member_use
+    if (await canLaunch(url)) {
+      // ignore: deprecated_member_use
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 
