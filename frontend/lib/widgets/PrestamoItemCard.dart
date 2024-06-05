@@ -8,9 +8,9 @@ import 'horizontal_card.dart';
 
 class PrestamoItemCard extends StatefulWidget {
   final PrestamoItem prestamoItem;
-  final CheckoutCart cart;
+  final CheckoutCart? cart;
 
-  PrestamoItemCard({required this.prestamoItem, required this.cart});
+  PrestamoItemCard({required this.prestamoItem, this.cart});
 
   @override
   _PrestamoItemCardState createState() => _PrestamoItemCardState();
@@ -49,7 +49,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
   }
 
   void _removeItem() {
-    widget.cart.removeItem(widget.prestamoItem.itemId);
+    widget.cart?.removeItem(widget.prestamoItem.itemId);
   }
 
   @override
@@ -66,7 +66,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
           ],
           child: Consumer2<PrestamoItem, CheckoutCart>(
             builder: (context, prestamoItem, cart, child) {
-              if(item == null){
+              if (item == null) {
                 return Container();
               }
 
@@ -89,14 +89,17 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                   return Align(
                     alignment: Alignment.center,
                     child: Container(
-                      width: width,
                       height: height,
+                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 15),
                       decoration: BoxDecoration(
-                        color: isHovered ? Colors.grey[850] : const Color.fromRGBO(255, 255, 255, 0.1),
+                        color: isHovered
+                            ? Colors.grey[850]
+                            : const Color.fromRGBO(255, 255, 255, 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
                         children: [
                           if (item != null)
                             AspectRatio(
@@ -106,7 +109,8 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(6),
                                   child: Image.network(
-                                    item!.imagePath ?? 'assets/images/place_holder.png',
+                                    item!.imagePath ??
+                                        'assets/images/place_holder.png',
                                     fit: BoxFit.cover,
                                     isAntiAlias: true,
                                   ),
@@ -114,6 +118,31 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               ),
                             ),
                           SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  item!.nombre,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  item!.serialNumber ?? 'No serial number',
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
                           Row(
                             children: [
                               ElevatedButton(
@@ -122,56 +151,72 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                   setState(() {
                                     selectedQuantity--;
                                     if (isInCart) {
-                                      widget.cart.addItem(PrestamoItem(
-                                          itemId: item!.id ?? 1, cantidad: selectedQuantity));
+                                      widget.cart?.addItem(PrestamoItem(
+                                          itemId: item!.id ?? 1,
+                                          cantidad: selectedQuantity));
                                     }
                                   });
                                 }
                                     : null,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isInCart ? Colors.orange : Colors.white,
+                                  backgroundColor: isInCart
+                                      ? Colors.orange
+                                      : Colors.white,
                                   shape: CircleBorder(),
-                                  padding: EdgeInsets.all(10),
+                                  padding: EdgeInsets.all(5),
                                 ),
-                                child: Icon(Icons.remove, color: isInCart ? Colors.white : Colors.black),
+                                child: Icon(
+                                  size: 14,
+                                  Icons.remove,
+                                  color: isInCart
+                                      ? Colors.white
+                                      : Colors.black),
                               ),
                               Text(
                                 selectedQuantity.toString(),
-                                style: TextStyle(color: Colors.white, fontSize: 16),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 14),
                               ),
                               ElevatedButton(
-                                onPressed: selectedQuantity < (item!.quantity - item!.quantityOnLoan)
+                                onPressed: selectedQuantity <
+                                    (item!.quantity -
+                                        item!.quantityOnLoan)
                                     ? () {
                                   setState(() {
                                     selectedQuantity++;
                                     if (isInCart) {
-                                      widget.cart.addItem(PrestamoItem(
-                                          itemId: item!.id ?? 1, cantidad: selectedQuantity));
+                                      widget.cart?.addItem(PrestamoItem(
+                                          itemId: item!.id ?? 1,
+                                          cantidad: selectedQuantity));
                                     }
                                   });
                                 }
                                     : null,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isInCart ? Colors.orange : Colors.white,
+                                  backgroundColor: isInCart
+                                      ? Colors.orange
+                                      : Colors.white,
                                   shape: CircleBorder(),
-                                  padding: EdgeInsets.all(10),
+                                  padding: EdgeInsets.all(5),
                                 ),
-                                child: Icon(Icons.add, color: isInCart ? Colors.white : Colors.black),
+                                child: Icon(Icons.add,
+                                    size: 14,
+                                    color: isInCart
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
-                              if (isInCart)
-                                Icon(Icons.check_circle, color: Colors.white, size: 30),
                             ],
                           ),
                           SizedBox(width: 16),
                           IconButton(
                             onPressed: _removeItem,
-                            icon: Icon(Icons.delete, color: Colors.red),
+                            icon: Icon(Icons.delete, color: Colors.white),
                           ),
                         ],
                       ),
                     ),
                   );
-                }
+                },
               );
             },
           ),

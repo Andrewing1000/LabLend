@@ -92,6 +92,7 @@ class MainFrameState extends State<MainFrame> {
       onCartLookup: (){
         showModalBottomSheet(
             context: context,
+            backgroundColor: Colors.black,
             builder: (context){
               return cartList;
             });

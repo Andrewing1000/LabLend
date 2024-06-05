@@ -1,6 +1,7 @@
 import '../models/Loan.dart';
 import 'package:flutter/foundation.dart';
 import '../models/Session.dart';
+import '../models/User.dart';
 
 class CheckoutCart with ChangeNotifier {
   final List<PrestamoItem> _items = [];
@@ -34,14 +35,14 @@ class CheckoutCart with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> confirmLoan(String usuario, DateTime fechaPrestamo, DateTime fechaDevolucion) async {
+  Future<void> confirmLoan(User usuario, DateTime fechaPrestamo, DateTime fechaDevolucion) async {
     if (_items.isEmpty) {
       throw Exception('Cannot confirm loan with an empty cart.');
     }
 
     Loan newLoan = Loan(
       id: 0,  // Assuming id will be set by the backend
-      usuario: usuario,
+      usuario: usuario.email,
       fechaPrestamo: fechaPrestamo,
       fechaDevolucion: fechaDevolucion,
       devuelto: false,

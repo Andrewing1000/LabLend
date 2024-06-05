@@ -289,7 +289,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/item/brands/$id/');
+      var response = await requestHandler.getRequest('/item/list/brands/$id/');
       return Brand.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -303,7 +303,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/item/categories/$id/');
+      var response = await requestHandler.getRequest('/item/list/categories/$id/');
       return Category.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -317,7 +317,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/item/items/$id/');
+      var response = await requestHandler.getRequest('/item/list/items/$id/');
       return Item.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
