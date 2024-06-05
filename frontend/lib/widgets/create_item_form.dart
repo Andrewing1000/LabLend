@@ -8,7 +8,6 @@ import 'package:frontend/models/item.dart';
 import 'package:frontend/widgets/icon_button.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:frontend/widgets/password_creation_field.dart';
 
 import 'banner.dart';
 import 'dart:typed_data' as DartData;
@@ -110,6 +109,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                           return Container();
                         }
 
+                        selectedBrand = null;
                         List<Brand> brands = snapshot.data!;
 
                         return StatefulBuilder(
@@ -207,7 +207,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                           link: linkController.text,
                           serialNumber: serialNumberController.text,
                           quantity: int.parse(quantityController.text),
-                          quantityOnLoan: 2,
+                          quantityOnLoan: 0,
                           marca: selectedBrand!,
                           categories: selectedCategories,
                         );
@@ -218,57 +218,59 @@ class _CreateItemFormState extends State<CreateItemForm> {
                   ],
                 ),
 
-                Center(
-                  child: StatefulBuilder(
-                    builder: (context, setState) {
-                      return Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              clipBehavior: Clip.hardEdge,
-                              borderRadius: BorderRadius.circular(20),
-                              child:
-                              Image.memory(
-                                imageBytes!=null? imageBytes!:placeHolderBytes!,
-                                height: 300,
-                                fit: BoxFit.cover,
+                Expanded(
+                  child: Center(
+                    child: StatefulBuilder(
+                      builder: (context, setState) {
+                        return Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                clipBehavior: Clip.hardEdge,
+                                borderRadius: BorderRadius.circular(20),
+                                child:
+                                Image.memory(
+                                  imageBytes!=null? imageBytes!:placeHolderBytes!,
+                                  height: 300,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
 
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CustomIconButton(
-                                    iconNormal: Icons.upload,
-                                    iconSelected: Icons.clear,
-                                    isSelected: imageBytes != null,
-                                    onPressed: () async{
-                                      if(imageBytes!=null){
-                                        setState(() {
-                                          imageBytes = null;
-                                        });
-                                      }
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomIconButton(
+                                      iconNormal: Icons.upload,
+                                      iconSelected: Icons.clear,
+                                      isSelected: imageBytes != null,
+                                      onPressed: () async{
+                                        if(imageBytes!=null){
+                                          setState(() {
+                                            imageBytes = null;
+                                          });
+                                        }
 
-                                      FilePickerResult? file = await FilePicker.platform.pickFiles(
-                                        type: FileType.custom,
-                                        allowedExtensions: ['jpg', 'jpeg', 'png'],
-                                      );
+                                        FilePickerResult? file = await FilePicker.platform.pickFiles(
+                                          type: FileType.custom,
+                                          allowedExtensions: ['jpg', 'jpeg', 'png'],
+                                        );
 
-                                      if(file != null){
-                                        setState(() {
-                                          imageBytes = file.files.single.bytes;
-                                        });
-                                      }
-                                    },
-                                    size: 30)
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                                        if(file != null){
+                                          setState(() {
+                                            imageBytes = file.files.single.bytes;
+                                          });
+                                        }
+                                      },
+                                      size: 30)
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    ),
                   ),
                 )
               ],

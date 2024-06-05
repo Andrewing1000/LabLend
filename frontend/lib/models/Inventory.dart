@@ -154,7 +154,7 @@ class Inventory {
   }
 
 
-  Future<void> uploadImage(Item item, Uint8List imageBytes, String fileExtension) async {
+  Future<bool> uploadImage(Item item, Uint8List imageBytes, String fileExtension) async {
     String mimeType;
 
     switch (fileExtension.toLowerCase()) {
@@ -184,12 +184,15 @@ class Inventory {
 
       if (response.statusCode == 200) {
         manager.notification(notification: 'La imagen se ha subido exitosamente');
+        return true;
       } else {
         manager.errorNotification(error: "No se pudo agregar la imagen");
+        return false;
       }
     } on DioException catch (e) {
       print(e.stackTrace);
       manager.errorNotification(error: "No se pudo agregar la imagen", details: e.response?.data);
+      return false;
     }
   }
 
@@ -286,7 +289,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/item/brands/$id/');
+      var response = await requestHandler.getRequest('/item/list/brands/$id/');
       return Brand.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -300,7 +303,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/item/categories/$id/');
+      var response = await requestHandler.getRequest('/item/list/categories/$id/');
       return Category.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
@@ -314,7 +317,7 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.getRequest('/item/items/$id/');
+      var response = await requestHandler.getRequest('/item/list/items/$id/');
       return Item.fromJson(response.data);
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);

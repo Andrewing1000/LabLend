@@ -47,7 +47,7 @@ class Category extends ChangeNotifier {
 }
 
 class Item extends ChangeNotifier {
-  int id;
+  int? id;
   String nombre;
   String? description;
   String? link;
@@ -59,7 +59,7 @@ class Item extends ChangeNotifier {
   List<Category> categories;
 
   Item({
-    required this.id,
+    this.id,
     required this.nombre,
     this.description,
     this.link,
@@ -99,6 +99,7 @@ class Item extends ChangeNotifier {
       'quantity_on_loan' : quantityOnLoan,
       'marca': marca.toJson(),
       'categories': categories.map((c) => c.toJson()).toList(),
+      'image' : imagePath,
     };
   }
 
@@ -106,8 +107,12 @@ class Item extends ChangeNotifier {
     await SessionManager.inventory.createItem(this);
   }
 
-  Future<void> update(Item newItem) async {
-    await SessionManager.inventory.updateItem(this, newItem);
+  Future<Item?> update(Item newItem) async {
+    return await SessionManager.inventory.updateItem(this, newItem);
+  }
+
+  Item clone(){
+    return Item.fromJson(this.toJson());
   }
 
   void updateItem(Item newItem) {

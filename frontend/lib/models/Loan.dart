@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/Cart.dart';
 import 'Session.dart';
 import 'User.dart';
 import 'item.dart';
@@ -66,11 +67,13 @@ class Loan with ChangeNotifier {
   }
 }
 
-class PrestamoItem {
+class PrestamoItem extends ChangeNotifier {
   final int itemId;
-  final int cantidad;
+  int _cantidad;
+  CheckoutCart? cart;
 
-  PrestamoItem({required this.itemId, required this.cantidad});
+  PrestamoItem({required this.itemId, required int cantidad})
+      : _cantidad = cantidad >= 0 ? cantidad : 0;
 
   factory PrestamoItem.fromJson(Map<String, dynamic> json) {
     return PrestamoItem(
@@ -82,7 +85,18 @@ class PrestamoItem {
   Map<String, dynamic> toJson() {
     return {
       'item_id': itemId,
-      'cantidad': cantidad,
+      'cantidad': _cantidad,
     };
+  }
+
+  int get cantidad => _cantidad;
+
+  set cantidad(int quantity) {
+    if (quantity < 0) {
+      quantity = 0;
+    }
+    _cantidad = quantity;
+    cart?.refresh();
+    notifyListeners();
   }
 }

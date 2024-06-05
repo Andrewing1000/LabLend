@@ -5,13 +5,15 @@ class StringField extends StatefulWidget {
   final String hintText;
   final double width;
   final bool enabled;
+  final bool required;
 
   const StringField({
     Key? key,
     required this.controller,
     required this.hintText,
     required this.width,
-    this.enabled = true, // Valor por defecto de true
+    this.enabled = true,
+    this.required= true,// Valor por defecto de true
   }) : super(key: key);
 
   @override
@@ -22,6 +24,7 @@ class _StringFieldState extends State<StringField> {
   String? _errorMessage;
 
   void _validate() {
+    if(!widget.required) return;
     setState(() {
       if (widget.controller.text.isEmpty) {
         _errorMessage = 'Este campo es obligatorio';

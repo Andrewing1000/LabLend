@@ -18,15 +18,22 @@ class Role{
 
 
 abstract class User extends ChangeNotifier{
+  int? id;
   String email;
   String name;
   bool isActive;
   Role role;
 
-  User({required this.email,
+  User({
+        int? id,
+        required this.email,
         required this.name,
         this.isActive = true,
-        this.role = Role.assistantRole});
+        this.role = Role.assistantRole}){
+    if(name.isEmpty){
+      name = "Super User";
+    }
+  }
 
 
   factory User.fromJson(Map<String, dynamic> userData){
@@ -34,6 +41,7 @@ abstract class User extends ChangeNotifier{
     User user = VisitorUser.anonymousUser;
     if(roleField == Role.adminRole.name || roleField == Role.superAdminRole.name){
       user = AdminUser(
+        id: userData['id'],
         email: userData['email'],
         name: userData['name'],
         isActive : userData['is_active'],
@@ -41,6 +49,7 @@ abstract class User extends ChangeNotifier{
     }
     else if(roleField == Role.assistantRole.name){
       user = AssistUser(
+        id: userData['id'],
         email: userData['email'],
         name: userData['name'],
         isActive : userData['is_active'],
@@ -53,6 +62,7 @@ abstract class User extends ChangeNotifier{
 
   Map<String, dynamic> toJson(){
     return {
+      'id' : id,
       'email' : email,
       'name' : name,
       'role_field' : role.name,
@@ -66,13 +76,14 @@ abstract class User extends ChangeNotifier{
 
 
   void create({required String password}) {
+    print("------------------------->A");
     SessionManager.userManager.createUser(this, password);
     return;
   }
 
-  void update({required User newUser, String? password}) {
-    SessionManager.userManager.updateUser(this, newUser: newUser, password: password);
-    return;
+  Future<User?> update({required User newUser, String? password}) async {
+
+    return await SessionManager.userManager.updateUser(this, newUser: newUser, password: password);
   }
 
   void deactivate(){
@@ -97,18 +108,18 @@ class VisitorUser extends User{
 
   User anonymousUser = VisitorUser(email: "", name: "");
 
-  VisitorUser({required super.email, required super.name}):
+  VisitorUser({required super.email, required super.name, super.id}):
         super(role: Role.visitorRole);
 }
 
 class AdminUser extends User{
-  AdminUser({required super.email, required super.name, super.isActive}):
+  AdminUser({required super.email, required super.name, super.isActive, super.id}):
         super(role: Role.adminRole);
 }
 
 
 class AssistUser extends User{
-  AssistUser({required super.email, required super.name, super.isActive}):
+  AssistUser({required super.email, required super.name, super.isActive, super.id}):
         super(role: Role.assistantRole);
 
 }

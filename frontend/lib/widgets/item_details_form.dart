@@ -1,132 +1,358 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:frontend/models/Session.dart';
 import 'package:frontend/models/item.dart';
+import 'package:frontend/widgets/icon_button.dart';
 import 'package:frontend/widgets/string_field.dart';
-import 'package:frontend/widgets/password_creation_field.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:dio/dio.dart';
 
-class ItemDetailsForm extends StatefulWidget {
+import 'banner.dart';
+import 'dart:typed_data' as DartData;
+
+class UpdateItemForm extends StatefulWidget {
   final Item item;
+  final Function(Item, DartData.Uint8List?) onFormSubmit;
 
-  const ItemDetailsForm({Key? key, required this.item}) : super(key: key);
+  const UpdateItemForm({
+    super.key,
+    required this.item,
+    required this.onFormSubmit,
+  });
 
   @override
-  _ItemDetailsFormState createState() => _ItemDetailsFormState();
+  _UpdateItemFormState createState() => _UpdateItemFormState(item: item);
 }
 
-class _ItemDetailsFormState extends State<ItemDetailsForm> {
-  late TextEditingController _nombreController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _linkController;
-  late TextEditingController _serialNumberController;
-  late TextEditingController _quantityController;
-  late TextEditingController _marcaController;
-  late TextEditingController _categoriesController;
-  late TextEditingController _idController;
+class _UpdateItemFormState extends State<UpdateItemForm> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController linkController = TextEditingController();
+  final TextEditingController serialNumberController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
+
+  Brand? selectedBrand;
+  List<Category> selectedCategories = [];
+  DartData.Uint8List? imageBytes;
+  DartData.Uint8List? placeHolderBytes;
+  late Item item;
+  late Item newItem;
+
+  _UpdateItemFormState({required this.item}) : newItem = item.clone();
 
   @override
   void initState() {
     super.initState();
-    _nombreController = TextEditingController(text: widget.item.nombre);
-    _descriptionController =
-        TextEditingController(text: widget.item.description);
-    _linkController = TextEditingController(text: widget.item.link);
-    _serialNumberController =
-        TextEditingController(text: widget.item.serialNumber);
-    _quantityController =
-        TextEditingController(text: widget.item.quantity.toString());
-    _marcaController = TextEditingController(text: widget.item.marca.marca);
-    _categoriesController = TextEditingController(
-      text: widget.item.categories.map((c) => c.nombre).join(', '),
-    );
-    _idController = TextEditingController(text: widget.item.id.toString());
+    newItem = widget.item.clone();
+    nameController.text = newItem.nombre;
+    descriptionController.text = newItem.description ?? '';
+    linkController.text = newItem.link ?? '';
+    serialNumberController.text = newItem.serialNumber ?? '';
+    quantityController.text = newItem.quantity.toString();
+    _loadImageBytes();
   }
 
   @override
   void dispose() {
-    _nombreController.dispose();
-    _descriptionController.dispose();
-    _linkController.dispose();
-    _serialNumberController.dispose();
-    _quantityController.dispose();
-    _marcaController.dispose();
-    _categoriesController.dispose();
-    _idController.dispose();
+    nameController.dispose();
+    descriptionController.dispose();
+    linkController.dispose();
+    serialNumberController.dispose();
+    quantityController.dispose();
     super.dispose();
   }
 
-  void _updateItem() {
-    // Actualiza los campos del ítem
-    widget.item.update(Item(
-      id: widget.item.id,
-      nombre: _nombreController.text,
-      description: _descriptionController.text,
-      link: _linkController.text,
-      serialNumber: _serialNumberController.text,
-      quantity: int.parse(_quantityController.text),
-      quantityOnLoan: 2,
-      marca: Brand(id: widget.item.marca.id, marca: _marcaController.text),
-      categories: widget.item.categories, // No cambiamos las categorías aquí
-    ));
-    // Aquí puedes llamar a una función para actualizar el ítem en el servidor si es necesario
+  Future<void> _loadImageBytes() async {
+    try {
+      final ByteData data = await rootBundle.load(
+          'assets/images/place_holder.png');
+      placeHolderBytes = data.buffer.asUint8List();
+
+      if (newItem.imagePath != null) {
+        final response = await Dio().get(
+          newItem.imagePath!,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        if (response.statusCode == 200) {
+          placeHolderBytes = Uint8List.fromList(response.data);
+        }
+      }
+    } catch (e) {
+      imageBytes = placeHolderBytes;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to load image: $e")),
+      );
+    }
   }
+
+  Future<List<Brand>> _fetchBrands() async {
+    try {
+      return await SessionManager.inventory.getBrands();
+    } catch (e) {
+      throw Exception("Failed to fetch brands");
+    }
+  }
+
+  Future<List<Category>> _fetchCategories() async {
+    try {
+      return await SessionManager.inventory.getCategories();
+    } catch (e) {
+      throw Exception("Failed to fetch categories");
+    }
+  }
+
+  void _submitForm() {
+    if (nameController.text.isNotEmpty) {
+      newItem.nombre = nameController.text;
+    }
+    if (descriptionController.text.isNotEmpty) {
+      newItem.description = descriptionController.text;
+    }
+    if (linkController.text.isNotEmpty) {
+      newItem.link = linkController.text;
+    }
+    if (serialNumberController.text.isNotEmpty) {
+      newItem.serialNumber = serialNumberController.text;
+    }
+    if (quantityController.text.isNotEmpty) {
+      newItem.quantity = int.parse(quantityController.text);
+    }
+
+    if (selectedBrand?.id != newItem.marca.id) {
+      newItem.marca = selectedBrand ?? newItem.marca;
+    }
+
+    newItem.categories = selectedCategories;
+
+    widget.onFormSubmit(newItem, imageBytes);
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        StringField(
-          controller: _idController,
-          hintText: 'ID',
-          width: MediaQuery.of(context).size.width * 0.8,
-          enabled: false, // El ID no se puede editar
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _nombreController,
-          hintText: 'Nombre del Ítem',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _descriptionController,
-          hintText: 'Descripción',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _linkController,
-          hintText: 'Enlace',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _serialNumberController,
-          hintText: 'Número de Serie',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _quantityController,
-          hintText: 'Cantidad',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _marcaController,
-          hintText: 'Marca',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 10),
-        StringField(
-          controller: _categoriesController,
-          hintText: 'Categorías',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _updateItem,
-          child: Text('Actualizar Ítem'),
-        ),
-      ],
+    return FutureBuilder<void>(
+      future: _loadImageBytes(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+              child: CircularProgressIndicator(color: Colors.white));
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        return Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildTextField(nameController, "Nombre", newItem.nombre),
+                    _buildTextField(descriptionController, "Descripción",
+                        newItem.description),
+                    _buildTextField(linkController, "Link", newItem.link),
+                    _buildTextField(serialNumberController, "Número de Serie",
+                        newItem.serialNumber),
+                    _buildTextField(quantityController, "Cantidad",
+                        newItem.quantity.toString()),
+                    const SizedBox(height: 20),
+                    _buildBrandDropdown(),
+                    const SizedBox(height: 20),
+                    _buildCategoryDropdown(),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _submitForm,
+                      child: const Text('Editar Item'),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Center(
+                    child: StatefulBuilder(
+                      builder: (context, setState) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.memory(
+                                imageBytes ?? placeHolderBytes!,
+                                height: 300,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CustomIconButton(
+                                  iconNormal: Icons.upload,
+                                  iconSelected: Icons.clear,
+                                  isSelected: imageBytes != null,
+                                  onPressed: () async {
+                                    if (imageBytes != null) {
+                                      setState(() {
+                                        imageBytes = null;
+                                      });
+                                    }
+
+                                    FilePickerResult? file = await FilePicker
+                                        .platform.pickFiles(
+                                      type: FileType.custom,
+                                      allowedExtensions: ['jpg', 'jpeg', 'png'],
+                                    );
+
+                                    if (file != null) {
+                                      setState(() {
+                                        imageBytes = file.files.single.bytes;
+                                      });
+                                    }
+                                  },
+                                  size: 30,
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label,
+      String? initialValue) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: StringField(
+        required: false,
+        controller: controller,
+        hintText: initialValue ?? '',
+        width: MediaQuery
+            .of(context)
+            .size
+            .width * 0.4,
+      ),
+    );
+  }
+
+  Widget _buildBrandDropdown() {
+    return FutureBuilder<List<Brand>>(
+      future: _fetchBrands(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+              child: CircularProgressIndicator(color: Colors.white));
+        } else
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return Container();
+        }
+
+        List<Brand> brands = snapshot.data!;
+        selectedBrand = null;
+        for(Brand brand in brands){
+          if(brand.id == newItem.marca.id){
+            selectedBrand = brand;
+          }
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return DropdownButton<Brand>(
+              value: selectedBrand,
+              hint: const Text(
+                  "Selecciona una Marca", style: TextStyle(color: Colors.white)),
+              dropdownColor: Colors.grey[900],
+              style: const TextStyle(color: Colors.white),
+              items: brands.map((Brand brand) {
+                return DropdownMenuItem<Brand>(
+                  value: brand,
+                  child: Text(brand.marca),
+                );
+              }).toList(),
+              onChanged: (Brand? newBrand) {
+                setState(() {
+                  selectedBrand = newBrand;
+                  if (selectedBrand != null) {
+                    newItem.marca = selectedBrand!;
+                  }
+                });
+              },
+            );
+          }
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryDropdown() {
+    return FutureBuilder<List<Category>>(
+      future: _fetchCategories(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Colors.white));
+        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return Container();
+        }
+
+        List<Category> categories = snapshot.data!;
+        selectedCategories = categories.where((cat) {
+          return newItem.categories.any((catI) => catI.id == cat.id);
+        }).toList();
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              children: [
+                DropdownButton<Category>(
+                  hint: const Text("Selecciona Categorías", style: TextStyle(color: Colors.white)),
+                  dropdownColor: Colors.grey[900],
+                  style: const TextStyle(color: Colors.white),
+                  items: categories.map((Category category) {
+                    return DropdownMenuItem<Category>(
+                      value: category,
+                      child: Text(category.nombre),
+                    );
+                  }).toList(),
+                  onChanged: (Category? newCategory) {
+                    setState(() {
+                      if (newCategory != null && !selectedCategories.contains(newCategory)) {
+                        selectedCategories.add(newCategory);
+                        newItem.categories.add(newCategory);
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  children: selectedCategories.map((category) {
+                    return Chip(
+                      label: Text(category.nombre),
+                      onDeleted: () {
+                        setState(() {
+                          selectedCategories.remove(category);
+                          newItem.categories.remove(category);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
   }
 }

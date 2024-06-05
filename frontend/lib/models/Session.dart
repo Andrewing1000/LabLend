@@ -95,11 +95,10 @@ class SessionManager with ChangeNotifier {
   ///
   /// Notify MainFrame
   void errorNotification({required String error, Map<String, dynamic>? details}){
-    String message = "$error \n";
+    String message = "$error";
     if(details != null){
-      for(String key in details!.keys){
-        message += "$key: $details\n";
-      }
+      String detail = formatDjangoErrors(details);
+      message = "$message\n$detail";
     }
     messageService.notify(message: message);
   }
@@ -246,5 +245,42 @@ class SessionManager with ChangeNotifier {
 
     notifyListeners();
     return _session;
+  }
+
+  String formatDjangoErrors(Map<String, dynamic> errorDict) {
+    List<String> formattedErrors = [];
+
+    void processErrors(String key, dynamic errors) {
+      if (errors is List) {
+        for (var error in errors) {
+          formattedErrors.add(_beautifyMessage(key, error));
+        }
+      } else if (errors is Map) {
+        errors.forEach((subKey, subErrors) {
+          processErrors('$key.$subKey', subErrors);
+        });
+      } else {
+        formattedErrors.add(_beautifyMessage(key, errors));
+      }
+    }
+
+    errorDict.forEach((field, errorList) {
+      processErrors(field, errorList);
+    });
+
+    return formattedErrors.join('\n');
+  }
+
+  String _beautifyMessage(String field, String error) {
+    String beautifiedField = _prettifyFieldName(field);
+    return "$beautifiedField: $error";
+  }
+
+  String _prettifyFieldName(String field) {
+    return field.split('.').map((part) {
+      return part.split('_').map((word) {
+        return word[0].toUpperCase() + word.substring(1);
+      }).join(' ');
+    }).join(' -> ');
   }
 }

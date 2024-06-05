@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/item.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/screens/HomePage.dart';
+import 'package:frontend/services/Cart.dart';
+import 'package:frontend/services/PageManager.dart';
+import 'package:frontend/services/SelectedItemContext.dart';
 import 'package:frontend/widgets/item_info.dart';
 
 Future<void> main() async {
@@ -42,7 +46,13 @@ Future<void> main() async {
         title: Text('Item Info Test'),
         backgroundColor: Colors.black,
       ),
-      body: ItemInfoWidget(item: dummyItem),
+      body: ItemInfoWidget(
+        pageManager: PageManager(defaultPage: HomePage(
+          selectedItem: SelectedItemContext(),
+        )),
+        cart: CheckoutCart(),
+        itemContext: SelectedItemContext(),
+      ),
     ),
   ));
 }

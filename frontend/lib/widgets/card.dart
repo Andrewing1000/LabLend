@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/Session.dart';
+import 'package:frontend/models/User.dart';
+import 'package:frontend/widgets/icon_button.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
 
@@ -7,8 +10,9 @@ class CustomCard extends StatefulWidget {
   static double height = (9.5 / 7) * width;
 
   Function? onTap;
+  Function? onEdit;
   Item item;
-  CustomCard({super.key, required this.item, this.onTap});
+  CustomCard({super.key, required this.item, this.onTap, this.onEdit});
 
   @override
   State<CustomCard> createState() {
@@ -89,27 +93,59 @@ class CustomCardState extends State<CustomCard> {
                             const SizedBox(
                               height: 5,
                             ),
-                            Text(
-                              item.nombre,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              textAlign: TextAlign.start,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: "/assets/fonts/Metropolis-Black.ttf",
-                              ),
-                            ),
-                            Text(
-                              item.description?? "",
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              textAlign: TextAlign.start,
-                              style: const TextStyle(
-                                color: Color.fromRGBO(255, 255, 255, 0.7),
-                                fontFamily: "/assets/fonts/Metropolis-Black.ttf",
-                                fontSize: 13,
-                              ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  flex: 6,
+                                  fit: FlexFit.tight,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Text(
+                                        item.nombre,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        textAlign: TextAlign.start,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontFamily: "/assets/fonts/Metropolis-Black.ttf",
+                                        ),
+                                      ),
+                                      Text(
+                                        item.description?? "",
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                        textAlign: TextAlign.start,
+                                        style: const TextStyle(
+                                          color: Color.fromRGBO(255, 255, 255, 0.7),
+                                          fontFamily: "/assets/fonts/Metropolis-Black.ttf",
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if(widget.onEdit != null
+                                    && SessionManager().session.user is AdminUser)
+                                  Flexible(
+                                    flex: 2,
+                                    fit: FlexFit.tight,
+                                    child: CustomIconButton(
+                                      iconNormal: Icons.edit,
+                                      size: 30,
+                                      isSelected: false,
+                                      onPressed: (){
+                                        final callback = widget.onEdit;
+                                        if(callback != null){
+                                          callback();
+                                        }
+                                      },
+                                    )
+                                ),
+                              ],
                             ),
                           ],
                         ),

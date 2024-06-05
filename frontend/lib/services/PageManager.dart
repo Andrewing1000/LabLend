@@ -30,6 +30,7 @@ class PageManager extends ChangeNotifier{
       lastQueue.last.onDispose();
       lastQueue.removeLast();
     }
+    notifyListeners();
   }
 
 
@@ -107,6 +108,14 @@ class PageManager extends ChangeNotifier{
     lastQueue.removeLast();
     lastQueue.addLast(page);
     currentPage.onSet();
+    notifyListeners();
+  }
+
+
+  void clear(){
+    nextQueue.clear();
+    lastQueue.clear();
+    lastQueue.add(defaultPage);
     notifyListeners();
   }
 }
