@@ -6,7 +6,7 @@ import '../models/Session.dart';
 
 class LoanCard extends StatefulWidget {
   static double width = 300;
-  static double height = 300;
+  static double height = 150;
 
   final Loan loan;
   final Item item;
@@ -43,6 +43,53 @@ class LoanCardState extends State<LoanCard> {
     }
   }
 
+  void _showLoanDetails() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          color: Colors.black,
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(
+                  'Préstamo de ${widget.loan.usuario}',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  'Fecha de préstamo: ${widget.loan.fechaPrestamo}\nFecha de devolución: ${widget.loan.fechaDevolucion}',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: widget.loan.items.length,
+                  itemBuilder: (context, index) {
+                    final prestamoItem = widget.loan.items[index];
+                    return ListTile(
+                      leading: Image.network(
+                        widget.item.imagePath ??
+                            'assets/images/place_holder.png',
+                        fit: BoxFit.cover,
+                        width: 50,
+                        height: 50,
+                      ),
+                      title: Text(widget.item.nombre,
+                          style: TextStyle(color: Colors.white)),
+                      subtitle: Text('Cantidad: ${prestamoItem.cantidad}',
+                          style: TextStyle(color: Colors.white70)),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -65,7 +112,7 @@ class LoanCardState extends State<LoanCard> {
               onEnter: _onEnter,
               onExit: _onExit,
               child: GestureDetector(
-                onTap: () {},
+                onTap: _showLoanDetails,
                 child: Card(
                   color: isHovered
                       ? Colors.white.withAlpha(20)
@@ -82,44 +129,80 @@ class LoanCardState extends State<LoanCard> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        Container(
-                          height: LoanCard.height * 0.4,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.network(
-                              item.imagePath != null
-                                  ? item.imagePath!
-                                  : "assets/images/place_holder.png",
-                              fit: BoxFit.cover,
+                        Row(
+                          children: [
+                            Container(
+                              height: LoanCard.height * 0.8,
+                              width: LoanCard.height * 0.8,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.network(
+                                  item.imagePath != null
+                                      ? item.imagePath!
+                                      : "assets/images/place_holder.png",
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          item.nombre,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: "/assets/fonts/Metropolis-Black.ttf",
-                          ),
-                        ),
-                        Text(
-                          "Cantidad: ${prestamoItem.cantidad}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        ElevatedButton(
-                          onPressed: loan.devuelto ? null : _returnLoan,
-                          child: Text(loan.devuelto ? 'Devuelto' : 'Devolver'),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.nombre,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    textAlign: TextAlign.start,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Cantidad: ${prestamoItem.cantidad}",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Usuario: ${loan.usuario}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Fecha Préstamo: ${loan.fechaPrestamo}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Fecha Devolución: ${loan.fechaDevolucion}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (!loan.devuelto)
+                              IconButton(
+                                icon: Icon(Icons.check_circle,
+                                    color: Colors.green),
+                                onPressed: _returnLoan,
+                              ),
+                            if (loan.devuelto)
+                              Icon(Icons.check_circle, color: Colors.green),
+                          ],
                         ),
                       ],
                     ),
