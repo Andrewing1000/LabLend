@@ -120,6 +120,7 @@ class AssistanSerializer(ManageUserSerializer):
 
     def create(self, validated_data):
         """Create and return a user with encrypted password"""
+        validated_data.pop('role_field')
         return get_user_model().objects.create_lab_assistant(**validated_data)
 
 
@@ -127,6 +128,7 @@ class AdminSerializer(ManageUserSerializer):
 
     def create(self, validated_data):
         """Create and return a user with encrypted password"""
+        validated_data.pop('role_field')
         return get_user_model().objects.create_lab_admin(**validated_data)
 
 
