@@ -1,8 +1,9 @@
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
+import '../models/Session.dart';
 import '../models/item.dart';
 import '../services/SelectedItemContext.dart';
 import '../widgets/card_vista.dart';
@@ -89,124 +90,29 @@ class HomePageState extends State<HomePage> {
 }
 
 class HomeSections extends ChangeNotifier {
-  List<Widget> sections;
+  List<Widget> sections = [];
   SelectedItemContext selectedItem;
 
-  HomeSections({this.sections = const [], required this.selectedItem}) {
-    List<HorizontalCard> hcItems = [
-      HorizontalCard(title: "Opción 1"),
-      HorizontalCard(title: "Opción 2"),
-      HorizontalCard(title: "Opción 3"),
-      HorizontalCard(title: "Opción 4"),
-      HorizontalCard(title: "Opción 1"),
-      HorizontalCard(title: "Opción 2"),
-      HorizontalCard(title: "Opción 3"),
-      HorizontalCard(title: "Opción 4"),
-    ];
+  HomeSections({required this.selectedItem}) {
+    _initializeSections();
+  }
 
-    List<Item> items = [
-      Item(
-        id: 1,
-        nombre: 'Microscopio',
-        description: 'Microscopio de alta precisión para observación celular.',
-        link: 'http://example.com/microscopio',
-        serialNumber: 'SN1234567890',
-        quantity: 50,
-        marca: Brand(id: 1, marca: "OptiLab"),
-        categories: [],
-        quantityOnLoan: 1,
-      ),
-      Item(
-        id: 2,
-        nombre: 'Centrifuga',
-        description: 'Centrífuga para separación de muestras biológicas.',
-        link: 'http://example.com/centrifuga',
-        serialNumber: 'SN0987654321',
-        quantity: 20,
-        marca: Brand(id: 2, marca: "BioSpin"),
-        categories: [],
-        quantityOnLoan: 2,
-      ),
-      Item(
-        id: 3,
-        nombre: 'Espectro',
-        description: 'Espectrofotómetro para análisis de absorbancia.',
-        link: 'http://example.com/espectrofotometro',
-        serialNumber: 'SN1122334455',
-        quantity: 10,
-        marca: Brand(id: 3, marca: "SpectroTech"),
-        categories: [],
-        quantityOnLoan: 0,
-      ),
-      Item(
-        id: 4,
-        nombre: 'Balanza Analitica',
-        description: 'Balanza analítica de alta precisión.',
-        link: 'http://example.com/balanza',
-        serialNumber: 'SN2233445566',
-        quantity: 15,
-        marca: Brand(id: 4, marca: "WeighPro"),
-        categories: [],
-        quantityOnLoan: 1,
-      ),
-      Item(
-        id: 5,
-        nombre: 'Protoboard',
-        description:
-            'Protoboard para la conexion de clabes o diferentes elementos.',
-        link: 'http://example.com/balanza',
-        serialNumber: 'SN2233445566',
-        quantity: 15,
-        marca: Brand(id: 4, marca: "WeighPro"),
-        categories: [],
-        quantityOnLoan: 1,
-      ),
-      Item(
-        id: 5,
-        nombre: 'Cables',
-        description: 'Cables con diferentes usos.',
-        link: 'http://example.com/balanza',
-        serialNumber: 'SN2233445566',
-        quantity: 15,
-        marca: Brand(id: 4, marca: "WeighPro"),
-        categories: [],
-        quantityOnLoan: 1,
-      ),
-      Item(
-        id: 6,
-        nombre: 'Caja centrifuga',
-        description: 'Para ver el comportamiento centrifugo.',
-        link: 'http://example.com/balanza',
-        serialNumber: 'SN2233445566',
-        quantity: 15,
-        marca: Brand(id: 4, marca: "WeighPro"),
-        categories: [],
-        quantityOnLoan: 1,
-      ),
-      Item(
-        id: 7,
-        nombre: 'Motor Paso a Paso',
-        description: 'realizacion de circuitos.',
-        link: 'http://example.com/balanza',
-        serialNumber: 'SN2233445566',
-        quantity: 15,
-        marca: Brand(id: 4, marca: "WeighPro"),
-        categories: [],
-        quantityOnLoan: 1,
-      ),
-    ];
+  Future<void> _initializeSections() async {
+    List<Item> items = await SessionManager.inventory.getItems();
+    items.shuffle();
 
-    List<CardVista> cItems = items
-        .map((item) => CardVista(
-              item: item,
-              imagePath:
-                  'assets/images/${item.nombre.toLowerCase().replaceAll(' ', '_')}.jpg',
-            ))
-        .toList();
+    List<CardVista> randomItems = items.take(3).map((item) {
+      return CardVista(
+        item: item,
+        imagePath:
+            'assets/images/${item.nombre.toLowerCase().replaceAll(' ', '_')}.jpg',
+      );
+    }).toList();
 
     List<Widget> body = [
-      HorizontalCardSection(items: hcItems),
-      CardSection(items: cItems),
+      HorizontalCardSection(
+          items: []), // Este se puede completar según sea necesario
+      CardSection(items: randomItems),
     ];
 
     set(body);

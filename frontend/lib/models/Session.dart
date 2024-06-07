@@ -22,12 +22,12 @@ class Session {
 
   Session({required this.user, required this.loginTime});
 
-
-  void logIn(String password){
+  void logIn(String password) {
     manager.login(user.email, password);
   }
-  void logOut(){
-    if(manager.session == this){
+
+  void logOut() {
+    if (manager.session == this) {
       manager.logOut();
     }
   }
@@ -36,30 +36,28 @@ class Session {
     return await manager.sessionCheck();
   }
 
-  Future<bool> connectionCheck() async{
+  Future<bool> connectionCheck() async {
     return await manager.connectionCheck();
   }
 
-  bool isAdmin(){
-    if(user is AdminUser){
+  bool isAdmin() {
+    if (user is AdminUser) {
       return true;
     }
     manager.errorNotification(error: "Acción denegada");
-    return false ;
+    return false;
   }
 
-  Future<bool> isReady() async{
+  Future<bool> isReady() async {
     //Implement login
     return await connectionCheck();
   }
-
 }
 
-
-class AnonymousSession extends Session{
-  AnonymousSession():super(user: VisitorUser.anonymousUser, loginTime: DateTime.now());
+class AnonymousSession extends Session {
+  AnonymousSession()
+      : super(user: VisitorUser.anonymousUser, loginTime: DateTime.now());
 }
-
 
 class SessionManager with ChangeNotifier {
   static SessionManager _manager = SessionManager._inner();
@@ -74,11 +72,11 @@ class SessionManager with ChangeNotifier {
   Session _session = AnonymousSession();
   bool _isOnline = false;
 
-  SessionManager._inner(){
+  SessionManager._inner() {
     connectionCheck();
   }
 
-  factory SessionManager(){
+  factory SessionManager() {
     _manager ??= SessionManager._inner();
     return _manager;
   }
@@ -86,59 +84,57 @@ class SessionManager with ChangeNotifier {
   Session get session => _session;
 
   bool get isOnline => _isOnline;
-  set isOnline(bool online){
+  set isOnline(bool online) {
     _isOnline = online;
     notifyListeners();
   }
+
   ///
   ///
   ///
   /// Notify MainFrame
-  void errorNotification({required String error, Map<String, dynamic>? details}){
+  void errorNotification(
+      {required String error, Map<String, dynamic>? details}) {
     String message = "$error";
-    if(details != null){
+    if (details != null) {
       String detail = formatDjangoErrors(details);
       message = "$message\n$detail";
     }
     messageService.notify(message: message);
   }
 
-  void notification({required String notification}){
+  void notification({required String notification}) {
     messageService.notify(message: notification);
   }
 
-  void confirmNotification(){
-
-  }
-
+  void confirmNotification() {}
 
   ///
   ///
   ///
   ///Online status manager
-  Future<bool> connectionCheck() async{
-
+  Future<bool> connectionCheck() async {
     var connectionRes;
-    try{
+    try {
       connectionRes = await httpHandler.connectionCheck();
-      if(!isOnline) errorNotification(error : 'Sin conexión');
-      if(connectionRes == isOnline) return isOnline;
+      if (!isOnline) errorNotification(error: 'Sin conexión');
+      if (connectionRes == isOnline) return isOnline;
       isOnline = connectionRes;
-    }catch (e){
+    } catch (e) {
       isOnline = false;
     }
 
-    if(!isOnline) errorNotification(error : 'Sin conexión');
+    if (!isOnline) errorNotification(error: 'Sin conexión');
     return isOnline;
   }
 
-  Future<bool> sessionCheck() async{
-    try{
+  Future<bool> sessionCheck() async {
+    try {
       var response = await httpHandler.getRequest('/user/me/');
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         return true;
       }
-    }on DioException catch (e){
+    } on DioException catch (e) {
       print(e.stackTrace);
     }
 
@@ -148,98 +144,88 @@ class SessionManager with ChangeNotifier {
     return false;
   }
 
-
   ///
   ///
   ///
   ///Login management
   Future<Session> login(String email, String password) async {
-    if(!(await connectionCheck())){return AnonymousSession();};
+    if (!(await connectionCheck())) {
+      return AnonymousSession();
+    }
+    ;
 
-    if(_session is! AnonymousSession){
-      if(await sessionCheck()){
-        if(_session?.user.email == email){
+    if (_session is! AnonymousSession) {
+      if (await sessionCheck()) {
+        if (_session?.user.email == email) {
           notification(notification: "Ya ha iniciado seción.");
           return _session;
-        }
-        else{
-          if(session is! AnonymousSession) await httpHandler.postRequest('/user/logout/');
+        } else {
+          if (session is! AnonymousSession)
+            await httpHandler.postRequest('/user/logout/');
         }
       }
     }
 
     Map<String, String> data = {
-      'email' : email,
-      'password' : password,
+      'email': email,
+      'password': password,
     };
 
-    try{
+    try {
       var response = await httpHandler.postRequest('/user/token/', body: data);
       User user = User.fromJson(response.data);
 
-      if(!user.isActive){
-        errorNotification(error :'La cuenta no está habilitada');
+      if (!user.isActive) {
+        errorNotification(error: 'La cuenta no está habilitada');
         return AnonymousSession();
       }
 
-      notification(notification : 'Sesión iniciada');
+      notification(notification: 'Sesión iniciada');
       _session = Session(user: user, loginTime: DateTime.now());
       notifyListeners();
       return _session;
-
-    } on DioException catch(e){
-
-      if(e.response?.statusCode == 404){
-
-        errorNotification(error : 'Usuario no registrado');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        errorNotification(error: 'Usuario no registrado');
         //Not found
         return AnonymousSession();
-      }
-      else if(e.response?.statusCode == 401){
-
+      } else if (e.response?.statusCode == 401) {
         //Bad credentials
         errorNotification(error: 'Credenciales inválidas');
         return AnonymousSession();
-      }
-      else if(e.response?.statusCode == 429){
-
+      } else if (e.response?.statusCode == 429) {
         //Too many attempts
-        errorNotification(error :'Muchos intentos, intente de nuevo más tarde');
+        errorNotification(error: 'Muchos intentos, intente de nuevo más tarde');
         return AnonymousSession();
-      }
-      else{
-
+      } else {
         print("Unknown Error");
         return AnonymousSession();
       }
     }
   }
 
-
-  Future<Session> logOut() async{
-    if(!(await connectionCheck())){
+  Future<Session> logOut() async {
+    if (!(await connectionCheck())) {
       return AnonymousSession();
     }
-    if(!(await sessionCheck())){
+    if (!(await sessionCheck())) {
       return AnonymousSession();
     }
 
     var response = await httpHandler.postRequest('/user/logout/');
 
-    if(response.statusCode == 200){
-      errorNotification(error : 'Sesión cerrada');
+    if (response.statusCode == 200) {
+      errorNotification(error: 'Sesión cerrada');
       print("Hasta aqui llegamos");
       mainFrame = MainFrame(messageService: messageService);
       _session = AnonymousSession();
-    }
-    else if(response.statusCode == 412){
-      errorNotification(error :'Primero inicie sesión');
+    } else if (response.statusCode == 412) {
+      errorNotification(error: 'Primero inicie sesión');
       _session = AnonymousSession();
-    }
-    else{
+    } else {
       print("Hasta aqui llegamos");
       mainFrame = MainFrame(messageService: messageService);
-      errorNotification(error :'Sesión cerrada');
+      errorNotification(error: 'Sesión cerrada');
       _session = AnonymousSession();
     }
 
