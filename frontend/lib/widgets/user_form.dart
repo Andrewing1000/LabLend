@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/boton_agregar.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:frontend/widgets/password_creation_field.dart';
@@ -56,34 +55,33 @@ class _UserFormState extends State<UserForm> {
           required: !updateMode,
           enabled: !updateMode,
           controller: emailController,
-          hintText: updateMode ? widget.user!.email : 'Correo Electrónico',
+          hintText: updateMode ? widget.user!.email! : 'Correo Electrónico',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         StringField(
           required: !updateMode,
-          enabled: !(updateMode && widget.user!.superAdmin),
           controller: nameController,
-          hintText: updateMode ? widget.user!.name : 'Nombre',
+          hintText: updateMode ? widget.user!.name! : 'Nombre',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         PasswordCreationField(
           controller: passwordController,
           hintText: 'Contraseña',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         DropdownButton<Role>(
           value: selectedRole,
           dropdownColor: Colors.grey[900],
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white),
           items: roles.map((Role role) {
             return DropdownMenuItem<Role>(
               value: role,
               child: Text(
                 role.name,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white),
               ),
             );
           }).toList(),
@@ -93,10 +91,7 @@ class _UserFormState extends State<UserForm> {
             });
           },
         ),
-        const SizedBox(height: 20),
-
-        if(!((updateMode && widget.user!.superAdmin) ||
-            (updateMode && widget.user!.email == SessionManager().session.user.email)))
+        SizedBox(height: 20),
         Row(
           children: [
             Checkbox(
@@ -109,13 +104,13 @@ class _UserFormState extends State<UserForm> {
               checkColor: Colors.white,
               activeColor: Colors.green,
             ),
-            const Text(
+            Text(
               'Activo',
               style: TextStyle(color: Colors.white),
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
         BotonAgregar(
           icon: updateMode ? Icons.update : Icons.add,
           onPressed: () {

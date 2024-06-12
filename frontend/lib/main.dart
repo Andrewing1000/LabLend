@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 Future<void> main() async {
   runApp(const MyApp());
   var manager = SessionManager();
-  Session session =
-      await manager.login("admin@example.com", "#123#AndresHinojosa#123");
+  // Session session =
+  //     await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
   ///
   ///
@@ -67,15 +67,16 @@ Future<void> main() async {
   /// Crear item
   // Item dummyItem = Item(
   //   id: 1,
-  //   nombre: 'El cojudo',
+  //   nombre: 'Test',
   //   description: 'This is an example item for testing purposes',
   //   link: 'http://example.com/example-item',
   //   serialNumber: 'SN1234567890',
   //   quantity: 50,
   //   marca: dummyBrand,
   //   categories: dummyCategories,
+  //   quantityOnLoan: 0,
   // );
-  //dummyItem.create();
+  // dummyItem.create();
 
   ///
   ///

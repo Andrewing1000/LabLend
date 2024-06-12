@@ -51,7 +51,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
 
   void _checkIfInCart() {
 
-    PrestamoItem existingItem;
+    PrestamoItem? existingItem;
 
     for(PrestamoItem item in widget.cart.items){
       if(item.itemId == this.item?.id){
@@ -60,9 +60,12 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
       }
     }
 
-      selectedQuantity = existingItem.cantidad;
+    if(existingItem != null){
+      selectedQuantity = existingItem?.cantidad?? 1;
       isInCart = true;
     }
+
+  }
 
   @override
   Widget build(BuildContext context) {
