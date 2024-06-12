@@ -28,19 +28,47 @@ class CardVista extends StatefulWidget {
   }
 }
 
-class CardVistaState extends State<CardVista> {
+class CardVistaState extends State<CardVista>
+    with SingleTickerProviderStateMixin {
   bool isHovered = false;
+  late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    _offsetAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.05, 0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
 
   void _onEnter(PointerEvent event) {
     setState(() {
       isHovered = true;
+      _controller.forward();
     });
   }
 
   void _onExit(PointerEvent event) {
     setState(() {
       isHovered = false;
+      _controller.reverse();
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -53,19 +81,18 @@ class CardVistaState extends State<CardVista> {
         builder: (context, item, child) {
           return Align(
             alignment: Alignment.center,
-            child: SizedBox(
-              width: CardVista.width,
-              height: CardVista.height,
-              child: MouseRegion(
-                onEnter: _onEnter,
-                onExit: _onExit,
-                child: GestureDetector(
-                  onTap: () {
-                    final callback = widget.onTap;
-                    if (callback != null) {
-                      callback();
-                    }
-                  },
+            child: MouseRegion(
+              onEnter: _onEnter,
+              onExit: _onExit,
+              child: GestureDetector(
+                onTap: () {
+                  final callback = widget.onTap;
+                  if (callback != null) {
+                    callback();
+                  }
+                },
+                child: SlideTransition(
+                  position: _offsetAnimation,
                   child: Card(
                     color: isHovered
                         ? Colors.white.withAlpha(20)
@@ -76,7 +103,8 @@ class CardVistaState extends State<CardVista> {
                     ),
                     child: Container(
                       padding: const EdgeInsets.all(10.0),
-                      width: double.infinity,
+                      width: CardVista.width,
+                      height: CardVista.height,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,9 +123,7 @@ class CardVistaState extends State<CardVista> {
                               ),
                             ),
                           ),
-                          const SizedBox(
-                            height: 5,
-                          ),
+                          const SizedBox(height: 5),
                           Row(
                             children: [
                               Flexible(
