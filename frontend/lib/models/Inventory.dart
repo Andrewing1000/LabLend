@@ -132,13 +132,18 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
+
+    print("Paso1");
     if (!isAdmin()) {
       return null;
     }
+
+    print("Paso2");
     if (!await sessionCheck()) {
       return null;
     }
 
+    print("Paso3");
     try {
       var response = await requestHandler.postRequest('/item/items/', body: item.toJson());
 
@@ -209,7 +214,9 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.putRequest('/item/items/${item.id}/', body: newItem.toJson());
+      var data = newItem.toJson();
+      data.remove('image');
+      var response = await requestHandler.putRequest('/item/items/${item.id}/', body: data);
       item.updateItem(newItem);
       manager.notification(notification: 'Ítem actualizado con éxito');
       return Item.fromJson(response.data);
