@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:frontend/services/ScrollPhysics.dart';
+import 'package:frontend/widgets/footer_widget.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
 import '../services/SelectedItemContext.dart';
@@ -207,6 +208,7 @@ class HomeSections extends ChangeNotifier {
     List<Widget> body = [
       HorizontalCardSection(items: hcItems),
       CardSection(items: cItems),
+      FooterWidget(),
     ];
 
     set(body);
