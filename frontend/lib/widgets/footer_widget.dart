@@ -2,29 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FooterWidget extends StatelessWidget {
-  const FooterWidget({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      height: 600,
+      height: 600, // Aumenta la altura según sea necesario
       child: Column(
         children: [
           Container(
             width: double.infinity,
-            height: 400,
+            height: 400, // Ajusta la altura según sea necesario
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: const AssetImage('assets/images/background.png'),
+                image: AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.3),
+                  Colors.black.withOpacity(0.3), // Efecto de opacidad
                   BlendMode.darken,
                 ),
               ),
             ),
-            child: const Stack(
+            child: Stack(
               children: [
                 Positioned(
                   left: 20,
@@ -52,7 +50,7 @@ class FooterWidget extends StatelessWidget {
             child: Container(
               color: Colors.black,
               padding: const EdgeInsets.all(20.0),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
@@ -76,7 +74,11 @@ class FooterWidget extends StatelessWidget {
                     ],
                   ),
                   SizedBox(width: 20),
-                  //MapWidget(),
+                  IconButton(
+                    icon: Icon(Icons.map, color: Colors.white, size: 30),
+                    onPressed: () =>
+                        _launchURL('https://maps.app.goo.gl/gnNShhurjLcXhvCi8'),
+                  ),
                   SizedBox(width: 20),
                   Expanded(
                     child: FadeInText(
@@ -96,6 +98,16 @@ class FooterWidget extends StatelessWidget {
       ),
     );
   }
+
+  void _launchURL(String url) async {
+    // ignore: deprecated_member_use
+    if (await canLaunch(url)) {
+      // ignore: deprecated_member_use
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 }
 
 class SocialMediaIcon extends StatefulWidget {
@@ -103,7 +115,7 @@ class SocialMediaIcon extends StatefulWidget {
   final String label;
   final String url;
 
-  const SocialMediaIcon({super.key, 
+  const SocialMediaIcon({
     required this.icon,
     required this.label,
     required this.url,
@@ -124,7 +136,7 @@ class _SocialMediaIconState extends State<SocialMediaIcon>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 300),
       vsync: this,
     );
 
@@ -174,7 +186,7 @@ class _SocialMediaIconState extends State<SocialMediaIcon>
                 child:
                     Icon(widget.icon, color: _colorAnimation.value, size: 30),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Text(
                 widget.label,
                 style: TextStyle(
@@ -204,7 +216,7 @@ class FadeInText extends StatefulWidget {
   final String text;
   final TextStyle style;
 
-  const FadeInText({super.key, 
+  const FadeInText({
     required this.text,
     required this.style,
   });
@@ -222,7 +234,7 @@ class _FadeInTextState extends State<FadeInText>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: 2),
       vsync: this,
     );
 

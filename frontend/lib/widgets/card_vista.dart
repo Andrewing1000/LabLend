@@ -14,7 +14,7 @@ class CardVista extends StatefulWidget {
   final Item item;
   final String imagePath;
 
-  const CardVista({
+  CardVista({
     super.key,
     required this.item,
     required this.imagePath,

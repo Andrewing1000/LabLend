@@ -31,28 +31,22 @@ dependencies:
   flutter:
     sdk: flutter
   palette_generator: ^0.3.0
-
+  provider: ^6.1.2
+  dio: ^5.1.1
+  cookie_jar: ^4.0.1
+  dio_cookie_manager: ^3.1.1
+  flutter_secure_storage: ^5.0.2
   font_awesome_flutter: ^10.7.0
   url_launcher: ^6.2.6
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
-
-  provider: any
-  dio: any
-  http_parser: any
-  cookie_jar: any
-  dio_cookie_manager: any
-  flutter_secure_storage: any
-  file_picker: any
-  flutter_lints: ^3.0.0
+  file_picker: ^5.0.0
+  flutter_webview_plugin: ^0.4.0
+  google_maps_flutter: ^2.0.6
+  webview_flutter:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-
+  flutter_lints: ^3.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -61,19 +55,6 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
-    - assets/images/balanza_analitica.jpg
-    - assets/images/cables.jpg
-    - assets/images/centrifuga.jpg
-    - assets/images/espectro.jpg
-    - assets/images/microscopio.jpg
-    - assets/images/protoboard.jpg
-    - assets/images/caja_centrifuga.jpg
-    - assets/images/generador_de_funciones.jpg
-    - assets/images/generador_de_señales.jpg
-    - assets/images/motor_paso_a_paso.jpg
-    - assets/images/pinza_de_laboratorio.jpg
-
-    - assets/images/background.png
 
   fonts:
     - family: MainFont

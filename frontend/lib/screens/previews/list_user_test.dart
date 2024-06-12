@@ -8,7 +8,7 @@ void main() async {
   Session session =
       await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     home: UserListPage(),
   ));
 }
