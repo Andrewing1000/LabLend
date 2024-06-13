@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import '../models/Session.dart';
 import '../models/item.dart';
 import '../services/SelectedItemContext.dart';
-import '../widgets/card_vista.dart';
 import '../widgets/card_section.dart';
+import '../widgets/card_vista.dart';
+
 import '../widgets/horizontal_card.dart';
 import '../widgets/horizontal_section.dart';
 import 'PageBase.dart';

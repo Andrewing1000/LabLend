@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-
-
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
   var manager = SessionManager();
-  // Session session =
-  //     await manager.login("admin@example.com", "#123#AndresHinojosa#123");
+   Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
   ///
   ///
@@ -149,8 +146,7 @@ class MyApp extends StatelessWidget {
         ],
         child: Consumer<SessionManager>(
           builder: (context, sessionManager, child) {
-            print("------------------------------------------------->Rascal");
-            return SessionManager.mainFrame;
+            return  SessionManager.mainFrame;
           },
         ),
       )),
