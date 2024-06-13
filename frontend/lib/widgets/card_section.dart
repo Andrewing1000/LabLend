@@ -2,29 +2,38 @@ import 'package:flutter/material.dart';
 
 class CardSection extends StatelessWidget {
   final List<Widget> items;
+  final String title;
 
-  CardSection({super.key, required this.items});
+  const CardSection({super.key,
+    required this.items,
+    required this.title
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 30,
+        Padding(
+          padding: EdgeInsets.fromLTRB(25, 25, 0, 0),
+          child: Text(
+            title,
+            textAlign: TextAlign.start,
+            style: const TextStyle(
+                fontSize: 25,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-        Text(
-          "Instrumentos de Laboratorio",
-          textAlign: TextAlign.start,
-          style: TextStyle(fontSize: 30, color: Colors.white),
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        Container(
-          height: 300, // Ajusta según sea necesario
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: items,
           ),
         ),

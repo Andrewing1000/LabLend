@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -6,95 +8,126 @@ class FooterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 600, // Aumenta la altura según sea necesario
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            height: 400, // Ajusta la altura según sea necesario
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/background.png'),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.3), // Efecto de opacidad
-                  BlendMode.darken,
-                ),
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 20,
-                  bottom: 20,
-                  child: FadeInText(
-                    text: 'LABORATORIO UCB',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 10.0,
-                          color: Colors.black,
-                          offset: Offset(2.0, 2.0),
+      height: 650, // Aumenta la altura según sea necesario
+      padding:  const EdgeInsets.fromLTRB(0, 20, 0, 0),
+
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Column(
+          children: [
+              Stack(
+                children: [
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaY: 0.5, sigmaX: 0.5),
+                    child: Container(
+                    width: double.infinity,
+                      height: 400, // Ajusta la altura según sea necesario
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/background.png'),
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                            Colors.black.withOpacity(0.3), // Efecto de opacidad
+                            BlendMode.darken,
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: Colors.black,
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SocialMediaIcon(
-                        icon: Icons.facebook,
-                        label: 'Facebook',
-                        url: 'https://www.facebook.com',
-                      ),
-                      SocialMediaIcon(
-                        icon: Icons.camera,
-                        label: 'Instagram',
-                        url: 'https://www.instagram.com',
-                      ),
-                      SocialMediaIcon(
-                        icon: Icons.alternate_email,
-                        label: 'Twitter',
-                        url: 'https://www.twitter.com',
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 20),
-                  IconButton(
-                    icon: Icon(Icons.map, color: Colors.white, size: 30),
-                    onPressed: () =>
-                        _launchURL('https://maps.app.goo.gl/gnNShhurjLcXhvCi8'),
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
+
+                  Positioned(
+                    left: 20,
+                    bottom: 20,
                     child: FadeInText(
-                      text:
-                          'En el Laboratorio de la Universidad Catolica Boliviana, estamos comprometidos con la excelencia academica y la investigacion. Nuestro Laboratorio ofrece una gama de materiales y recursos para apoyar el desarrollo de proyectos cientificos y academicos. En el Laboratorio de la Universidad Catolica',
+                      text: 'LABORATORIO UCB',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 10.0,
+                            color: Colors.black,
+                            offset: Offset(2.0, 2.0),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
+            Expanded(
+              child: Container(
+                color: Colors.black,
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Flexible(
+                      flex: 1,
+                      fit:  FlexFit.tight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SocialMediaIcon(
+                            icon: Icons.facebook,
+                            label: 'Facebook',
+                            url: 'https://www.facebook.com/UCB.BOLIVIA/',
+                          ),
+                          SocialMediaIcon(
+                            icon: Icons.camera,
+                            label: 'Instagram',
+                            url: 'https://www.instagram.com/ucb.lapaz/?hl=en',
+                          ),
+                          SocialMediaIcon(
+                            icon: Icons.alternate_email,
+                            label: 'Twitter',
+                            url: 'https://x.com/UCBLaPaz/',
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                    Flexible(
+                      flex: 1,
+                      fit:  FlexFit.tight,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.map, color: Colors.white, size: 30),
+                            onPressed: () =>
+                                _launchURL('https://maps.app.goo.gl/gnNShhurjLcXhvCi8'),
+                          ),
+                          const Text("Ubicación",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 20),
+
+                    const Flexible(
+                      flex: 2,
+                      fit: FlexFit.tight,
+                      child: FadeInText(
+                        text:
+                            'En el Laboratorio de la Universidad Catolica Boliviana, estamos comprometidos con la excelencia academica y la investigacion. Nuestro Laboratorio ofrece una gama de materiales y recursos para apoyar el desarrollo de proyectos cientificos y academicos. En el Laboratorio de la Universidad Catolica',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

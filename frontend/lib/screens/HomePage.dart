@@ -9,6 +9,7 @@ import '../services/SelectedItemContext.dart';
 import '../widgets/card_section.dart';
 import '../widgets/card_vista.dart';
 
+import '../widgets/footer_widget.dart';
 import '../widgets/horizontal_card.dart';
 import '../widgets/horizontal_section.dart';
 import 'PageBase.dart';
@@ -102,18 +103,41 @@ class HomeSections extends ChangeNotifier {
     List<Item> items = await SessionManager.inventory.getItems();
     items.shuffle();
 
-    List<CardVista> randomItems = items.take(3).map((item) {
+    List<CardVista> mostSearched = items.take(6).map((item) {
       return CardVista(
         item: item,
-        imagePath:
-            'assets/images/${item.nombre.toLowerCase().replaceAll(' ', '_')}.jpg',
       );
     }).toList();
 
+
+    List<CardVista> newItems = items.sublist(6, 12).map((item) {
+      return CardVista(
+        item: item,
+      );
+    }).toList();
+
+
+    List<CardVista> recomended = items.sublist(4, 10).map((item) {
+      return CardVista(
+        item: item,
+      );
+    }).toList();
+
+
     List<Widget> body = [
-      HorizontalCardSection(
-          items: []), // Este se puede completar según sea necesario
-      CardSection(items: randomItems),
+      FooterWidget(),
+      // HorizontalCardSection(
+      //     items: []), // Este se puede completar según sea necesario
+      CardSection(
+          title: "Más Buscados",
+          items: mostSearched),
+      CardSection(
+          title: "Nuevos",
+          items: newItems),
+
+      CardSection(
+          title: "Recomendados",
+          items: recomended),
     ];
 
     set(body);

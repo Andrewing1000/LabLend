@@ -2,7 +2,9 @@ import "dart:ui";
 
 
 import "package:flutter/material.dart";
+import "package:frontend/screens/PageBase.dart";
 import "package:frontend/screens/PasswordReset.dart";
+import "package:frontend/screens/category_brand_screen.dart";
 import "package:frontend/screens/create_item_screen.dart";
 import "package:frontend/screens/create_user.dart";
 import "package:frontend/services/Cart.dart";
@@ -57,6 +59,7 @@ class MainFrameState extends State<MainFrame> {
   late SearchUserPage searchUserPage;
   late SearchLoanPage searchLoanPage;
   late CreateItemScreen createItemPage;
+  late CategoryBrandScreen categoryBrandPage;
   late CreateUserScreen createUserPage;
   late ItemInfoWidget sidePanel;
 
@@ -75,6 +78,7 @@ class MainFrameState extends State<MainFrame> {
     searchUserPage = SearchUserPage();
     searchLoanPage = SearchLoanPage();
     createItemPage = CreateItemScreen();
+    categoryBrandPage = CategoryBrandScreen();
     createUserPage = CreateUserScreen();
     pageManager = PageManager(defaultPage: homePage);
     cartList = CheckoutCartList(cart: cart);
@@ -123,6 +127,15 @@ class MainFrameState extends State<MainFrame> {
       ),
 
       NavItem(
+        iconNormal: Icons.category_outlined,
+        iconSelected: Icons.category,
+        onPressed: () {
+          pageManager.setPage(categoryBrandPage as PageBase);
+        },
+        title: "Search",
+        permissions: [Role.adminRole, Role.assistantRole],
+      ),
+      NavItem(
           iconNormal: Icons.people_outline,
           iconSelected: Icons.people,
           onPressed: () {
@@ -140,15 +153,7 @@ class MainFrameState extends State<MainFrame> {
           title: "Search",
           permissions: [Role.adminRole, Role.assistantRole],
       ),
-      NavItem(
-          iconNormal: Icons.info_outline,
-          iconSelected: Icons.info,
-          onPressed: () {
 
-          },
-          title: "Search",
-          permissions: [Role.adminRole, Role.assistantRole],
-      ),
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);

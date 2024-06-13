@@ -12,12 +12,10 @@ class CardVista extends StatefulWidget {
   final Function? onTap;
   final Function? onEdit;
   final Item item;
-  final String imagePath;
 
   CardVista({
     super.key,
     required this.item,
-    required this.imagePath,
     this.onTap,
     this.onEdit,
   });
@@ -118,7 +116,7 @@ class CardVistaState extends State<CardVista>
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(6),
                               child: Image.network(
-                                widget.imagePath,
+                                item.imagePath?? '/assets/images/place_holder.png',
                                 fit: BoxFit.cover,
                               ),
                             ),
