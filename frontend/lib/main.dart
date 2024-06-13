@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/models/User.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
   var manager = SessionManager();
-   Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
+  Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
   ///
   ///

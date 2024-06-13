@@ -1,13 +1,12 @@
 import 'dart:typed_data';
-import 'item.dart';
+import 'Item.dart';
 import 'Session.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 
 class Inventory {
   static var manager = SessionManager();
-  var session = manager.session;
-  var requestHandler =SessionManager.httpHandler;
+  var requestHandler = SessionManager.httpHandler;
 
   Future<List<Brand>> getBrands() async {
     if (!await isReady()) {
@@ -332,14 +331,17 @@ class Inventory {
   }
 
   bool isAdmin() {
+    final session = SessionManager().session;
     return session.isAdmin();
   }
 
   Future<bool> isReady() async {
+    var session = SessionManager().session;
     return await session.isReady();
   }
 
   Future<bool> sessionCheck() async {
+    final session = SessionManager().session;
     return await session.sessionCheck();
   }
 }

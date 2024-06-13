@@ -4,12 +4,8 @@ import 'package:dio/dio.dart';
 
 class UserManager {
   static var manager = SessionManager();
-  var session = manager.session;
-  var requestHandler;
+  var requestHandler = SessionManager.httpHandler;
 
-  UserManager() {
-    requestHandler = session.requestHandler;
-  }
 
   Future<List<User>> getUserList(
       {bool? isAdmin, bool? isActive, String? email}) async {
@@ -60,6 +56,7 @@ class UserManager {
       return null;
     }
 
+    final session = SessionManager().session;
     if (session.user.email == email) {
       var response = await requestHandler.getRequest('/user/me');
       return User.fromJson(response.data);
@@ -213,14 +210,17 @@ class UserManager {
   }
 
   bool isAdmin() {
+    final session = SessionManager().session;
     return session.isAdmin();
   }
 
-  Future<bool> sessionCheck() async {
-    return await session.sessionCheck();
+  Future<bool> isReady() async {
+    var session = SessionManager().session;
+    return await session.isReady();
   }
 
-  Future<bool> isReady() async {
-    return await session.isReady();
+  Future<bool> sessionCheck() async {
+    final session = SessionManager().session;
+    return await session.sessionCheck();
   }
 }

@@ -3,7 +3,7 @@ import 'package:frontend/models/Session.dart';
 import 'package:frontend/models/User.dart';
 import 'package:frontend/widgets/icon_button.dart';
 import 'package:provider/provider.dart';
-import '../models/item.dart';
+import '../models/Item.dart';
 
 class CardVista extends StatefulWidget {
   static double width = 200;

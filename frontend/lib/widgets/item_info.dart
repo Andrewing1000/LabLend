@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Loan.dart';
 import 'package:frontend/models/User.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/services/Cart.dart';
 import 'package:frontend/services/PageManager.dart';

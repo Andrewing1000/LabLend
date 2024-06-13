@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/widgets/string_field.dart';
 
 class EditItemForm extends StatefulWidget {

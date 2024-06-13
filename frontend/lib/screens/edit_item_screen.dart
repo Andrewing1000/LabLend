@@ -7,7 +7,7 @@ import 'package:frontend/widgets/item_details_form.dart';
 //import 'package:frontend/models/User.dart';
 import 'package:frontend/models/Session.dart';
 
-import '../models/item.dart';
+import '../models/Item.dart';
 
 class EditItemScreen extends PageBase{
 

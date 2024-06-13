@@ -5,7 +5,7 @@ import 'package:frontend/screens/create_item_screen.dart';
 import 'package:frontend/screens/edit_item_screen.dart';
 import 'package:frontend/widgets/card.dart';
 import '../models/User.dart';
-import '../models/item.dart';
+import '../models/Item.dart';
 import '../services/SelectedItemContext.dart';
 
 import "package:provider/provider.dart";

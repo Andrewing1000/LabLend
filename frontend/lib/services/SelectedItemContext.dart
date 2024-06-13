@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/item.dart';
+import '../models/Item.dart';
 
 class SelectedItemContext extends ChangeNotifier{
   Item? _item;

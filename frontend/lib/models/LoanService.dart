@@ -4,12 +4,7 @@ import 'package:dio/dio.dart';
 
 class LoanService {
   static var manager = SessionManager();
-  var session = manager.session;
-  var requestHandler;
-
-  LoanService() {
-    requestHandler = session.requestHandler;
-  }
+  var requestHandler = SessionManager.httpHandler;
 
   Future<List<Loan>> getLoanList({DateTime? startDate, DateTime? endDate, bool? devuelto, String? email}) async {
     if (!await isReady()) {
@@ -149,14 +144,17 @@ class LoanService {
   }
 
   bool isAdmin() {
+    final session = SessionManager().session;
     return session.isAdmin();
   }
 
-  Future<bool> sessionCheck() async {
-    return await session.sessionCheck();
+  Future<bool> isReady() async {
+    var session = SessionManager().session;
+    return await session.isReady();
   }
 
-  Future<bool> isReady() async {
-    return await session.isReady();
+  Future<bool> sessionCheck() async {
+    final session = SessionManager().session;
+    return await session.sessionCheck();
   }
 }

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/widgets/icon_button.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:file_picker/file_picker.dart';

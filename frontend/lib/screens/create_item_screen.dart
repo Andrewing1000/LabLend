@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/widgets/create_item_form.dart';
 import 'package:frontend/widgets/banner.dart';
 

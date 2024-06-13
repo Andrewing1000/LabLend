@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/Loan.dart';
 import '../models/Session.dart';
-import '../models/item.dart';
+import '../models/Item.dart';
 import '../services/Cart.dart';
 import 'horizontal_card.dart';
 

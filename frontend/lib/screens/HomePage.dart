@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/services/ScrollPhysics.dart';
 import 'package:provider/provider.dart';
 import '../models/Session.dart';
-import '../models/item.dart';
+import '../models/Item.dart';
 import '../services/SelectedItemContext.dart';
 import '../widgets/card_section.dart';
 import '../widgets/card_vista.dart';

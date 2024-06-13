@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/HomePage.dart';
 import 'package:frontend/services/Cart.dart';
