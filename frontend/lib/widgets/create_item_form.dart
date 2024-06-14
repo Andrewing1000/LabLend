@@ -9,7 +9,17 @@ import 'package:file_picker/file_picker.dart';
 
 import 'dart:typed_data' as DartData;
 class CreateItemForm extends StatefulWidget {
-  final Function(Item, DartData.Uint8List?) onFormSubmit;
+  final Function(
+      {
+      required String name,
+      required String description,
+      required String link,
+      required String serialNumber,
+      required String quantity,
+      Brand? brand,
+      required List<Category> categories,
+      Uint8List? imageBytes,
+      }) onFormSubmit;
 
   const CreateItemForm({super.key, required this.onFormSubmit});
 
@@ -57,31 +67,38 @@ class _CreateItemFormState extends State<CreateItemForm> {
                     const SizedBox(height: 20),
                     StringField(
                       controller: nameController,
-                      hintText: 'Nombre del Item',
+                      hintText: '',
+                      labelText: 'Nombre del Item',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(height: 20),
                     StringField(
                       controller: descriptionController,
-                      hintText: 'Descripción',
+                      hintText: '',
+                      labelText: 'Descripción',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(height: 20),
                     StringField(
+                      required: false,
                       controller: linkController,
-                      hintText: 'Link',
+                      hintText: '',
+                      labelText: 'Link',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(height: 20),
                     StringField(
                       controller: serialNumberController,
-                      hintText: 'Número de Serie',
+                      hintText: '',
+                      labelText: 'Código de Serie',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(height: 20),
                     StringField(
                       controller: quantityController,
-                      hintText: 'Cantidad',
+                      hintText: '',
+                      labelText: 'Cantidad',
+                      digitsOnly: true,
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(height: 20),
@@ -170,6 +187,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                   children: selectedCategories.map((category) {
                                     return Chip(
                                       label: Text(category.nombre),
+                                      backgroundColor: Colors.white,
                                       onDeleted: () {
                                         setState(() {
                                           selectedCategories.remove(category);
@@ -189,18 +207,15 @@ class _CreateItemFormState extends State<CreateItemForm> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Item newItem = Item(
-                          id: DateTime.now().millisecondsSinceEpoch,
-                          nombre: nameController.text,
-                          description: descriptionController.text,
-                          link: linkController.text,
-                          serialNumber: serialNumberController.text,
-                          quantity: int.parse(quantityController.text),
-                          quantityOnLoan: 0,
-                          marca: selectedBrand!,
-                          categories: selectedCategories,
-                        );
-                        widget.onFormSubmit(newItem, imageBytes);
+                        widget.onFormSubmit(
+                            name: nameController.text,
+                            description: descriptionController.text,
+                            link: linkController.text,
+                            serialNumber: serialNumberController.text,
+                            quantity: quantityController.text,
+                            brand: selectedBrand,
+                            categories: selectedCategories,
+                            imageBytes: imageBytes);
                       },
                       child: const Text('Crear Item'),
                     ),

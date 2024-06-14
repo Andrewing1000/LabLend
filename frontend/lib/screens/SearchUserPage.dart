@@ -155,7 +155,7 @@ class SearchUserPage extends BrowsablePage {
                   child: Container(
                     padding: const EdgeInsets.all(50),
                     child: FloatingActionButton(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: Theme.of(context).primaryColor,
                       shape: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(200),
                       ),

@@ -70,7 +70,7 @@ class ToolBarState extends State<ToolBar>{
                         topRight: Radius.circular(10)),
                       color: page is BrowsablePage?
                         const Color.fromRGBO(21, 21, 21, 1.0):
-                        Colors.amberAccent,
+                        Theme.of(context).colorScheme.primary,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -128,18 +128,18 @@ class ToolBarState extends State<ToolBar>{
                               ),
                               Container(width: 10,),
 
-                              if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
-                                normalIcon: Icons.notifications_none_outlined,
-                                selectedIcon: Icons.notifications,
-                                size: 25,
-                                isSelected: true,
-                                onPressed: (){
-                                  setState(() {
-                                    throw UnimplementedError();
-                                    ///Implementar
-                                  });
-                                },
-                              ),
+                              // if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
+                              //   normalIcon: Icons.notifications_none_outlined,
+                              //   selectedIcon: Icons.notifications,
+                              //   size: 25,
+                              //   isSelected: true,
+                              //   onPressed: (){
+                              //     setState(() {
+                              //       throw UnimplementedError();
+                              //       ///Implementar
+                              //     });
+                              //   },
+                              // ),
 
                               Container(width: 10,),
                               CircularButton.animated(

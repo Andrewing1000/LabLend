@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/models/User.dart';
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -140,6 +140,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return MaterialApp(
+      theme: AppTheme.lightTheme,
       home: Scaffold(
           body: MultiProvider(
         providers: [

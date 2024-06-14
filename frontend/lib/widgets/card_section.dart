@@ -20,11 +20,7 @@ class CardSection extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.start,
-            style: const TextStyle(
-                fontSize: 25,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
 

@@ -223,7 +223,7 @@ class MainFrameState extends State<MainFrame> {
             Container(
               height: double.infinity,
               width: double.infinity,
-              color: Colors.black,
+              color: Theme.of(context).scaffoldBackgroundColor,
               padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -267,7 +267,7 @@ class MainFrameState extends State<MainFrame> {
                       stops: [ResizeRange(start: 0, end: double.infinity)],
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 21, 21, 1.0),
+                          color: Theme.of(context).canvasColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: pageContainer,
@@ -310,7 +310,7 @@ class MainFrameState extends State<MainFrame> {
                       child: Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: const Color.fromRGBO(21, 21, 21, 1.0),
+                            color: Theme.of(context).canvasColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: sidePanel,
@@ -363,7 +363,7 @@ class MainFrameState extends State<MainFrame> {
                 builder: (context, messageService, child){
                   final messageView = messageService.notification;
                   if(messageView != null && messageService.displaying){
-                    return messageView;
+                    return  messageView;
                   }
                   return Container();
                 },

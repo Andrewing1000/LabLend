@@ -103,8 +103,17 @@ class Item extends ChangeNotifier {
     };
   }
 
-  Future<void> create() async {
-    await SessionManager.inventory.createItem(this);
+  set onLoan(int c){
+    quantityOnLoan = c;
+    notifyListeners();
+  }
+
+  int get onLoan{
+    return quantityOnLoan;
+  }
+
+  Future<Item?> create() async {
+    return await SessionManager.inventory.createItem(this);
   }
 
   Future<Item?> update(Item newItem) async {
@@ -122,6 +131,7 @@ class Item extends ChangeNotifier {
     link = newItem.link;
     serialNumber = newItem.serialNumber;
     quantity = newItem.quantity;
+    quantityOnLoan = newItem.quantityOnLoan;
     marca = newItem.marca;
     categories = newItem.categories;
     imagePath = newItem.imagePath;

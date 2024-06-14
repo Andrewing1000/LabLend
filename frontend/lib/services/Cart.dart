@@ -1,3 +1,4 @@
+import '../models/Item.dart';
 import '../models/Loan.dart';
 import 'package:flutter/foundation.dart';
 import '../models/Session.dart';
@@ -27,6 +28,9 @@ class CheckoutCart with ChangeNotifier {
 
   void removeItem(int itemId) {
     _items.removeWhere((item) => item.itemId == itemId);
+    for(PrestamoItem item in _items){
+      print(item.itemId);
+    }
     notifyListeners();
   }
 
@@ -48,6 +52,12 @@ class CheckoutCart with ChangeNotifier {
       devuelto: false,
       items: _items,
     );
+
+    for(PrestamoItem pItem in _items){
+      Item? item = await SessionManager.inventory.getItemById(pItem.itemId);
+      if(item == null) continue;
+      item.onLoan += pItem.cantidad;
+    }
 
     try {
       await SessionManager.loanService.createLoan(newLoan);

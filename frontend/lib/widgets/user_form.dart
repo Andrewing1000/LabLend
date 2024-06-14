@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/boton_agregar.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:frontend/widgets/password_creation_field.dart';
@@ -49,39 +50,45 @@ class _UserFormState extends State<UserForm> {
 
   @override
   Widget build(BuildContext context) {
+    bool activeSwitch = !updateMode || (!SessionManager().session.user.superAdmin &&
+        SessionManager().session.user.email != widget.user!.email);
+
     return Column(
       children: [
         StringField(
           required: !updateMode,
           enabled: !updateMode,
           controller: emailController,
-          hintText: updateMode ? widget.user!.email! : 'Correo Electrónico',
+          hintText: updateMode ? widget.user!.email : '',
+          labelText: "email",
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           required: !updateMode,
           controller: nameController,
-          hintText: updateMode ? widget.user!.name! : 'Nombre',
+          enabled: activeSwitch,
+          hintText: updateMode ? widget.user!.name : '',
+          labelText: "Nombre",
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         PasswordCreationField(
           controller: passwordController,
           hintText: 'Contraseña',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         DropdownButton<Role>(
           value: selectedRole,
           dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           items: roles.map((Role role) {
             return DropdownMenuItem<Role>(
               value: role,
               child: Text(
                 role.name,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             );
           }).toList(),
@@ -91,8 +98,9 @@ class _UserFormState extends State<UserForm> {
             });
           },
         ),
-        SizedBox(height: 20),
-        Row(
+        const SizedBox(height: 20),
+        if(activeSwitch)
+          Row(
           children: [
             Checkbox(
               value: isActive,
@@ -102,15 +110,15 @@ class _UserFormState extends State<UserForm> {
                 });
               },
               checkColor: Colors.white,
-              activeColor: Colors.green,
+              activeColor: Colors.orange,
             ),
-            Text(
+            const Text(
               'Activo',
               style: TextStyle(color: Colors.white),
             ),
           ],
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         BotonAgregar(
           icon: updateMode ? Icons.update : Icons.add,
           onPressed: () {

@@ -8,6 +8,8 @@ class Inventory {
   static var manager = SessionManager();
   var requestHandler = SessionManager.httpHandler;
 
+  Map<int, Item> _cacheItems = {};
+
   Future<List<Brand>> getBrands() async {
     if (!await isReady()) {
       return [];
@@ -76,13 +78,23 @@ class Inventory {
       return [];
     }
 
-    List<Item> itemList = [];
-    for (var itemData in response.data) {
-      var item = Item.fromJson(itemData);
-      itemList.add(item);
-    }
 
-    return itemList;
+    Map<int, Item> newDict = {};
+    for (var itemData in response.data) {
+      int itemId = itemData['id'];
+
+      if(_cacheItems.containsKey(itemId)){
+        _cacheItems[itemId]!.updateItem(Item.fromJson(itemData));
+        newDict[itemId] = _cacheItems[itemId]!;
+      }
+      else{
+        newDict[itemId] = Item.fromJson(itemData);
+      }
+
+
+    }
+    _cacheItems = newDict;
+    return _cacheItems.values.toList();
   }
 
   Future<Brand?> createBrand(Brand brand) async {
@@ -131,18 +143,13 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-
-    print("Paso1");
     if (!isAdmin()) {
       return null;
     }
-
-    print("Paso2");
     if (!await sessionCheck()) {
       return null;
     }
 
-    print("Paso3");
     try {
       var response = await requestHandler.postRequest('/item/items/', body: item.toJson());
 
@@ -321,9 +328,15 @@ class Inventory {
       return null;
     }
 
+    if(_cacheItems.containsKey(id)){
+      return _cacheItems[id];
+    }
+
     try {
       var response = await requestHandler.getRequest('/item/list/items/$id/');
-      return Item.fromJson(response.data);
+      var item = Item.fromJson(response.data);
+      _cacheItems[id] = item;
+      return item;
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
       return null;

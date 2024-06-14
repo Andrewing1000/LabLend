@@ -39,6 +39,7 @@ class Session {
   }
 
   bool isAdmin(){
+    print('------------------->${user.email}');
     if(user is AdminUser){
       return true;
     }
@@ -105,8 +106,8 @@ class SessionManager with ChangeNotifier {
     messageService.notify(message: notification);
   }
 
-  void confirmNotification(){
-
+  Future<bool> confirmNotification({required String message}) async {
+    return await messageService.confirm(message: message);
   }
 
 

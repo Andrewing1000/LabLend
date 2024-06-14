@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class StringField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
+  final String labelText;
   final double width;
   final bool enabled;
   final bool required;
+  final bool digitsOnly;
 
   const StringField({
     super.key,
     required this.controller,
     required this.hintText,
+    required this.labelText,
     required this.width,
     this.enabled = true,
-    this.required= true,// Valor por defecto de true
+    this.required= true,
+    this.digitsOnly = false,
   });
 
   @override
@@ -40,14 +45,17 @@ class _StringFieldState extends State<StringField> {
       width: widget.width,
       child: TextField(
         controller: widget.controller,
-        enabled: widget.enabled, // Controla si el campo está habilitado o no
+        enabled: widget.enabled,
+        inputFormatters: [
+          if(widget.digitsOnly) FilteringTextInputFormatter.digitsOnly,
+        ],// Controla si el campo está habilitado o no
         style: const TextStyle(color: Colors.white), // Estilo del texto
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.grey[900], // Color de fondo del campo de texto
-          hintText: widget.hintText,
-          hintStyle: const TextStyle(
-              color: Colors.white54), // Estilo del texto de sugerencia
+          fillColor: Colors.grey[900],
+          labelText: widget.labelText,
+          labelStyle: Theme.of(context).textTheme.labelMedium,// Color de fondo del campo de texto
+          hintText: widget.hintText, // Estilo del texto de sugerencia
           errorText: _errorMessage,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(

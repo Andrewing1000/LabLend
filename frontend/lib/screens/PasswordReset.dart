@@ -22,8 +22,9 @@ class RecuperarContrasenaScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               StringField(
+                labelText: "email",
                 controller: emailController,
-                hintText: "Correo Electrónico",
+                hintText: "email",
                 width: 300, // Ancho del campo de texto
               ),
               const SizedBox(height: 20),

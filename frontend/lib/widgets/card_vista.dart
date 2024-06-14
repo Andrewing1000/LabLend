@@ -13,7 +13,7 @@ class CardVista extends StatefulWidget {
   final Function? onEdit;
   final Item item;
 
-  CardVista({
+  const CardVista({
     super.key,
     required this.item,
     this.onTap,

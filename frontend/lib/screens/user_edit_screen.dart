@@ -67,12 +67,13 @@ class EditUserScreenState extends State<EditUserScreen> {
       return;
     }
 
-
-    var res = await widget.user.update(newUser: newUser, password: password.isNotEmpty? password:null);
-    if(res != null){
-      widget.manager?.removePage();
+    final pass = await SessionManager().confirmNotification(message: "Confirmar la edición de usuario");
+    if(pass){
+      var res = await widget.user.update(newUser: newUser, password: password.isNotEmpty? password:null);
+      if(res != null){
+        widget.manager?.removePage();
+      }
     }
-
   }
 
   @override

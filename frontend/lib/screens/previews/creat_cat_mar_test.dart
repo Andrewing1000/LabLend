@@ -15,7 +15,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   final Session session;
 
-  MyApp({required this.session});
+  const MyApp({super.key, required this.session});
 
   @override
   Widget build(BuildContext context) {

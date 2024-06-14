@@ -69,6 +69,7 @@ class CheckoutCartList extends StatelessWidget {
                                   SessionManager().session.user,
                                   DateTime.now(),
                                   DateTime.now().add(const Duration(days: 1)));
+                              Navigator.pop(context);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
@@ -83,6 +84,7 @@ class CheckoutCartList extends StatelessWidget {
                         FloatingActionButton.extended(
                             onPressed: (){
                               cart.clearCart();
+                              Navigator.pop(context);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),

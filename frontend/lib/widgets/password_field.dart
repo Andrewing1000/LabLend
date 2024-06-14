@@ -61,8 +61,8 @@ class _PasswordFieldState extends State<PasswordField> {
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.grey[900], // Color de fondo del campo de texto
-          hintText: widget.hintText,
-          hintStyle: const TextStyle(color: Colors.white54), // Estilo del texto de sugerencia
+          labelStyle: Theme.of(context).textTheme.labelMedium,
+          labelText: 'contraseña',// Estilo del texto de sugerencia
           suffixIcon: IconButton(
             icon: Icon(
               _isObscured ? Icons.visibility_off : Icons.visibility,

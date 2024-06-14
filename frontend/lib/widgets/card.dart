@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/models/User.dart';
@@ -6,13 +7,14 @@ import 'package:provider/provider.dart';
 import '../models/Item.dart';
 
 class CustomCard extends StatefulWidget {
-  static double width = 200;
-  static double height = (9.5 / 7) * width;
+  static double width = 230;
+  static double height = (9 / 7) * width;
 
   Function? onTap;
   Function? onEdit;
+  Function? onDelete;
   Item item;
-  CustomCard({super.key, required this.item, this.onTap, this.onEdit});
+  CustomCard({super.key, required this.item, this.onTap, this.onEdit, this.onDelete});
 
   @override
   State<CustomCard> createState() {
@@ -78,18 +80,22 @@ class CustomCardState extends State<CustomCard> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
-                            Container(
-                                height: CustomCard.height * 5.8 / 9,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.network(
-                                    item.imagePath != null? item.imagePath! : "assets/images/place_holder.png",
-                                    fit: BoxFit.cover,
-                                  ),
-                                )),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Container(
+                                    height: constraints.maxWidth * (CustomCard.height/CustomCard.width) * 6.5 / 9,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.network(
+                                        item.imagePath != null? item.imagePath! : "assets/images/place_holder.png",
+                                        fit: BoxFit.fitHeight,
+                                      ),
+                                    ));
+                              }
+                            ),
                             const SizedBox(
                               height: 5,
                             ),
@@ -128,6 +134,8 @@ class CustomCardState extends State<CustomCard> {
                                     ],
                                   ),
                                 ),
+
+
                                 if(widget.onEdit != null
                                     && SessionManager().session.user is AdminUser)
                                   Flexible(
@@ -145,6 +153,24 @@ class CustomCardState extends State<CustomCard> {
                                       },
                                     )
                                 ),
+
+                                if(widget.onDelete != null
+                                    && SessionManager().session.user is AdminUser)
+                                  Flexible(
+                                      flex: 2,
+                                      fit: FlexFit.tight,
+                                      child: CustomIconButton(
+                                        iconNormal: Icons.delete,
+                                        size: 30,
+                                        isSelected: false,
+                                        onPressed: (){
+                                          final callback = widget.onDelete;
+                                          if(callback != null){
+                                            callback();
+                                          }
+                                        },
+                                      )
+                                  ),
                               ],
                             ),
                           ],

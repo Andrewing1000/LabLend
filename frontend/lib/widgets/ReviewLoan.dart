@@ -66,8 +66,10 @@ class Reviewloan extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         if(!loan.devuelto) FloatingActionButton.extended(
-                            onPressed: (){
-                              SessionManager.loanService.updateDevuelto(loan, true);
+                            onPressed: () async {
+                                await SessionManager.loanService.updateDevuelto(loan, true);
+                                await SessionManager.inventory.getItems();
+                                Navigator.pop(context);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),

@@ -29,11 +29,67 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   final bool _showNotification = false;
   final String _notificationMessage = '';
 
-  Future<void> _createItem(Item item, Uint8List? imageBytes) async {
-    await item.create();
+  Future<void> _createItem(
+      {
+      required String name,
+      required String description,
+      required String link,
+      required String serialNumber,
+      required String quantity,
+      Brand? brand,
+      required List<Category> categories,
+      Uint8List? imageBytes,
+      }) async {
 
-    if(imageBytes == null) return;
-    await SessionManager.inventory.uploadImage(item, imageBytes, "png");
+    if(name.isEmpty){
+      SessionManager().errorNotification(error: "Se requiere el nombre del Item");
+      return;
+    }
+    if(description.isEmpty){
+      SessionManager().errorNotification(error: "Se requiere una descripción del Item");
+      return;
+    }
+    if(serialNumber.isEmpty){
+      SessionManager().errorNotification(error: "Se requiere el código serial del Item");
+      return;
+    }
+    if(quantity.isEmpty){
+      SessionManager().errorNotification(error: "Se requiere la cantidad del Item");
+      return;
+    }
+    if(brand == null){
+      SessionManager().errorNotification(error: "Se requiere especificar la marca");
+      return;
+    }
+
+    int quantityInt = 0;
+    try{
+      quantityInt = int.parse(quantity);
+    }catch(e){
+      SessionManager().errorNotification(error: "La cantidad debe ser un entero");
+      return;
+    }
+
+    Item item = Item(
+      nombre: name,
+      description: description,
+      link: link,
+      quantity: quantityInt,
+      marca: brand,
+      categories: categories,
+      quantityOnLoan: 0,
+      serialNumber: serialNumber,
+    );
+
+
+    final pass = await SessionManager().confirmNotification(message: "Confirmar la creación de item");
+    var res = await item.create();
+    if(imageBytes != null){
+      await SessionManager.inventory.uploadImage(item, imageBytes, 'png');
+    }
+    if (res != null) {
+      widget.manager?.removePage();
+    }
   }
 
   @override

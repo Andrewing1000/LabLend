@@ -37,14 +37,15 @@ class LoginPageState extends State<LoginScreen>{
           mainAxisSize: MainAxisSize.min,
           children: [
             StringField(
+              labelText: "email",
               controller: userController,
-              hintText: "email",
+              hintText: "",
               width: 300, // Ancho del campo de texto
             ),
             const SizedBox(height: 20),
             PasswordField(
               controller: passwordController,
-              hintText: "Contraseña",
+              hintText: "",
               width: 300, // Ancho del campo de texto
             ),
             const SizedBox(height: 20),
@@ -72,7 +73,7 @@ class LoginPageState extends State<LoginScreen>{
               child: const Text(
                 "Recuperar contraseña",
                 style:
-                TextStyle(color: Color.fromARGB(255, 243, 222, 33)),
+                TextStyle(color: Colors.white),
               ),
             ),
             const SizedBox(height: 40),

@@ -33,7 +33,6 @@ class PasswordCreationField extends StatefulWidget {
 
   // Método para evaluar la fuerza de la contraseña
   double getStrength(String password) {
-    if (!isValid(password)) return 0; // Si no es válida, fuerza es 0
 
     double strength = 0;
     final int length = password.length;
@@ -69,14 +68,14 @@ class PasswordCreationField extends StatefulWidget {
       '0123456789'
     ];
     for (String sequence in sequences) {
-      for (int i = 0; i < sequence.length - 3; i++) {
-        if (password.contains(sequence.substring(i, i + 3))) {
+      for (int i = 0; i < sequence.length - 2; i++) {
+        if (password.contains(sequence.substring(i, i + 2))) {
           strength -= 0.1;
         }
       }
     }
 
-    return strength.clamp(0, 1); // Fuerza limitada entre 0 y 1
+    return strength.clamp(0, 1);
   }
 
   @override
@@ -84,23 +83,24 @@ class PasswordCreationField extends StatefulWidget {
 }
 
 // Estado asociado al widget PasswordCreationField
-class _PasswordCreationFieldState extends State<PasswordCreationField> {
+class _PasswordCreationFieldState extends State<PasswordCreationField> with SingleTickerProviderStateMixin{
+  late AnimationController controller;
   bool _isObscured = true; // Estado para controlar si la contraseña está oculta
   double _strength = 0; // Estado para almacenar la fuerza de la contraseña
   bool _isValid = false; // Estado para almacenar la validez de la contraseña
-
   @override
   void initState() {
     super.initState();
+    controller = AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: 500),
+    );
+    controller.addListener((){
+      setState(() {
+      });
+    });
     widget.controller.addListener(
         _updatePasswordCriteria); // Agrega listener para actualizar la fuerza y validez
-  }
-
-  @override
-  void dispose() {
-    widget.controller
-        .removeListener(_updatePasswordCriteria); // Elimina listener
-    super.dispose();
   }
 
   // Método para alternar la visibilidad de la contraseña
@@ -115,8 +115,20 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
     setState(() {
       _strength = widget.getStrength(widget.controller.text);
       _isValid = widget.isValid(widget.controller.text);
+      controller.animateTo(_strength,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.decelerate,
+      );
       //print("Password: ${widget.controller.text}"); // Mostrar la contraseña en la consola
     });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    widget.controller
+        .removeListener(_updatePasswordCriteria);
+    super.dispose();
   }
 
   @override
@@ -133,9 +145,8 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.grey[900], // Color de fondo del campo de texto
-              hintText: widget.hintText,
-              hintStyle: const TextStyle(
-                  color: Colors.white54), // Estilo del texto de sugerencia
+              labelText: 'contraseña',
+              labelStyle: Theme.of(context).textTheme.labelMedium,// Estilo del texto de sugerencia
               suffixIcon: IconButton(
                 icon: Icon(
                   _isObscured ? Icons.visibility_off : Icons.visibility,
@@ -156,25 +167,18 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
         SizedBox(
           width: widget.width, // Ancho de la barra de progreso
           child: LinearProgressIndicator(
-            value: _strength, // Valor de la fuerza de la contraseña
-            backgroundColor: Colors.red,
-            valueColor: AlwaysStoppedAnimation<Color>(_strength < 0.33
-                ? Colors.red
-                : _strength < 0.66
-                    ? Colors.yellow
-                    : Colors.green),
+            value: controller.value, // Valor de la fuerza de la contraseña
+            backgroundColor: Colors.white,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              (_isValid? Colors.greenAccent: Colors.orangeAccent),
+            )),
           ),
-        ),
+        const SizedBox(height: 5),
         const SizedBox(height: 5),
         Text(
-          "Fuerza: ${(_strength * 100).toInt()}%",
-          style: const TextStyle(color: Colors.white),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          _isValid ? "Contraseña valida" : "Contraseña Invalida",
+          _isValid ? "Contraseña válida" : "Contraseña Inválida",
           style: TextStyle(
-            color: _isValid ? Colors.green : Colors.red,
+            color: _isValid ? Colors.greenAccent: Colors.white,
           ),
         ),
       ],

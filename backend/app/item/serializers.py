@@ -13,6 +13,9 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'nombre', 'description']
+        kwargs = {
+            'id' : {'read_only': False}
+        }
 
 class ItemSerializer(serializers.ModelSerializer):
     marca = BrandSerializer()
@@ -49,6 +52,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
         instance.categories.clear()
         for category in categories_data:
+            print("------------------>", category)
             cat, created = Category.objects.get_or_create(**category)
             instance.categories.add(cat)
 

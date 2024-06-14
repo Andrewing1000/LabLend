@@ -35,7 +35,7 @@ class FooterWidget extends StatelessWidget {
                     ),
                   ),
 
-                  Positioned(
+                  const Positioned(
                     left: 20,
                     bottom: 20,
                     child: FadeInText(
@@ -60,11 +60,11 @@ class FooterWidget extends StatelessWidget {
               child: Container(
                 color: Colors.black,
                 padding: const EdgeInsets.all(20.0),
-                child: Row(
+                child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const Flexible(
+                    Flexible(
                       flex: 1,
                       fit:  FlexFit.tight,
                       child: Column(
@@ -92,20 +92,10 @@ class FooterWidget extends StatelessWidget {
                     Flexible(
                       flex: 1,
                       fit:  FlexFit.tight,
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.map, color: Colors.white, size: 30),
-                            onPressed: () =>
-                                _launchURL('https://maps.app.goo.gl/gnNShhurjLcXhvCi8'),
-                          ),
-                          const Text("Ubicación",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
+                      child: SocialMediaIcon(
+                        icon: Icons.map,
+                        label: "Ubicación",
+                        url: 'https://maps.app.goo.gl/gnNShhurjLcXhvCi8',
                       ),
                     ),
                     SizedBox(width: 20),

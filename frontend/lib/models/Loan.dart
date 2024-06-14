@@ -46,8 +46,8 @@ class Loan with ChangeNotifier {
     return Loan.fromJson(toJson());
   }
 
-  void create() {
-    SessionManager.loanService.createLoan(this);
+  Future<Loan?> create() async {
+    return await SessionManager.loanService.createLoan(this);
   }
 
   void update(Loan newPrestamo) {

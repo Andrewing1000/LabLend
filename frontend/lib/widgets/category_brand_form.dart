@@ -3,6 +3,8 @@ import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
 
 class CategoryBrandForm extends StatefulWidget {
+  const CategoryBrandForm({super.key});
+
   @override
   _CategoryBrandFormState createState() => _CategoryBrandFormState();
 }
@@ -70,12 +72,18 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
       await SessionManager.inventory.deleteCategory(_selectedCategory!);
       _loadCategories(); // Refresh categories
     }
+    else{
+      SessionManager().errorNotification(error: "Debe seleccionar una categoría");
+    }
   }
 
   Future<void> _deleteBrand() async {
     if (_selectedBrand != null) {
       await SessionManager.inventory.deleteBrand(_selectedBrand!);
       _loadBrands(); // Refresh brands
+    }
+    else{
+      SessionManager().errorNotification(error: "Debe seleccionar una marca");
     }
   }
 
@@ -89,118 +97,178 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        color: const Color(0xFF121212), // Spotify dark background
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Crear Categoría',
-                style: TextStyle(fontSize: 20, color: Colors.white)),
-            TextField(
-              controller: _categoryNameController,
-              decoration: InputDecoration(
-                labelText: 'Nombre de la Categoría',
-                labelStyle: TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.grey[800],
-                border: OutlineInputBorder(),
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).canvasColor,
+        borderRadius: BorderRadius.circular(10),
+      ),// Spotify dark background
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+
+          const SizedBox(height: 30,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 300,
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _categoryNameController,
+                      decoration: InputDecoration(
+                        labelText: 'Nombre de la Categoría',
+                        labelStyle: const TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.grey[800],
+                        border: const OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _categoryDescriptionController,
+                      decoration: InputDecoration(
+                        labelText: 'Descripción',
+                        labelStyle: const TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.grey[800],
+                        border: const OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: _createCategory,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      child: const Text('Crear Categoría'),
+                    ),
+
+                  ],
+                ),
               ),
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _categoryDescriptionController,
-              decoration: InputDecoration(
-                labelText: 'Descripción',
-                labelStyle: TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.grey[800],
-                border: OutlineInputBorder(),
+
+              const SizedBox(width: 100),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 300
+                ),
+                child: Column(
+                  children: [
+                    DropdownButton<Category>(
+                      value: _selectedCategory,
+                      hint: Text('Seleccionar Categoría',
+                        style: Theme.of(context).textTheme.labelMedium,),
+                      dropdownColor: const Color(0xFF2E2E2E),
+                      onChanged: (Category? newValue) {
+                        setState(() {
+                          _selectedCategory = newValue;
+                        });
+                      },
+                      items: _categories.map((Category category) {
+                        return DropdownMenuItem<Category>(
+                          value: category,
+                          child: Text(category.nombre, style: Theme.of(context).textTheme.bodyMedium,),
+                        );
+                      }).toList(),
+                    ),
+                    ElevatedButton(
+                      onPressed: _deleteCategory,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      child: const Text('Eliminar Categoría'),
+
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+
+          const SizedBox(height: 30,),
+          const Divider(
+            color: Colors.white, // Custom color
+            height: 10, // Space around the divider
+            thickness: 1, // Thickness of the line
+            indent: 0, // Start margin
+            endIndent: 0, // End margin
+          ),
+          const SizedBox(height: 30,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 300,
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _brandNameController,
+                      decoration: InputDecoration(
+                        labelText: 'Nombre de la Marca',
+                        labelStyle: const TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.grey[800],
+                        border: const OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: _createBrand,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      child: const Text('Crear Marca'),
+                    ),
+                  ],
+                ),
               ),
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _createCategory,
-              child: Text('Crear Categoría'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-            ),
-            SizedBox(height: 20),
-            Text('Crear Marca',
-                style: TextStyle(fontSize: 20, color: Colors.white)),
-            TextField(
-              controller: _brandNameController,
-              decoration: InputDecoration(
-                labelText: 'Nombre de la Marca',
-                labelStyle: TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.grey[800],
-                border: OutlineInputBorder(),
-              ),
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _createBrand,
-              child: Text('Crear Marca'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-            ),
-            SizedBox(height: 20),
-            Text('Eliminar Categoría',
-                style: TextStyle(fontSize: 20, color: Colors.white)),
-            DropdownButton<Category>(
-              value: _selectedCategory,
-              hint: Text('Seleccionar Categoría',
-                  style: TextStyle(color: Colors.white70)),
-              dropdownColor: const Color(0xFF2E2E2E),
-              onChanged: (Category? newValue) {
-                setState(() {
-                  _selectedCategory = newValue;
-                });
-              },
-              items: _categories.map((Category category) {
-                return DropdownMenuItem<Category>(
-                  value: category,
-                  child: Text(category.nombre,
-                      style: TextStyle(color: Colors.white)),
-                );
-              }).toList(),
-            ),
-            ElevatedButton(
-              onPressed: _deleteCategory,
-              child: Text('Eliminar Categoría'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-            ),
-            SizedBox(height: 20),
-            Text('Eliminar Marca',
-                style: TextStyle(fontSize: 20, color: Colors.white)),
-            DropdownButton<Brand>(
-              value: _selectedBrand,
-              hint: Text('Seleccionar Marca',
-                  style: TextStyle(color: Colors.white70)),
-              dropdownColor: const Color(0xFF2E2E2E),
-              onChanged: (Brand? newValue) {
-                setState(() {
-                  _selectedBrand = newValue;
-                });
-              },
-              items: _brands.map((Brand brand) {
-                return DropdownMenuItem<Brand>(
-                  value: brand,
-                  child:
-                      Text(brand.marca, style: TextStyle(color: Colors.white)),
-                );
-              }).toList(),
-            ),
-            ElevatedButton(
-              onPressed: _deleteBrand,
-              child: Text('Eliminar Marca'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-            ),
-          ],
-        ),
+
+              const SizedBox(width: 100),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxWidth: 300
+                ),
+                child: Column(
+                  children: [
+                    DropdownButton<Brand>(
+                      value: _selectedBrand,
+                      hint: Text('Seleccionar Marca',
+                          style: Theme.of(context).textTheme.labelMedium
+                      ),
+                      dropdownColor: const Color(0xFF2E2E2E),
+                      onChanged: (Brand? newValue) {
+                        setState(() {
+                          _selectedBrand = newValue;
+                        });
+                      },
+                      items: _brands.map((Brand brand) {
+                        return DropdownMenuItem<Brand>(
+                          value: brand,
+                          child:
+                          Text(brand.marca, style: Theme.of(context).textTheme.bodyMedium),
+                        );
+                      }).toList(),
+                    ),
+                    ElevatedButton(
+                      onPressed: _deleteBrand,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      child: const Text('Eliminar Marca'),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+
+          Expanded(child: Spacer()),
+
+        ],
       ),
     );
   }

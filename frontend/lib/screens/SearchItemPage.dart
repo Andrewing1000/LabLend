@@ -38,15 +38,15 @@ class SearchItemPage extends BrowsablePage {
     return FutureBuilder<List<Item>>(
       future: _fetchItems(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
+        List<Item> items = [];
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator(color: Colors.white,));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No se encontraron items',
-          style: TextStyle(color: Colors.white),));
         } else {
-          List<Item> items = snapshot.data!;
+        if (snapshot.hasData && !snapshot.data!.isEmpty) {
+          items = snapshot.data!;
+        }
           return MultiProvider(
 
             providers: [
@@ -56,33 +56,48 @@ class SearchItemPage extends BrowsablePage {
               builder: (context, sessionManager, child) {
                 return Stack(
                   children: [
-                    CustomScrollView(
+                    if(items.isEmpty)
+                    const Center(child: Text('No se encontraron items',
+                      style: TextStyle(color: Colors.white),)),
+                    if(items.isNotEmpty) CustomScrollView(
                       slivers: <Widget>[
-                        SliverPadding(
-                          padding: const EdgeInsets.all(10.0),
-                          sliver: SliverGrid(
-                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 200.0, // Maximum width of each item
-                              mainAxisSpacing: 10.0, // Spacing between rows
-                              crossAxisSpacing: 10.0, // Spacing between columns
-                              childAspectRatio:
-                                  .5, // Optional: You can adjust this if needed
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
-                                return CustomCard(
-                                  item: items[index],
-                                  onTap: (){
-                                    selectedItem.setItem(items[index]);
+                        StatefulBuilder(
+                          builder: (context, setState) {
+                            return SliverPadding(
+                              padding: const EdgeInsets.all(10.0),
+                              sliver: SliverGrid(
+                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: CustomCard.width, // Maximum width of each item
+                                  mainAxisSpacing: 10.0, // Spacing between rows
+                                  crossAxisSpacing: 10.0, // Spacing between columns
+                                  childAspectRatio: CustomCard.width/CustomCard.height,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (BuildContext context, int index) {
+                                    return CustomCard(
+                                      item: items[index],
+                                      onTap: (){
+                                        selectedItem.setItem(items[index]);
+                                      },
+                                      onEdit: (){
+                                        manager?.setPage(EditItemScreen(item: items[index]));
+                                      },
+                                      onDelete: () async {
+                                        var res = await sessionManager.confirmNotification(
+                                            message: "El item \"${items[index].nombre}\" será eliminado");
+                                        if(!res) return;
+                                        SessionManager.inventory.deleteItem(items[index]);
+                                        items.removeAt(index);
+                                        setState((){});
+
+                                      },
+                                    );
                                   },
-                                  onEdit: (){
-                                    manager?.setPage(EditItemScreen(item: items[index]));
-                                  },
-                                );
-                              },
-                              childCount: items.length, // Number of items in the grid
-                            ),
-                          ),
+                                  childCount: items.length, // Number of items in the grid
+                                ),
+                              ),
+                            );
+                          }
                         ),
                       ],
                     ),
@@ -92,7 +107,7 @@ class SearchItemPage extends BrowsablePage {
                         child: Container(
                           padding: const EdgeInsets.all(30),
                           child: FloatingActionButton(
-                            backgroundColor: Colors.orange,
+                            backgroundColor: Theme.of(context).primaryColor,
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
                             ),

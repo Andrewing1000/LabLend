@@ -61,8 +61,11 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
     }
 
     if(existingItem != null){
-      selectedQuantity = existingItem?.cantidad?? 1;
+      selectedQuantity = existingItem.cantidad;
       isInCart = true;
+    }
+    else{
+      isInCart = false;
     }
 
   }
@@ -82,6 +85,9 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
           }
           item = itemContext.item!;
           _checkIfInCart();
+          if(cart.items.isEmpty){
+            selectedQuantity = 1;
+          }
           return Container(
             width: MediaQuery.of(context).size.width * 0.25,
             color: Colors.transparent,
@@ -210,6 +216,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                             onPressed: selectedQuantity < (item!.quantity - item!.quantityOnLoan)
                                 ? () {
                               setState(() {
+                                if(!isInCart) return;
                                 selectedQuantity++;
                                 if (isInCart) {
                                   widget.cart.addItem(PrestamoItem(itemId: item!.id ?? 1, cantidad: selectedQuantity));
@@ -228,6 +235,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                         ],
                       ),
                       const SizedBox(height: 20),
+
                       if(sessionManager.session.user is! VisitorUser)
                         ElevatedButton(
                         onPressed: () {
@@ -238,13 +246,16 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                           if(selectedQuantity <= (item!.quantity - item!.quantityOnLoan)){
                             cart.addItem(PrestamoItem(itemId: item!.id ?? 1, cantidad: selectedQuantity));
                           }
+                          else{
+                            SessionManager().notification(notification: "No hay suficientes unidades disponibles");
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          backgroundColor: isInCart? Colors.white: Colors.orange,
+                          backgroundColor: isInCart? Colors.white: Theme.of(context).primaryColor,
                         ),
-                        child: Text( isInCart? 'Quitar':'Agregar', style: const TextStyle(
-                            color: Colors.black,
+                        child: Text( isInCart? 'Quitar':'Agregar', style: TextStyle(
+                            color: isInCart? Colors.black: Colors.white,
                             fontSize: 16)),
                       ),
                     ],

@@ -76,10 +76,8 @@ abstract class User extends ChangeNotifier{
   }
 
 
-  void create({required String password}) {
-    print("------------------------->A");
-    SessionManager.userManager.createUser(this, password);
-    return;
+  Future<User?> create({required String password}) async {
+    return await SessionManager.userManager.createUser(this, password);
   }
 
   Future<User?> update({required User newUser, String? password}) async {

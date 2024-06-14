@@ -10,10 +10,17 @@ class SelectedItemContext extends ChangeNotifier{
     return _item != null;
   }
   void setItem(Item item){
+    unsetItem();
     _item = item;
+    item.addListener((){
+      notifyListeners();
+    });
     notifyListeners();
   }
   void unsetItem(){
+    if(_item != null ){
+      _item?.removeListener(notifyListeners);
+    }
     _item = null;
     notifyListeners();
   }

@@ -24,7 +24,12 @@ class AnState extends State<CategoryBrandScreen>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gestión de Categorías y Marcas'),
+        title: Text('Gestión de Categorías y Marcas',
+        style: TextStyle(
+          fontFamily: 'Metropolis',
+          fontSize: 25,
+          fontWeight: FontWeight.w500,
+        ),),
       ),
       body: CategoryBrandForm(),
     );

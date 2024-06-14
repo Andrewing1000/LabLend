@@ -103,6 +103,7 @@ class HomeSections extends ChangeNotifier {
     List<Item> items = await SessionManager.inventory.getItems();
     items.shuffle();
 
+
     List<CardVista> mostSearched = items.take(6).map((item) {
       return CardVista(
         item: item,
@@ -110,14 +111,17 @@ class HomeSections extends ChangeNotifier {
     }).toList();
 
 
-    List<CardVista> newItems = items.sublist(6, 12).map((item) {
+    items.shuffle();
+    List<CardVista> newItems = items.take(6).map((item) {
       return CardVista(
         item: item,
       );
     }).toList();
 
 
-    List<CardVista> recomended = items.sublist(4, 10).map((item) {
+
+    items.shuffle();
+    List<CardVista> recomended = items.take(6).map((item) {
       return CardVista(
         item: item,
       );

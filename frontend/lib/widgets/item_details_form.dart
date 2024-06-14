@@ -156,7 +156,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
                     _buildTextField(serialNumberController, "Número de Serie",
                         newItem.serialNumber),
                     _buildTextField(quantityController, "Cantidad",
-                        newItem.quantity.toString()),
+                        newItem.quantity.toString(), digitsOnly:  true),
                     const SizedBox(height: 20),
                     _buildBrandDropdown(),
                     const SizedBox(height: 20),
@@ -229,13 +229,14 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
   }
 
   Widget _buildTextField(TextEditingController controller, String label,
-      String? initialValue) {
+      String? initialValue, {bool digitsOnly = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: StringField(
-        required: false,
+        digitsOnly: digitsOnly,
         controller: controller,
         hintText: initialValue ?? '',
+        labelText: label,
         width: MediaQuery
             .of(context)
             .size
@@ -337,6 +338,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
                   children: selectedCategories.map((category) {
                     return Chip(
                       label: Text(category.nombre),
+                      backgroundColor: Colors.white,
                       onDeleted: () {
                         setState(() {
                           selectedCategories.remove(category);

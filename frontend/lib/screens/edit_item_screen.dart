@@ -72,14 +72,15 @@ class EditItemScreenState extends State<EditItemScreen> {
       return;
     }
 
-    var res = await item.update(newItem);
-    var resIm = true;
-    if(imageBytes != null){
-      resIm = await SessionManager.inventory.uploadImage(item, imageBytes, 'png');
-    }
-
-    if (res != null && resIm) {
-      widget.manager?.removePage();
+    final pass = await SessionManager().confirmNotification(message: "Confirmar la edición de item");
+    if(pass){
+      var res = await item.update(newItem);
+      if(imageBytes != null){
+        await SessionManager.inventory.uploadImage(item, imageBytes, 'png');
+      }
+      if (res != null) {
+        widget.manager?.removePage();
+      }
     }
   }
 
