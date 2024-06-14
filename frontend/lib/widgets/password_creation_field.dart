@@ -24,7 +24,7 @@ class PasswordCreationField extends StatefulWidget {
         r'[!@#$%^&*(),.?":{}|<>]'); // Verifica si contiene caracteres especiales
 
     // Verifica los requisitos mínimos de la contraseña
-    return password.length >= 8 &&
+    return password.length >= 12 &&
         hasUpperCase.hasMatch(password) &&
         hasLowerCase.hasMatch(password) &&
         hasDigit.hasMatch(password) &&
@@ -33,7 +33,6 @@ class PasswordCreationField extends StatefulWidget {
 
   // Método para evaluar la fuerza de la contraseña
   double getStrength(String password) {
-
     double strength = 0;
     final int length = password.length;
     final RegExp hasUpperCase = RegExp(r'[A-Z]');
@@ -83,7 +82,8 @@ class PasswordCreationField extends StatefulWidget {
 }
 
 // Estado asociado al widget PasswordCreationField
-class _PasswordCreationFieldState extends State<PasswordCreationField> with SingleTickerProviderStateMixin{
+class _PasswordCreationFieldState extends State<PasswordCreationField>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
   bool _isObscured = true; // Estado para controlar si la contraseña está oculta
   double _strength = 0; // Estado para almacenar la fuerza de la contraseña
@@ -92,12 +92,11 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> with Sing
   void initState() {
     super.initState();
     controller = AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 500),
+      vsync: this,
+      duration: Duration(milliseconds: 500),
     );
-    controller.addListener((){
-      setState(() {
-      });
+    controller.addListener(() {
+      setState(() {});
     });
     widget.controller.addListener(
         _updatePasswordCriteria); // Agrega listener para actualizar la fuerza y validez
@@ -115,7 +114,8 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> with Sing
     setState(() {
       _strength = widget.getStrength(widget.controller.text);
       _isValid = widget.isValid(widget.controller.text);
-      controller.animateTo(_strength,
+      controller.animateTo(
+        _strength,
         duration: const Duration(milliseconds: 600),
         curve: Curves.decelerate,
       );
@@ -126,8 +126,7 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> with Sing
   @override
   void dispose() {
     controller.dispose();
-    widget.controller
-        .removeListener(_updatePasswordCriteria);
+    widget.controller.removeListener(_updatePasswordCriteria);
     super.dispose();
   }
 
@@ -146,7 +145,9 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> with Sing
               filled: true,
               fillColor: Colors.grey[900], // Color de fondo del campo de texto
               labelText: 'contraseña',
-              labelStyle: Theme.of(context).textTheme.labelMedium,// Estilo del texto de sugerencia
+              labelStyle: Theme.of(context)
+                  .textTheme
+                  .labelMedium, // Estilo del texto de sugerencia
               suffixIcon: IconButton(
                 icon: Icon(
                   _isObscured ? Icons.visibility_off : Icons.visibility,
@@ -167,18 +168,18 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> with Sing
         SizedBox(
           width: widget.width, // Ancho de la barra de progreso
           child: LinearProgressIndicator(
-            value: controller.value, // Valor de la fuerza de la contraseña
-            backgroundColor: Colors.white,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              (_isValid? Colors.greenAccent: Colors.orangeAccent),
-            )),
-          ),
+              value: controller.value, // Valor de la fuerza de la contraseña
+              backgroundColor: Colors.white,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                (_isValid ? Colors.greenAccent : Colors.orangeAccent),
+              )),
+        ),
         const SizedBox(height: 5),
         const SizedBox(height: 5),
         Text(
           _isValid ? "Contraseña válida" : "Contraseña Inválida",
           style: TextStyle(
-            color: _isValid ? Colors.greenAccent: Colors.white,
+            color: _isValid ? Colors.greenAccent : Colors.white,
           ),
         ),
       ],
