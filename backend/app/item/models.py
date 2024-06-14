@@ -15,7 +15,7 @@ def item_image_file_path(instance, filename):
 
 
 class Brand(models.Model):
-    marca = models.CharField(max_length=100, blank=False, null=False, unique=True)
+    marca = models.CharField(max_length=100, blank=False, null=False,)
 
     def clean(self):
         if self.marca.strip() == "":
@@ -30,7 +30,7 @@ class Brand(models.Model):
 
 
 class Category(models.Model):
-    nombre = models.CharField(max_length=100, unique= True, blank=False, null=False)
+    nombre = models.CharField(max_length=100, blank=False, null=False)
     description = models.TextField(blank=True)
 
     def clean(self):
