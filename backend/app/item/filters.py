@@ -19,7 +19,7 @@ class ItemFilter(filters.FilterSet):
         return queryset.annotate(
             similarity=TrigramSimilarity('nombre', value)
         ).filter(
-            similarity__gt=0.1  # Adjust threshold as needed
+            similarity__gt=0.01  # Adjust threshold as needed
         ).order_by('-similarity')
 
     def filter_queryset(self, queryset):
