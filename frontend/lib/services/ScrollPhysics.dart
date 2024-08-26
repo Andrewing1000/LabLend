@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 class CustomScrollPhysics extends ScrollPhysics {
   final double scrollSpeedFactor;
 
-  CustomScrollPhysics({ScrollPhysics? parent, this.scrollSpeedFactor = 1}) : super(parent: parent);
+  const CustomScrollPhysics({super.parent, this.scrollSpeedFactor = 1});
 
   @override
   CustomScrollPhysics applyTo(ScrollPhysics? ancestor) {

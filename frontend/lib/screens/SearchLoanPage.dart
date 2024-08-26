@@ -1,13 +1,10 @@
-import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/LoanCard.dart';
 import 'package:frontend/widgets/ReviewLoan.dart';
-import 'package:frontend/widgets/card.dart';
 import '../models/Loan.dart';
 import '../models/User.dart';
-import '../models/item.dart';
 
 class SearchLoanPage extends BrowsablePage {
 
@@ -92,7 +89,7 @@ class SearchLoanPage extends BrowsablePage {
                       fit: FlexFit.tight,
                       child: Text(
                         'Usuario',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
                           color: Colors.white,
@@ -107,7 +104,7 @@ class SearchLoanPage extends BrowsablePage {
                       fit: FlexFit.tight,
                       child: Text(
                         'Fecha Préstamo',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
                           color: Colors.white,
@@ -122,7 +119,7 @@ class SearchLoanPage extends BrowsablePage {
                       fit: FlexFit.tight,
                       child: Text(
                         'Fecha Devolución',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
                           color: Colors.white,
@@ -137,7 +134,7 @@ class SearchLoanPage extends BrowsablePage {
                       fit: FlexFit.tight,
                       child: Text(
                         'Estado',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
                           color: Colors.white,

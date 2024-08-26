@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/screens/main_frame.dart';
-
-import 'models/Loan.dart';
-import 'models/item.dart';
-import 'models/User.dart';
-
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
-  runApp(MyApp());
+  runApp(const MyApp());
   var manager = SessionManager();
-  Session session =
-      await manager.login("admin@example.com", "#123#AndresHinojosa#123");
+  Session session = await manager.login("admin@example.com", "#123#AndresHinojosa#123");
 
   ///
   ///
@@ -71,15 +65,16 @@ Future<void> main() async {
   /// Crear item
   // Item dummyItem = Item(
   //   id: 1,
-  //   nombre: 'El cojudo',
+  //   nombre: 'Test',
   //   description: 'This is an example item for testing purposes',
   //   link: 'http://example.com/example-item',
   //   serialNumber: 'SN1234567890',
   //   quantity: 50,
   //   marca: dummyBrand,
   //   categories: dummyCategories,
+  //   quantityOnLoan: 0,
   // );
-  //dummyItem.create();
+  // dummyItem.create();
 
   ///
   ///
@@ -139,23 +134,24 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return MaterialApp(
+      theme: AppTheme.lightTheme,
       home: Scaffold(
-        body: MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: SessionManager()),
-          ],
-          child: Consumer<SessionManager>(
-            builder: (context, sessionManager, child){
-              print("------------------------------------------------->Rascal");
-              return SessionManager.mainFrame;
-            },
-          ),
-        )
-      ),
+          body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: SessionManager()),
+        ],
+        child: Consumer<SessionManager>(
+          builder: (context, sessionManager, child) {
+            return  SessionManager.mainFrame;
+          },
+        ),
+      )),
     );
   }
 }

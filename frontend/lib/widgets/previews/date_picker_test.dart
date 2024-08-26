@@ -3,11 +3,13 @@ import "package:flutter/material.dart";
 import "../CustomDatePicker.dart";
 
 void main(){
-  return runApp(App());
+  return runApp(const App());
 }
 
 
 class App extends StatelessWidget {
+  const App({super.key});
+
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,9 @@ import "dart:ui";
 
 
 import "package:flutter/material.dart";
+import "package:frontend/screens/PageBase.dart";
 import "package:frontend/screens/PasswordReset.dart";
+import "package:frontend/screens/category_brand_screen.dart";
 import "package:frontend/screens/create_item_screen.dart";
 import "package:frontend/screens/create_user.dart";
 import "package:frontend/services/Cart.dart";
@@ -17,7 +19,6 @@ import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
 import "../models/User.dart";
-import "../models/item.dart";
 import "../services/PageManager.dart";
 
 
@@ -58,6 +59,7 @@ class MainFrameState extends State<MainFrame> {
   late SearchUserPage searchUserPage;
   late SearchLoanPage searchLoanPage;
   late CreateItemScreen createItemPage;
+  late CategoryBrandScreen categoryBrandPage;
   late CreateUserScreen createUserPage;
   late ItemInfoWidget sidePanel;
 
@@ -76,6 +78,7 @@ class MainFrameState extends State<MainFrame> {
     searchUserPage = SearchUserPage();
     searchLoanPage = SearchLoanPage();
     createItemPage = CreateItemScreen();
+    categoryBrandPage = CategoryBrandScreen();
     createUserPage = CreateUserScreen();
     pageManager = PageManager(defaultPage: homePage);
     cartList = CheckoutCartList(cart: cart);
@@ -124,6 +127,15 @@ class MainFrameState extends State<MainFrame> {
       ),
 
       NavItem(
+        iconNormal: Icons.category_outlined,
+        iconSelected: Icons.category,
+        onPressed: () {
+          pageManager.setPage(categoryBrandPage as PageBase);
+        },
+        title: "Search",
+        permissions: [Role.adminRole, Role.assistantRole],
+      ),
+      NavItem(
           iconNormal: Icons.people_outline,
           iconSelected: Icons.people,
           onPressed: () {
@@ -141,15 +153,7 @@ class MainFrameState extends State<MainFrame> {
           title: "Search",
           permissions: [Role.adminRole, Role.assistantRole],
       ),
-      NavItem(
-          iconNormal: Icons.info_outline,
-          iconSelected: Icons.info,
-          onPressed: () {
 
-          },
-          title: "Search",
-          permissions: [Role.adminRole, Role.assistantRole],
-      ),
     ];
 
     navBar = VerticalNavbar(iconSize: 30, items: items);
@@ -219,7 +223,7 @@ class MainFrameState extends State<MainFrame> {
             Container(
               height: double.infinity,
               width: double.infinity,
-              color: Colors.black,
+              color: Theme.of(context).scaffoldBackgroundColor,
               padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -263,7 +267,7 @@ class MainFrameState extends State<MainFrame> {
                       stops: [ResizeRange(start: 0, end: double.infinity)],
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 21, 21, 1.0),
+                          color: Theme.of(context).canvasColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: pageContainer,
@@ -304,9 +308,9 @@ class MainFrameState extends State<MainFrame> {
                         //ResizeRange(start: 700, end: double.infinity),
                       ],
                       child: Container(
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: const Color.fromRGBO(21, 21, 21, 1.0),
+                            color: Theme.of(context).canvasColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: sidePanel,
@@ -359,7 +363,7 @@ class MainFrameState extends State<MainFrame> {
                 builder: (context, messageService, child){
                   final messageView = messageService.notification;
                   if(messageView != null && messageService.displaying){
-                    return messageView;
+                    return  messageView;
                   }
                   return Container();
                 },

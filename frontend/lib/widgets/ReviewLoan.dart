@@ -58,7 +58,7 @@ class Reviewloan extends StatelessWidget {
                   fit: FlexFit.tight,
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     color: Colors.white.withAlpha(30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -66,8 +66,10 @@ class Reviewloan extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         if(!loan.devuelto) FloatingActionButton.extended(
-                            onPressed: (){
-                              SessionManager.loanService.updateDevuelto(loan, true);
+                            onPressed: () async {
+                                await SessionManager.loanService.updateDevuelto(loan, true);
+                                await SessionManager.inventory.getItems();
+                                Navigator.pop(context);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
@@ -84,7 +86,7 @@ class Reviewloan extends StatelessWidget {
                           const Center(
                             child: Row(
                               children: [
-                                const Text("Devuelto",
+                                Text("Devuelto",
                                   style: TextStyle(
                                     color: Colors.white,
                                   ),

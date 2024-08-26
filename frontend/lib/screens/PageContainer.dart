@@ -1,8 +1,5 @@
-import 'package:frontend/models/Session.dart';
-import 'package:frontend/services/ContextMessageService.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/HomePage.dart';
 import 'package:frontend/widgets/tool_bar.dart';
 import '../services/PageManager.dart';
 

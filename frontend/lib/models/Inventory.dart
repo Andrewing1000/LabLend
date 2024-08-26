@@ -1,21 +1,21 @@
-import 'dart:convert';
 import 'dart:typed_data';
-import 'item.dart';
+import 'Item.dart';
 import 'Session.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 
 class Inventory {
   static var manager = SessionManager();
-  var session = manager.session;
-  var requestHandler =SessionManager.httpHandler;
+  var requestHandler = SessionManager.httpHandler;
+
+  Map<int, Item> _cacheItems = {};
 
   Future<List<Brand>> getBrands() async {
     if (!await isReady()) {
       return [];
     }
 
-    var response;
+    Response response;
     try {
       response = await requestHandler.getRequest('/item/list/brands/');
     } on DioException catch (e) {
@@ -37,7 +37,7 @@ class Inventory {
       return [];
     }
 
-    var response;
+    Response response;
     try {
       response = await requestHandler.getRequest('/item/list/categories/');
     } on DioException catch (e) {
@@ -70,7 +70,7 @@ class Inventory {
       if (namePattern != null) 'name': namePattern,
     };
 
-    var response;
+    Response response;
     try {
       response = await requestHandler.getRequest('/item/list/items/', query: queryParameters);
     } on DioException catch (e) {
@@ -78,20 +78,30 @@ class Inventory {
       return [];
     }
 
-    List<Item> itemList = [];
-    for (var itemData in response.data) {
-      var item = Item.fromJson(itemData);
-      itemList.add(item);
-    }
 
-    return itemList;
+    Map<int, Item> newDict = {};
+    for (var itemData in response.data) {
+      int itemId = itemData['id'];
+
+      if(_cacheItems.containsKey(itemId)){
+        _cacheItems[itemId]!.updateItem(Item.fromJson(itemData));
+        newDict[itemId] = _cacheItems[itemId]!;
+      }
+      else{
+        newDict[itemId] = Item.fromJson(itemData);
+      }
+
+
+    }
+    _cacheItems = newDict;
+    return _cacheItems.values.toList();
   }
 
   Future<Brand?> createBrand(Brand brand) async {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -112,7 +122,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -133,7 +143,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -202,7 +212,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -210,7 +220,9 @@ class Inventory {
     }
 
     try {
-      var response = await requestHandler.putRequest('/item/items/${item.id}/', body: newItem.toJson());
+      var data = newItem.toJson();
+      data.remove('image');
+      var response = await requestHandler.putRequest('/item/items/${item.id}/', body: data);
       item.updateItem(newItem);
       manager.notification(notification: 'Ítem actualizado con éxito');
       return Item.fromJson(response.data);
@@ -224,7 +236,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -245,7 +257,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -266,7 +278,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!this.isAdmin()) {
+    if (!isAdmin()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -316,9 +328,15 @@ class Inventory {
       return null;
     }
 
+    if(_cacheItems.containsKey(id)){
+      return _cacheItems[id];
+    }
+
     try {
       var response = await requestHandler.getRequest('/item/list/items/$id/');
-      return Item.fromJson(response.data);
+      var item = Item.fromJson(response.data);
+      _cacheItems[id] = item;
+      return item;
     } on DioException catch (e) {
       manager.errorNotification(error: '', details: e.response?.data);
       return null;
@@ -326,14 +344,17 @@ class Inventory {
   }
 
   bool isAdmin() {
+    final session = SessionManager().session;
     return session.isAdmin();
   }
 
   Future<bool> isReady() async {
+    var session = SessionManager().session;
     return await session.isReady();
   }
 
   Future<bool> sessionCheck() async {
+    final session = SessionManager().session;
     return await session.sessionCheck();
   }
 }

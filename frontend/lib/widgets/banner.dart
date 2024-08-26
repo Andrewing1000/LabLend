@@ -1,5 +1,4 @@
 
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
@@ -12,12 +11,12 @@ class BannerWidget extends StatefulWidget {
   final String description;
 
   const BannerWidget({
-    Key? key,
+    super.key,
     this.imageUrl,
     required this.title,
     required this.subtitle,
     required this.description,
-  }) : super(key: key);
+  });
 
   @override
   _BannerWidgetState createState() => _BannerWidgetState();
@@ -67,7 +66,7 @@ class _BannerWidgetState extends State<BannerWidget> {
               children: [
                 Text(
                   widget.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,

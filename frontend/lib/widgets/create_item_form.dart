@@ -1,21 +1,27 @@
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/widgets/icon_button.dart';
 import 'package:frontend/widgets/string_field.dart';
 import 'package:file_picker/file_picker.dart';
 
-import 'banner.dart';
 import 'dart:typed_data' as DartData;
 class CreateItemForm extends StatefulWidget {
-  final Function(Item, DartData.Uint8List?) onFormSubmit;
+  final Function(
+      {
+      required String name,
+      required String description,
+      required String link,
+      required String serialNumber,
+      required String quantity,
+      Brand? brand,
+      required List<Category> categories,
+      Uint8List? imageBytes,
+      }) onFormSubmit;
 
-  const CreateItemForm({Key? key, required this.onFormSubmit})
-      : super(key: key);
+  const CreateItemForm({super.key, required this.onFormSubmit});
 
   @override
   _CreateItemFormState createState() => _CreateItemFormState();
@@ -30,8 +36,8 @@ class _CreateItemFormState extends State<CreateItemForm> {
 
   Brand? selectedBrand;
   List<Category> selectedCategories = [];
-  DartData.Uint8List? imageBytes = null;
-  DartData.Uint8List? placeHolderBytes = null;
+  DartData.Uint8List? imageBytes;
+  DartData.Uint8List? placeHolderBytes;
 
   Future<void> _loadImageBytes() async {
     final DartData.ByteData data = await rootBundle.load('assets/images/place_holder.png');
@@ -52,50 +58,50 @@ class _CreateItemFormState extends State<CreateItemForm> {
         }
         return Column(
           children: [
-            BannerWidget(
-              imageUrl: imageBytes != null? imageBytes! : placeHolderBytes!,
-              title: "Crear Nuevo Item",
-              subtitle: "Complete el formulario para crear un nuevo item",
-              description:
-              "Ingrese los datos del nuevo item en el laboratorio.",
-            ),
             Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Column(
                   children: [
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: nameController,
-                      hintText: 'Nombre del Item',
+                      hintText: '',
+                      labelText: 'Nombre del Item',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: descriptionController,
-                      hintText: 'Descripción',
+                      hintText: '',
+                      labelText: 'Descripción',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
+                      required: false,
                       controller: linkController,
-                      hintText: 'Link',
+                      hintText: '',
+                      labelText: 'Link',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: serialNumberController,
-                      hintText: 'Número de Serie',
+                      hintText: '',
+                      labelText: 'Código de Serie',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     StringField(
                       controller: quantityController,
-                      hintText: 'Cantidad',
+                      hintText: '',
+                      labelText: 'Cantidad',
+                      digitsOnly: true,
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     FutureBuilder<List<Brand>>(
                       future: SessionManager.inventory.getBrands(),
                       builder: (context, AsyncSnapshot<List<Brand>> snapshot) {
@@ -116,10 +122,10 @@ class _CreateItemFormState extends State<CreateItemForm> {
                           builder: (context, setState) {
                             return DropdownButton<Brand>(
                               value: selectedBrand,
-                              hint: Text("Selecciona una Marca",
+                              hint: const Text("Selecciona una Marca",
                                   style: TextStyle(color: Colors.white)),
                               dropdownColor: Colors.grey[900],
-                              style: TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white),
                               items: brands.map((Brand brand) {
                                 return DropdownMenuItem<Brand>(
                                   value: brand,
@@ -137,7 +143,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       }
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     FutureBuilder<List<Category>>(
                       future: SessionManager.inventory.getCategories(),
                       builder: (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
@@ -159,7 +165,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                   hint: const Text("Selecciona Categorías",
                                       style: TextStyle(color: Colors.white)),
                                   dropdownColor: Colors.grey[900],
-                                  style: TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Colors.white),
                                   items: categories.map((Category category) {
                                     return DropdownMenuItem<Category>(
                                       value: category,
@@ -175,12 +181,13 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                     });
                                   },
                                 ),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                                 Wrap(
                                   spacing: 10,
                                   children: selectedCategories.map((category) {
                                     return Chip(
                                       label: Text(category.nombre),
+                                      backgroundColor: Colors.white,
                                       onDeleted: () {
                                         setState(() {
                                           selectedCategories.remove(category);
@@ -197,23 +204,20 @@ class _CreateItemFormState extends State<CreateItemForm> {
                     ),
 
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Item newItem = Item(
-                          id: DateTime.now().millisecondsSinceEpoch,
-                          nombre: nameController.text,
-                          description: descriptionController.text,
-                          link: linkController.text,
-                          serialNumber: serialNumberController.text,
-                          quantity: int.parse(quantityController.text),
-                          quantityOnLoan: 0,
-                          marca: selectedBrand!,
-                          categories: selectedCategories,
-                        );
-                        widget.onFormSubmit(newItem, imageBytes);
+                        widget.onFormSubmit(
+                            name: nameController.text,
+                            description: descriptionController.text,
+                            link: linkController.text,
+                            serialNumber: serialNumberController.text,
+                            quantity: quantityController.text,
+                            brand: selectedBrand,
+                            categories: selectedCategories,
+                            imageBytes: imageBytes);
                       },
-                      child: Text('Crear Item'),
+                      child: const Text('Crear Item'),
                     ),
                   ],
                 ),

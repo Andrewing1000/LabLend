@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-
-import 'card.dart';
 
 class CardSection extends StatelessWidget {
-  List<CustomCard> items;
+  final List<Widget> items;
+  final String title;
 
-  CardSection({super.key, required this.items});
+  const CardSection({super.key,
+    required this.items,
+    required this.title
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 30,
+        Padding(
+          padding: EdgeInsets.fromLTRB(25, 25, 0, 0),
+          child: Text(
+            title,
+            textAlign: TextAlign.start,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ),
-        Text(
-          "Section",
-          textAlign: TextAlign.start,
-          style: TextStyle(fontSize: 30, color: Colors.white),
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        Container(
-          height: CustomCard.height,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: items,
           ),
         ),

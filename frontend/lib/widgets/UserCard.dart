@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/User.dart';
@@ -7,7 +6,7 @@ class UserCard extends StatefulWidget {
   final User user;
   final VoidCallback onTap;
 
-  UserCard({required this.user, required this.onTap});
+  const UserCard({super.key, required this.user, required this.onTap});
 
   @override
   _UserCardState createState() => _UserCardState();
@@ -44,7 +43,7 @@ class _UserCardState extends State<UserCard> {
               return Card(
                 color: isHovered ? Colors.grey[850] : Colors.black,
                 elevation: 5,
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
@@ -66,7 +65,7 @@ class _UserCardState extends State<UserCard> {
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
-                            SizedBox(width: 16),
+                            const SizedBox(width: 16),
                             Text(
                               user.name,
                               style: const TextStyle(
@@ -79,7 +78,7 @@ class _UserCardState extends State<UserCard> {
                           ],
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Flexible(
                         flex: 3,
                         fit: FlexFit.tight,
@@ -94,7 +93,7 @@ class _UserCardState extends State<UserCard> {
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Flexible(
                         flex: 2,
                         fit: FlexFit.tight,

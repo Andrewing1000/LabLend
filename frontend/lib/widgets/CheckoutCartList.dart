@@ -56,7 +56,7 @@ class CheckoutCartList extends StatelessWidget {
                   fit: FlexFit.tight,
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     color: Colors.white.withAlpha(30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -68,7 +68,8 @@ class CheckoutCartList extends StatelessWidget {
                               cart.confirmLoan(
                                   SessionManager().session.user,
                                   DateTime.now(),
-                                  DateTime.now().add(Duration(days: 1)));
+                                  DateTime.now().add(const Duration(days: 1)));
+                              Navigator.pop(context);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
@@ -83,6 +84,7 @@ class CheckoutCartList extends StatelessWidget {
                         FloatingActionButton.extended(
                             onPressed: (){
                               cart.clearCart();
+                              Navigator.pop(context);
                             },
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/Cart.dart';
 import 'Session.dart';
-import 'User.dart';
-import 'item.dart';
 
 
 class Loan with ChangeNotifier {
@@ -48,8 +46,8 @@ class Loan with ChangeNotifier {
     return Loan.fromJson(toJson());
   }
 
-  void create() {
-    SessionManager.loanService.createLoan(this);
+  Future<Loan?> create() async {
+    return await SessionManager.loanService.createLoan(this);
   }
 
   void update(Loan newPrestamo) {

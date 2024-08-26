@@ -6,6 +6,8 @@ import '../widgets/string_field.dart';
 class RecuperarContrasenaScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
 
+  RecuperarContrasenaScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -20,11 +22,12 @@ class RecuperarContrasenaScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               StringField(
+                labelText: "email",
                 controller: emailController,
-                hintText: "Correo Electrónico",
+                hintText: "email",
                 width: 300, // Ancho del campo de texto
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   // Validar el campo
@@ -35,7 +38,7 @@ class RecuperarContrasenaScreen extends StatelessWidget {
                     print("El campo es obligatorio.");
                   }
                 },
-                child: Text("Recuperar"),
+                child: const Text("Recuperar"),
               ),
             ],
           ),

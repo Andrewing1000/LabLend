@@ -15,7 +15,7 @@ def item_image_file_path(instance, filename):
 
 
 class Brand(models.Model):
-    marca = models.CharField(max_length=100, blank=False, null=False)
+    marca = models.CharField(max_length=100, blank=False, null=False,)
 
     def clean(self):
         if self.marca.strip() == "":

@@ -4,9 +4,9 @@ class NotificationWidget extends StatelessWidget {
   final String message;
 
   const NotificationWidget({
-    Key? key,
+    super.key,
     required this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class NotificationWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 10,
@@ -36,7 +36,7 @@ class NotificationWidget extends StatelessWidget {
                 Expanded(
                   child: Text(
                     message,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                     ),

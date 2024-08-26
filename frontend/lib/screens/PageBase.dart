@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import '../models/Session.dart';
 import '../services/PageManager.dart';
 
 abstract class PageBase extends StatefulWidget {
@@ -9,11 +8,10 @@ abstract class PageBase extends StatefulWidget {
   bool disposable;
 
   PageBase({
-    Key? key,
+    super.key,
     this.manager,
     this.child,
-    this.disposable = false}):
-  super(key: key);
+    this.disposable = false});
 
   void onDispose();
   void onSet();
@@ -31,7 +29,7 @@ abstract class BrowsablePage extends PageBase {
     List<Filter> filters = const [],
   }) {
     for (Filter filter in filters) {
-      this.filterSet.add(filter);
+      filterSet.add(filter);
     }
   }
 
@@ -82,7 +80,7 @@ abstract class Filter<T> extends ChangeNotifier {
 
   Filter({
     required this.attributeName,
-    List<T>? items = null,
+    List<T>? items,
     required this.multiple,
     Set<T>? selected,
   }):

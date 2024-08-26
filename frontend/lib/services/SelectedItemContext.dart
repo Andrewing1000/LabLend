@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:frontend/screens/PageContainer.dart';
 
-import '../models/item.dart';
+import '../models/Item.dart';
 
 class SelectedItemContext extends ChangeNotifier{
   Item? _item;
@@ -11,10 +10,17 @@ class SelectedItemContext extends ChangeNotifier{
     return _item != null;
   }
   void setItem(Item item){
+    unsetItem();
     _item = item;
+    item.addListener((){
+      notifyListeners();
+    });
     notifyListeners();
   }
   void unsetItem(){
+    if(_item != null ){
+      _item?.removeListener(notifyListeners);
+    }
     _item = null;
     notifyListeners();
   }

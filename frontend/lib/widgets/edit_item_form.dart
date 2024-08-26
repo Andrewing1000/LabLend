@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/widgets/string_field.dart';
 
 class EditItemForm extends StatefulWidget {
@@ -7,10 +7,10 @@ class EditItemForm extends StatefulWidget {
   final Function(Item) onFormSubmit;
 
   const EditItemForm({
-    Key? key,
+    super.key,
     required this.item,
     required this.onFormSubmit,
-  }) : super(key: key);
+  });
 
   @override
   _EditItemFormState createState() => _EditItemFormState();
@@ -49,39 +49,44 @@ class _EditItemFormState extends State<EditItemForm> {
         StringField(
           controller: nameController,
           hintText: 'Nombre del Item',
+          labelText: 'Nombre del Item',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: descriptionController,
           hintText: 'Descripción',
+          labelText: 'Descripción',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: linkController,
           hintText: 'Link',
+          labelText: 'Link',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: serialNumberController,
-          hintText: 'Número de Serie',
+          hintText: 'Código de Serie',
+          labelText: 'Código de Serie',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         StringField(
           controller: quantityController,
           hintText: 'Cantidad',
+          labelText: 'Cantidad',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         DropdownButton<Brand>(
           value: selectedBrand,
-          hint: Text("Selecciona una Marca",
+          hint: const Text("Selecciona una Marca",
               style: TextStyle(color: Colors.white)),
           dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           items: [
             Brand(id: 1, marca: 'Example Brand A'),
             Brand(id: 2, marca: 'Example Brand B'),
@@ -99,12 +104,12 @@ class _EditItemFormState extends State<EditItemForm> {
             });
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         DropdownButton<Category>(
-          hint: Text("Selecciona Categorías",
+          hint: const Text("Selecciona Categorías",
               style: TextStyle(color: Colors.white)),
           dropdownColor: Colors.grey[900],
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           items: [
             Category(
                 id: 1,
@@ -129,7 +134,7 @@ class _EditItemFormState extends State<EditItemForm> {
             });
           },
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Wrap(
           spacing: 10,
           children: selectedCategories.map((category) {
@@ -143,7 +148,7 @@ class _EditItemFormState extends State<EditItemForm> {
             );
           }).toList(),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
             Item newItem = Item(
@@ -159,7 +164,7 @@ class _EditItemFormState extends State<EditItemForm> {
             );
             widget.onFormSubmit(newItem);
           },
-          child: Text('Actualizar Item'),
+          child: const Text('Actualizar Item'),
         ),
       ],
     );

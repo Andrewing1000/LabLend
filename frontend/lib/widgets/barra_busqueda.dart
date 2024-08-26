@@ -88,10 +88,6 @@ class BarraBusquedaState extends State<BarraBusqueda>{
                             size: BarraBusqueda.height/2,),
                         ),
                         hintText: 'Buscar',
-                        hintStyle: TextStyle(
-                            color: Colors.white.withAlpha(150),
-                            fontSize: BarraBusqueda.height/3.5
-                        ),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
                           vertical: (BarraBusqueda.height - BarraBusqueda.height / 3.5) / 2 - 7,

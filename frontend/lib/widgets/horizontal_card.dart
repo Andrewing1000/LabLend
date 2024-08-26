@@ -8,7 +8,7 @@ class HorizontalCard extends StatefulWidget {
 
   final String title;
 
-  HorizontalCard({super.key, required this.title});
+  const HorizontalCard({super.key, required this.title});
 
   @override
   State<HorizontalCard> createState() {

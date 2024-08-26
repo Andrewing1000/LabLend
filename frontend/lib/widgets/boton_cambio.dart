@@ -12,7 +12,7 @@ class BotonCambio extends StatefulWidget {
 
   // Constructor del widget, que inicializa todos los parámetros requeridos
   const BotonCambio({
-    Key? key,
+    super.key,
     required this.texto,
     required this.colorNormal,
     required this.colorSeleccionado,
@@ -20,7 +20,7 @@ class BotonCambio extends StatefulWidget {
     required this.onPressed,
     required this.seleccionado,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   _BotonCambioState createState() => _BotonCambioState();
@@ -38,10 +38,10 @@ class _BotonCambioState extends State<BotonCambio> {
       },
       // Estilo del botón
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(
+        backgroundColor: WidgetStateProperty.all(
           widget.seleccionado ? widget.colorSeleccionado : widget.colorNormal, // Cambia el color del botón según el estado de seleccionado
         ),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0), // Define el radio de las esquinas del botón
             side: BorderSide(
@@ -56,7 +56,7 @@ class _BotonCambioState extends State<BotonCambio> {
       // Contenido del botón: texto que se muestra
       child: Text(
         widget.texto,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white, // Color del texto
           fontSize: 16, // Tamaño del texto
         ),

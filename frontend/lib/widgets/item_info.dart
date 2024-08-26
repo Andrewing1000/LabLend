@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Loan.dart';
 import 'package:frontend/models/User.dart';
-import 'package:frontend/models/item.dart';
+import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/services/Cart.dart';
 import 'package:frontend/services/PageManager.dart';
@@ -51,7 +51,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
 
   void _checkIfInCart() {
 
-    var existingItem;
+    PrestamoItem? existingItem;
 
     for(PrestamoItem item in widget.cart.items){
       if(item.itemId == this.item?.id){
@@ -60,13 +60,14 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
       }
     }
 
-    if (existingItem != null) {
-        selectedQuantity = existingItem.cantidad;
-        isInCart = true;
-    } else {
-        selectedQuantity = 1;
-        isInCart = false;
+    if(existingItem != null){
+      selectedQuantity = existingItem.cantidad;
+      isInCart = true;
     }
+    else{
+      isInCart = false;
+    }
+
   }
 
   @override
@@ -84,6 +85,9 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
           }
           item = itemContext.item!;
           _checkIfInCart();
+          if(cart.items.isEmpty){
+            selectedQuantity = 1;
+          }
           return Container(
             width: MediaQuery.of(context).size.width * 0.25,
             color: Colors.transparent,
@@ -118,7 +122,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                         alignment: const Alignment(0, -1),
                         child: Container(
                           color: Colors.transparent,
-                          padding: EdgeInsets.fromLTRB(20, 250, 20, 20),
+                          padding: const EdgeInsets.fromLTRB(20, 250, 20, 20),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -137,7 +141,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                                       color: dominantColor.computeLuminance() > 0.5 ?
                                       Colors.black.withAlpha(100) :
                                       Colors.white.withAlpha(100),
-                                      offset: Offset(1.0, 1.0),
+                                      offset: const Offset(1.0, 1.0),
                                     ),
                                   ],
                                 ),
@@ -149,7 +153,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                       Align(
                         alignment: const Alignment(1, 0),
                         child: Container(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           child: IconButton(
                             onPressed: () {
                               itemContext.unsetItem();
@@ -165,7 +169,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Recuadro gris detrás de la información del ítem
                 Container(
                   padding: const EdgeInsets.all(10.0),
@@ -181,7 +185,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                       _buildInfoRow('Cantidad disponible', (item!.quantity - item!.quantityOnLoan).toString()),
                       _buildInfoRow('Número de serie', item!.serialNumber ?? 'No disponible'),
                       _buildInfoRow('Categorías', item!.categories.map((c) => c.nombre).join(', ')),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       // Selector de cantidad y botón para agregar a la lista de compras
                       if(sessionManager.session.user is! VisitorUser)
                         Row(
@@ -199,19 +203,20 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isInCart ? Colors.orange : Colors.white,
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(10),
+                              shape: const CircleBorder(),
+                              padding: const EdgeInsets.all(10),
                             ),
                             child: Icon(Icons.remove, color: isInCart ? Colors.white : Colors.black),
                           ),
                           Text(
                             selectedQuantity.toString(),
-                            style: TextStyle(color: Colors.white, fontSize: 16),
+                            style: const TextStyle(color: Colors.white, fontSize: 16),
                           ),
                           ElevatedButton(
                             onPressed: selectedQuantity < (item!.quantity - item!.quantityOnLoan)
                                 ? () {
                               setState(() {
+                                if(!isInCart) return;
                                 selectedQuantity++;
                                 if (isInCart) {
                                   widget.cart.addItem(PrestamoItem(itemId: item!.id ?? 1, cantidad: selectedQuantity));
@@ -221,15 +226,16 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isInCart ? Colors.orange : Colors.white,
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(10),
+                              shape: const CircleBorder(),
+                              padding: const EdgeInsets.all(10),
                             ),
                             child: Icon(Icons.add, color: isInCart ? Colors.white : Colors.black),
                           ),
-                          if (isInCart) Icon(Icons.check_circle, color: Colors.white, size: 30),
+                          if (isInCart) const Icon(Icons.check_circle, color: Colors.white, size: 30),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
+
                       if(sessionManager.session.user is! VisitorUser)
                         ElevatedButton(
                         onPressed: () {
@@ -240,13 +246,16 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                           if(selectedQuantity <= (item!.quantity - item!.quantityOnLoan)){
                             cart.addItem(PrestamoItem(itemId: item!.id ?? 1, cantidad: selectedQuantity));
                           }
+                          else{
+                            SessionManager().notification(notification: "No hay suficientes unidades disponibles");
+                          }
                         },
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          backgroundColor: isInCart? Colors.white: Colors.orange,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          backgroundColor: isInCart? Colors.white: Theme.of(context).primaryColor,
                         ),
-                        child: Text( isInCart? 'Quitar':'Agregar', style: const TextStyle(
-                            color: Colors.black,
+                        child: Text( isInCart? 'Quitar':'Agregar', style: TextStyle(
+                            color: isInCart? Colors.black: Colors.white,
                             fontSize: 16)),
                       ),
                     ],
@@ -268,12 +277,12 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
         children: [
           Text(
             '$title: ',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, overflow: TextOverflow.ellipsis),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, overflow: TextOverflow.ellipsis),
           ),
           Expanded(
             child: Text(
               content,
-              style: TextStyle(color: Colors.white, fontSize: 16, overflow: TextOverflow.ellipsis),
+              style: const TextStyle(color: Colors.white, fontSize: 16, overflow: TextOverflow.ellipsis),
             ),
           ),
         ],

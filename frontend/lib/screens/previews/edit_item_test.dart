@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/edit_item_screen.dart';
 import 'package:frontend/models/Session.dart';
 
-import '../../models/item.dart';
+import '../../models/Item.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

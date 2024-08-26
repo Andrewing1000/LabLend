@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/card.dart';
 
-import '../../models/item.dart';
+import '../../models/Item.dart';
 
 void main() {
   Item item = Item(

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/banner.dart';
-import 'package:frontend/widgets/notification.dart';
 import 'package:frontend/models/User.dart';
 //import 'package:frontend/models/User.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/widgets/string_field.dart';
 
 import '../widgets/user_form.dart';
 
@@ -69,12 +67,13 @@ class EditUserScreenState extends State<EditUserScreen> {
       return;
     }
 
-
-    var res = await widget.user.update(newUser: newUser, password: password.isNotEmpty? password:null);
-    if(res != null){
-      widget.manager?.removePage();
+    final pass = await SessionManager().confirmNotification(message: "Confirmar la edición de usuario");
+    if(pass){
+      var res = await widget.user.update(newUser: newUser, password: password.isNotEmpty? password:null);
+      if(res != null){
+        widget.manager?.removePage();
+      }
     }
-
   }
 
   @override

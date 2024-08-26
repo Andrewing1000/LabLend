@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '/widgets/boton_cambio.dart'; // Asegúrate de importar correctamente el widget
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: Scaffold(
       backgroundColor: Colors.black,
       body: BotonCambioTest(),
@@ -12,6 +12,8 @@ void main() {
 
 // Clase principal que contiene la lógica y los widgets para la prueba de BotonCambio
 class BotonCambioTest extends StatefulWidget {
+  const BotonCambioTest({super.key});
+
   @override
   _BotonCambioTestState createState() => _BotonCambioTestState();
 }

@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class StringField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
+  final String labelText;
   final double width;
   final bool enabled;
   final bool required;
+  final bool digitsOnly;
 
   const StringField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.hintText,
+    required this.labelText,
     required this.width,
     this.enabled = true,
-    this.required= true,// Valor por defecto de true
-  }) : super(key: key);
+    this.required= true,
+    this.digitsOnly = false,
+  });
 
   @override
   _StringFieldState createState() => _StringFieldState();
@@ -36,18 +41,21 @@ class _StringFieldState extends State<StringField> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width,
       child: TextField(
         controller: widget.controller,
-        enabled: widget.enabled, // Controla si el campo está habilitado o no
-        style: TextStyle(color: Colors.white), // Estilo del texto
+        enabled: widget.enabled,
+        inputFormatters: [
+          if(widget.digitsOnly) FilteringTextInputFormatter.digitsOnly,
+        ],// Controla si el campo está habilitado o no
+        style: const TextStyle(color: Colors.white), // Estilo del texto
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.grey[900], // Color de fondo del campo de texto
-          hintText: widget.hintText,
-          hintStyle: TextStyle(
-              color: Colors.white54), // Estilo del texto de sugerencia
+          fillColor: Colors.grey[900],
+          labelText: widget.labelText,
+          labelStyle: Theme.of(context).textTheme.labelMedium,// Color de fondo del campo de texto
+          hintText: widget.hintText, // Estilo del texto de sugerencia
           errorText: _errorMessage,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(

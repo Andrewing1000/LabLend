@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:provider/provider.dart';
 
 
 
@@ -23,6 +22,7 @@ abstract class User extends ChangeNotifier{
   String name;
   bool isActive;
   Role role;
+  bool superAdmin = false;
 
   User({
         int? id,
@@ -30,8 +30,9 @@ abstract class User extends ChangeNotifier{
         required this.name,
         this.isActive = true,
         this.role = Role.assistantRole}){
-    if(name.isEmpty){
-      name = "Super User";
+    if(name.isEmpty || name == "Super User" || name == "SUPER_USER"){
+      name = "SUPER_USER";
+      superAdmin = true;
     }
   }
 
@@ -75,10 +76,8 @@ abstract class User extends ChangeNotifier{
   }
 
 
-  void create({required String password}) {
-    print("------------------------->A");
-    SessionManager.userManager.createUser(this, password);
-    return;
+  Future<User?> create({required String password}) async {
+    return await SessionManager.userManager.createUser(this, password);
   }
 
   Future<User?> update({required User newUser, String? password}) async {

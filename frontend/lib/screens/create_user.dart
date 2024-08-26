@@ -4,12 +4,13 @@ import 'package:frontend/screens/PageBase.dart';
 // import 'package:frontend/models/Session.dart'; // Comentado para ver solo la vista
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/user_form.dart';
-import 'package:frontend/widgets/notification.dart';
 
 import '../models/User.dart';
 // import 'package:frontend/models/user.dart'; // Comentado para ver solo la vista
 
 class CreateUserScreen extends PageBase{
+  CreateUserScreen({super.key});
+
   @override
   _CreateUserScreenState createState() => _CreateUserScreenState();
 
@@ -29,8 +30,18 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   Future<void> _createUser(String email, String name, String password,
       Role role, bool isActive) async {
-    if (email.isEmpty || name.isEmpty || password.isEmpty) {
-      SessionManager().errorNotification(error: "Tolos los campos son obligatorios");
+    if (email.isEmpty){
+      SessionManager().errorNotification(error: "Se requiere el email de usuario");
+      return;
+    }
+
+    if (name.isEmpty){
+      SessionManager().errorNotification(error: "Se requiere el nombre de usuario");
+      return;
+    }
+
+    if(password.isEmpty) {
+      SessionManager().errorNotification(error: "La contraseña no puede estar vacía");
       return;
     }
 
@@ -41,7 +52,14 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       user = AssistUser(email: email, name: name, isActive: isActive);
     }
 
-    user.create(password: password);
+    final pass = await SessionManager().confirmNotification(message: "Se creará el usuario con email \"$email\"");
+
+    if(pass){
+      var res = user.create(password: password);
+      if(res!=null){
+        widget.manager?.removePage();
+      }
+    }
   }
 
   @override
@@ -51,7 +69,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                BannerWidget(
+                const BannerWidget(
                     imageUrl: null,
                     title: "Registro de usuarios",
                     subtitle: "",
