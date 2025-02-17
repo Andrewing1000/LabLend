@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  app:                                  #Service name
+  app_new:                                  #Service name
     build:
       context: .
       args:
