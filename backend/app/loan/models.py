@@ -15,7 +15,11 @@ class Prestamo(models.Model):
         if self.fecha_devolucion <= self.fecha_prestamo:
             raise ValidationError({'fecha_devolucion': 'La fecha de devolución debe ser posterior a la fecha de préstamo.'})
 
-        # Validar que los items no están prestados en el rango de fechas
+        # Validar que los items no están prestados en el rango de fechas.
+        # Un préstamo nuevo aún no tiene items: cada PrestamoItem valida
+        # su disponibilidad al guardarse.
+        if self.pk is None:
+            return
         for prestamo_item in self.prestamoitem_set.all():
             item = prestamo_item.item
             if prestamo_item.cantidad > (item.quantity - item.quantity_on_loan):

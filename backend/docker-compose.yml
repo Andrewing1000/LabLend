@@ -15,7 +15,6 @@ services:
       sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
-  #  --certificate /etc/ssl/certs/cert.pem --key /etc/ssl/private/key.pem"
 
     environment:
       - DB_HOST=db
@@ -27,9 +26,9 @@ services:
 
 
   db:
-    image: postgres:13-alpine
+    image: postgres:17-alpine
     volumes:
-      - dev-db-data:/var/lib/postgres/data
+      - dev-db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=devdb             #Local dev DataBase configuration for instalation
       - POSTGRES_USER=devuser

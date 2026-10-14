@@ -79,24 +79,23 @@ La aplicación Flutter nunca accede directamente a la base de datos: cada operac
 
 | Capa | Tecnología | Uso en LabLend |
 | --- | --- | --- |
-| Servidor | Python 3.9 | Lenguaje del servidor |
-| Servidor | Django 3.2 | Framework web: ORM, autenticación, sesiones, protección CSRF y panel de administración |
-| Servidor | Django REST Framework 3.12 | API REST, clases de permiso por rol y limitación de solicitudes (throttling) |
-| Servidor | django-filter | Filtros de búsqueda de equipos, préstamos y usuarios |
-| Servidor | django-password-validators | Reglas de complejidad e historial de contraseñas |
-| Servidor | django-cors-headers | Control de orígenes cruzados (CORS) para el cliente web |
-| Servidor | drf-spectacular 0.15 | Documentación OpenAPI y Swagger en /api/docs/ |
-| Servidor | Pillow 8.2 | Manejo de las imágenes de los equipos |
-| Base de datos | PostgreSQL 13 (psycopg2) | Almacenamiento; búsqueda por similitud de texto con la extensión pg_trgm |
+| Servidor | Python 3.12 | Lenguaje del servidor |
+| Servidor | Django 5.2 LTS | Framework web: ORM, autenticación, sesiones, protección CSRF y panel de administración |
+| Servidor | Django REST Framework 3.18 | API REST, clases de permiso por rol y limitación de solicitudes (throttling) |
+| Servidor | django-filter 26.2 | Filtros de búsqueda de equipos, préstamos y usuarios |
+| Servidor | django-password-validators 1.7 | Reglas de complejidad e historial de contraseñas |
+| Servidor | django-cors-headers 4.9 | Control de orígenes cruzados (CORS) para el cliente web |
+| Servidor | drf-spectacular 0.30 | Documentación OpenAPI y Swagger en /api/docs/ |
+| Servidor | Pillow 12.3 | Validación y manejo de las imágenes de los equipos |
+| Base de datos | PostgreSQL 17 (psycopg2 2.9) | Almacenamiento; búsqueda por similitud de texto con la extensión pg_trgm |
 | Cliente | Flutter con Dart 3.3 o superior | Una sola base de código para web, Android, iOS, Windows, Linux y macOS |
 | Cliente | dio 5.1, cookie_jar 4.0, dio_cookie_manager 3.1 | Cliente HTTP y manejo de la cookie de sesión y el token CSRF |
 | Cliente | flutter_secure_storage 5.0 | Almacenamiento cifrado del token CSRF en móviles |
 | Cliente | provider 6.1 | Manejo del estado de la aplicación |
 | Cliente | file_picker 5.0 | Selección de imágenes al registrar equipos |
 | Infraestructura | Docker y Docker Compose | Contenedor de la API (Alpine Linux) y contenedor de PostgreSQL |
-| Infraestructura | OpenSSL y django-sslserver | Certificado autofirmado para pruebas con HTTPS |
 | Herramientas | Git y GitHub | Control de versiones del código |
-| Herramientas | flake8 3.9 | Análisis estático de estilo del código Python |
+| Herramientas | flake8 7 | Análisis estático de estilo del código Python |
 
 ## 6. Problemas o necesidades que el sistema resuelve
 
@@ -145,7 +144,7 @@ La revisión del código del servidor (backend/app) y de la aplicación (fronten
 | D7 | La cookie de sesión se puede leer desde JavaScript (SESSION_COOKIE_HTTPONLY=False) | Cookie HttpOnly y SameSite=Lax, sirviendo la aplicación y la API desde el mismo dominio | 10 (defensa en profundidad) | Pendiente |
 | D8 | El sistema funciona por HTTP con el servidor de desarrollo de Django (runserver) | HTTPS del hosting con HSTS y redirección, y un servidor de producción (Gunicorn) | 10 (seguridad por defecto) | Pendiente |
 | D9 | El panel de administración de Django está activo en /admin/ y permite gestionar usuarios fuera de la aplicación | Desactivarlo en producción: usuarios y roles se gestionan desde la aplicación | 10 (minimizar la superficie de ataque) | Pendiente |
-| D10 | Django 3.2 y Pillow 8.2 ya no reciben parches de seguridad (Django 3.2 perdió soporte en abril de 2024) | Actualizar a Django 5.2 LTS con Python 3.12 y a versiones con soporte de las demás librerías | 10 (seguridad por defecto) | Pendiente |
+| D10 | Django 3.2 y Pillow 8.2 ya no reciben parches de seguridad (Django 3.2 perdió soporte en abril de 2024) | Actualizar a Django 5.2 LTS con Python 3.12 y PostgreSQL 17, y a versiones con soporte de las demás librerías | 10 (seguridad por defecto) | Implementado |
 
 ### 8.2 Usuarios y autenticación
 

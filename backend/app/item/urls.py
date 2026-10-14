@@ -7,9 +7,10 @@ router = DefaultRouter()
 router.register(r'brands', BrandViewSet)
 router.register(r'categories', CategoryViewSet)
 router.register(r'items', ItemViewSet)
-router.register(r'list/categories', ListCategoriesView)
-router.register(r'list/brands', ListBrandsView)
-router.register(r'list/items', ListItemsView)
+router.register(r'list/categories', ListCategoriesView,
+                basename='list-category')
+router.register(r'list/brands', ListBrandsView, basename='list-brand')
+router.register(r'list/items', ListItemsView, basename='list-item')
 urlpatterns = [
     path('', include(router.urls)),
 ]
