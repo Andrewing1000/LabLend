@@ -129,54 +129,63 @@ Al terminar la reingeniería, LabLend tendrá 9 módulos: 7 que ya existen y 2 n
 
 ## 8. Alcance de la reingeniería del sistema
 
-La revisión del código del servidor (backend/app) y de la aplicación (frontend/lib) encontró 27 deficiencias de seguridad, y la reingeniería planifica corregirlas todas. Cada fila indica la deficiencia, su corrección y la sección donde se demuestra; la columna Estado indica el avance al 14 de octubre de 2026.
+La revisión del código del servidor (backend/app) y de la aplicación (frontend/lib) encontró 29 deficiencias de seguridad, y la reingeniería planifica corregirlas todas. Cada fila indica la deficiencia, su corrección, la sección donde se demuestra y su categoría en el [OWASP Top 10:2025](https://top10.owasp.org/2025); la columna Estado indica el avance al 14 de octubre de 2026.
+
+Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfiguration, A03 Software Supply Chain Failures, A04 Cryptographic Failures, A06 Insecure Design, A07 Authentication Failures, A09 Security Logging and Alerting Failures, A10 Mishandling of Exceptional Conditions. La revisión no encontró casos de A05 Injection ni de A08 Software or Data Integrity Failures: el código no usa SQL directo, y todas las consultas pasan por el ORM de Django, que trata los datos del usuario como parámetros.
 
 ### 8.1 Configuración, secretos y despliegue
 
-| N.º | Deficiencia encontrada | Corrección | Se demuestra en | Estado |
-| --- | --- | --- | --- | --- |
-| D1 | La clave secreta de Django (SECRET_KEY) está escrita en settings.py y publicada en GitHub | Leerla de una variable de entorno y generar una nueva | 10 (seguridad por defecto) | Pendiente |
-| D2 | La contraseña del correo Gmail está en settings.py, y docker-compose.yml usa las credenciales de base de datos de ejemplo (changeme) | Variables de entorno en un archivo .env fuera del repositorio; cambiar las contraseñas expuestas, que siguen en el historial de git | 10 (seguridad por defecto) | Pendiente |
-| D3 | Cada migración crea un superusuario con correo y contraseña fijos, escritos en core/models.py y core/signals.py | Eliminar la creación automática; la cuenta inicial es un administrador de seguridad creado con un comando, con una contraseña generada y guardada en el gestor de contraseñas | 9.3 y 10 (mecanismo menos común) | Pendiente |
-| D4 | La aplicación Flutter inicia sesión como superadministrador al arrancar, con esa contraseña escrita en frontend/lib/main.dart, así que todos los usuarios comparten la misma cuenta | Eliminar el inicio automático: cada persona entra por la pantalla de login con su propia cuenta | 10 (mecanismo menos común) | Pendiente |
-| D5 | DEBUG=True: ante un error, el servidor muestra el código, la configuración y las rutas | DEBUG=False en producción y ALLOWED_HOSTS limitado al dominio del hosting | 10 (fallar de forma segura) | Pendiente |
-| D6 | CORS acepta peticiones con credenciales desde cualquier origen | Aceptar solo el dominio del sistema | 10 (minimizar la superficie de ataque) | Pendiente |
-| D7 | La cookie de sesión se puede leer desde JavaScript (SESSION_COOKIE_HTTPONLY=False) | Cookie HttpOnly y SameSite=Lax, sirviendo la aplicación y la API desde el mismo dominio | 10 (defensa en profundidad) | Pendiente |
-| D8 | El sistema funciona por HTTP con el servidor de desarrollo de Django (runserver) | HTTPS del hosting con HSTS y redirección, y un servidor de producción (Gunicorn) | 10 (seguridad por defecto) | Pendiente |
-| D9 | El panel de administración de Django está activo en /admin/ y permite gestionar usuarios fuera de la aplicación | Desactivarlo en producción: usuarios y roles se gestionan desde la aplicación | 10 (minimizar la superficie de ataque) | Pendiente |
-| D10 | Django 3.2 y Pillow 8.2 ya no reciben parches de seguridad (Django 3.2 perdió soporte en abril de 2024) | Actualizar a Django 5.2 LTS con Python 3.12 y PostgreSQL 17, y a versiones con soporte de las demás librerías | 10 (seguridad por defecto) | Implementado |
+| N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
+| --- | --- | --- | --- | --- | --- |
+| D1 | La clave secreta de Django (SECRET_KEY) está escrita en settings.py y publicada en GitHub | Leerla de una variable de entorno y generar una nueva | 10 (seguridad por defecto) | A04 | Pendiente |
+| D2 | La contraseña del correo Gmail está en settings.py, y docker-compose.yml usa las credenciales de base de datos de ejemplo (changeme) | Variables de entorno en un archivo .env fuera del repositorio; cambiar las contraseñas expuestas, que siguen en el historial de git | 10 (seguridad por defecto) | A02 | Pendiente |
+| D3 | Cada migración crea un superusuario con correo y contraseña fijos, escritos en core/models.py y core/signals.py | Eliminar la creación automática; la cuenta inicial es un administrador de seguridad creado con un comando, con una contraseña generada y guardada en el gestor de contraseñas | 9.3 y 10 (mecanismo menos común) | A07 | Pendiente |
+| D4 | La aplicación Flutter inicia sesión como superadministrador al arrancar, con esa contraseña escrita en frontend/lib/main.dart, así que todos los usuarios comparten la misma cuenta | Eliminar el inicio automático: cada persona entra por la pantalla de login con su propia cuenta | 10 (mecanismo menos común) | A07 | Pendiente |
+| D5 | DEBUG=True: ante un error, el servidor muestra el código, la configuración y las rutas | DEBUG=False en producción y ALLOWED_HOSTS limitado al dominio del hosting | 10 (fallar de forma segura) | A02 | Pendiente |
+| D6 | CORS acepta peticiones con credenciales desde cualquier origen | Aceptar solo el dominio del sistema | 10 (minimizar la superficie de ataque) | A01 | Pendiente |
+| D7 | La cookie de sesión se puede leer desde JavaScript (SESSION_COOKIE_HTTPONLY=False) | Cookie HttpOnly y SameSite=Lax, sirviendo la aplicación y la API desde el mismo dominio | 10 (defensa en profundidad) | A02 | Pendiente |
+| D8 | El sistema funciona por HTTP con el servidor de desarrollo de Django (runserver) | HTTPS del hosting con HSTS y redirección, y un servidor de producción (Gunicorn) | 10 (seguridad por defecto) | A04 | Pendiente |
+| D9 | El panel de administración de Django está activo en /admin/ y permite gestionar usuarios fuera de la aplicación | Desactivarlo en producción: usuarios y roles se gestionan desde la aplicación | 10 (minimizar la superficie de ataque) | A02 | Pendiente |
+| D10 | Django 3.2 y Pillow 8.2 ya no reciben parches de seguridad (Django 3.2 perdió soporte en abril de 2024) | Actualizar a Django 5.2 LTS con Python 3.12 y PostgreSQL 17, y a versiones con soporte de las demás librerías | 10 (seguridad por defecto) | A03 | Implementado |
 
 ### 8.2 Usuarios y autenticación
 
-| N.º | Deficiencia encontrada | Corrección | Se demuestra en | Estado |
-| --- | --- | --- | --- | --- |
-| D11 | No existe un código de usuario: se inicia sesión con el correo | Código de usuario (User ID) con formato estándar, generado al crear la cuenta y usado para iniciar sesión | 9.1 | Pendiente |
-| D12 | El login responde distinto si el correo no existe (404) o si la contraseña es incorrecta (401), lo que permite averiguar qué correos están registrados | Un solo mensaje genérico para ambos casos | 10 (fallar de forma segura) | Pendiente |
-| D13 | Un administrador de laboratorio puede editar cualquier cuenta, incluida la del superadministrador, y cambiarle la contraseña (/user/manage/) | Solo el administrador de seguridad gestiona cuentas, y nadie puede modificar una cuenta con más privilegios que la suya | 9.1 y 10 (mínimo privilegio) | Pendiente |
-| D14 | Un usuario puede cambiar su correo y su contraseña sin confirmar la contraseña actual (/user/me/) | Pedir la contraseña actual para cambiar la contraseña o el correo | 9.3 | Pendiente |
+| N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
+| --- | --- | --- | --- | --- | --- |
+| D11 | No existe un código de usuario: se inicia sesión con el correo | Código de usuario (User ID) con formato estándar, generado al crear la cuenta y usado para iniciar sesión | 9.1 | — (requisito del curso) | Pendiente |
+| D12 | El login responde distinto si el correo no existe (404) o si la contraseña es incorrecta (401), lo que permite averiguar qué correos están registrados | Un solo mensaje genérico para ambos casos | 10 (fallar de forma segura) | A07 | Pendiente |
+| D13 | Un administrador de laboratorio puede editar cualquier cuenta, incluida la del superadministrador, y cambiarle la contraseña (/user/manage/) | Solo el administrador de seguridad gestiona cuentas, y nadie puede modificar una cuenta con más privilegios que la suya | 9.1 y 10 (mínimo privilegio) | A01 | Pendiente |
+| D14 | Un usuario puede cambiar su correo y su contraseña sin confirmar la contraseña actual (/user/me/) | Pedir la contraseña actual para cambiar la contraseña o el correo | 9.3 | A07 | Pendiente |
 
 ### 8.3 Roles y permisos
 
-| N.º | Deficiencia encontrada | Corrección | Se demuestra en | Estado |
-| --- | --- | --- | --- | --- |
-| D15 | Solo hay dos roles fijos en el código (core/models.py), y no se pueden crear, editar ni eliminar roles | Control de acceso basado en roles (RBAC): roles guardados en la base de datos, con permisos por función, administrados desde la aplicación; un usuario puede tener uno o varios roles | 9.2 | Pendiente |
-| D16 | Cada vista compara el nombre del rol por su cuenta (IsLabAdmin), y los permisos declarados en el modelo LabAdmin no se usan | Un único mecanismo que verifica, en cada petición, el permiso de la función solicitada | 9.2 y 10 (economía del mecanismo, mediación completa) | Pendiente |
-| D17 | La aplicación Flutter arma su menú con nombres de rol fijos (frontend/lib/models/User.dart) y muestra opciones que el servidor luego rechaza, como marcas y categorías al asistente | Menú construido a partir de los permisos que devuelve el servidor | 9.2 y 10 (menos asombro) | Pendiente |
-| D18 | El mismo administrador gestiona el inventario y las cuentas de usuario | Rol de administrador de seguridad, separado del administrador de laboratorio, y una regla que impide asignar ambos roles al mismo usuario | 9.2 y 10 (segregación de roles) | Pendiente |
-| D19 | No existe una matriz de accesos documentada | Matriz de accesos por rol y función, verificable en la aplicación | 9.2 | Pendiente |
-| D27 | El superusuario de Django pasa todas las comprobaciones de permisos, y el código le agrega excepciones explícitas (isAdmin e IsLogged en core/models.py) | Eliminar el superusuario: ninguna cuenta queda fuera de RBAC; el rol de administrador de seguridad queda protegido y no se puede eliminar | 9.2 y 10 (mínimo privilegio, mediación completa) | Pendiente |
+| N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
+| --- | --- | --- | --- | --- | --- |
+| D15 | Solo hay dos roles fijos en el código (core/models.py), y no se pueden crear, editar ni eliminar roles | Control de acceso basado en roles (RBAC): roles guardados en la base de datos, con permisos por función, administrados desde la aplicación; un usuario puede tener uno o varios roles | 9.2 | A01 | Pendiente |
+| D16 | Cada vista compara el nombre del rol por su cuenta (IsLabAdmin), y los permisos declarados en el modelo LabAdmin no se usan | Un único mecanismo que verifica, en cada petición, el permiso de la función solicitada | 9.2 y 10 (economía del mecanismo, mediación completa) | A01 | Pendiente |
+| D17 | La aplicación Flutter arma su menú con nombres de rol fijos (frontend/lib/models/User.dart) y muestra opciones que el servidor luego rechaza, como marcas y categorías al asistente | Menú construido a partir de los permisos que devuelve el servidor | 9.2 y 10 (menos asombro) | A01 | Pendiente |
+| D18 | El mismo administrador gestiona el inventario y las cuentas de usuario | Rol de administrador de seguridad, separado del administrador de laboratorio, y una regla que impide asignar ambos roles al mismo usuario | 9.2 y 10 (segregación de roles) | A01 | Pendiente |
+| D19 | No existe una matriz de accesos documentada | Matriz de accesos por rol y función, verificable en la aplicación | 9.2 | A01 | Pendiente |
+| D27 | El superusuario de Django pasa todas las comprobaciones de permisos, y el código le agrega excepciones explícitas (isAdmin e IsLogged en core/models.py) | Eliminar el superusuario: ninguna cuenta queda fuera de RBAC; el rol de administrador de seguridad queda protegido y no se puede eliminar | 9.2 y 10 (mínimo privilegio, mediación completa) | A01 | Pendiente |
 
 ### 8.4 Contraseñas
 
-| N.º | Deficiencia encontrada | Corrección | Se demuestra en | Estado |
-| --- | --- | --- | --- | --- |
-| D20 | Al cambiar una contraseña no se valida la política (UserSerializer.update en user/serializers.py) | Validar la política en toda creación y cambio de contraseña | 9.3 | Pendiente |
-| D21 | Las contraseñas no vencen | Vencimiento a los 90 días, con cambio obligatorio | 9.3 | Pendiente |
-| D22 | El historial de contraseñas está instalado pero no configurado, así que se puede reutilizar una contraseña anterior | Impedir reutilizar las últimas 5 contraseñas | 9.3 | Pendiente |
-| D23 | No hay bloqueo de cuenta, solo un límite de 3 intentos por minuto que se reinicia solo | Bloquear la cuenta al tercer intento fallido | 9.3 | Pendiente |
-| D24 | No se puede desbloquear una cuenta ni reiniciar una contraseña, y el botón "Recuperar contraseña" no hace nada | Desbloqueo y reinicio por el administrador de seguridad, con contraseña temporal y cambio obligatorio al ingresar | 9.3 y 10 (menos asombro) | Pendiente |
-| D25 | El algoritmo de hash de contraseñas no está definido ni documentado (se usa PBKDF2-SHA256 por omisión) | Definir y documentar el algoritmo (Argon2 o PBKDF2-SHA256) | 9.3 | Pendiente |
-| D26 | No hay un procedimiento para generar ni resguardar las contraseñas de los usuarios: el administrador las escribe a mano | Generarlas automáticamente y guardarlas en un gestor de contraseñas, por ejemplo Bitwarden o KeePassXC | 9.3 | Pendiente |
+| N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
+| --- | --- | --- | --- | --- | --- |
+| D20 | Al cambiar una contraseña no se valida la política (UserSerializer.update en user/serializers.py) | Validar la política en toda creación y cambio de contraseña | 9.3 | A07 | Pendiente |
+| D21 | Las contraseñas no vencen | Vencimiento a los 90 días, con cambio obligatorio | 9.3 | A07 | Pendiente |
+| D22 | El historial de contraseñas está instalado pero no configurado, así que se puede reutilizar una contraseña anterior | Impedir reutilizar las últimas 5 contraseñas | 9.3 | A07 | Pendiente |
+| D23 | No hay bloqueo de cuenta, solo un límite de 3 intentos por minuto que se reinicia solo | Bloquear la cuenta al tercer intento fallido | 9.3 | A07 | Pendiente |
+| D24 | No se puede desbloquear una cuenta ni reiniciar una contraseña, y el botón "Recuperar contraseña" no hace nada | Desbloqueo y reinicio por el administrador de seguridad, con contraseña temporal y cambio obligatorio al ingresar | 9.3 y 10 (menos asombro) | A07 | Pendiente |
+| D25 | El algoritmo de hash de contraseñas no está definido ni documentado (se usa PBKDF2-SHA256 por omisión) | Definir y documentar el algoritmo (Argon2 o PBKDF2-SHA256) | 9.3 | A04 | Pendiente |
+| D26 | No hay un procedimiento para generar ni resguardar las contraseñas de los usuarios: el administrador las escribe a mano | Generarlas automáticamente y guardarlas en un gestor de contraseñas, por ejemplo Bitwarden o KeePassXC | 9.3 | A06 | Pendiente |
+
+### 8.5 Registro de eventos y manejo de errores
+
+| N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
+| --- | --- | --- | --- | --- | --- |
+| D28 | Solo se registran el inicio y el cierre de sesión: los intentos fallidos, los bloqueos, los desbloqueos y los cambios de roles y permisos no dejan rastro | Registrar estos eventos de seguridad con fecha, usuario y acción, consultables por el administrador de seguridad | 9.2 y 9.3 | A09 | Pendiente |
+| D29 | Si una validación del modelo falla, por ejemplo un préstamo con la fecha de devolución anterior a la de préstamo, la API responde con error 500 en lugar de 400 y, con DEBUG activo, muestra la traza completa | Convertir los errores de validación en respuestas 400 con un mensaje claro, y registrar los errores inesperados sin mostrar detalles internos | 10 (fallar de forma segura) | A10 | Pendiente |
 
 ## Enlaces
 
