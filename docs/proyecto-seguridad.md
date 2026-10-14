@@ -185,7 +185,7 @@ Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfigurati
 | N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
 | --- | --- | --- | --- | --- | --- |
 | D28 | Solo se registran el inicio y el cierre de sesión: los intentos fallidos, los bloqueos, los desbloqueos y los cambios de roles y permisos no dejan rastro | Registrar estos eventos de seguridad con fecha, usuario y acción, consultables por el administrador de seguridad | 9.2 y 9.3 | A09 | Pendiente |
-| D29 | Si una validación del modelo falla, por ejemplo un préstamo con la fecha de devolución anterior a la de préstamo, la API responde con error 500 en lugar de 400 y, con DEBUG activo, muestra la traza completa | Convertir los errores de validación en respuestas 400 con un mensaje claro, y registrar los errores inesperados sin mostrar detalles internos | 10 (fallar de forma segura) | A10 | Pendiente |
+| D29 | Si una validación del modelo falla, por ejemplo un préstamo con la fecha de devolución anterior a la de préstamo, la API responde con error 500 en lugar de 400 y, con DEBUG activo, muestra la traza completa | Convertir los errores de validación en respuestas 400 con un mensaje claro, revertir el préstamo completo si falla, y registrar los errores inesperados sin mostrar detalles internos | 10 (fallar de forma segura) | A10 | Implementado |
 
 ## Enlaces
 

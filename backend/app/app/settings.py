@@ -177,6 +177,8 @@ REST_FRAMEWORK = {
 
     'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema',
 
+    'EXCEPTION_HANDLER': 'core.exceptions.api_exception_handler',
+
     'DEFAULT_THROTTLE_CLASSES': [
 
         'rest_framework.throttling.AnonRateThrottle',
@@ -194,6 +196,17 @@ REST_FRAMEWORK = {
         'login' : '3/min',
     },
 
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        'core': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

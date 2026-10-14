@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from .models import Prestamo, PrestamoItem
 from item.serializers import ItemSerializer
@@ -23,6 +24,9 @@ class PrestamoSerializer(serializers.ModelSerializer):
         model = Prestamo
         fields = ['id', 'usuario', 'fecha_prestamo', 'fecha_devolucion', 'devuelto', 'items']
 
+    # Si falla la validación de un ítem, se revierte todo el préstamo y su
+    # efecto en el stock.
+    @transaction.atomic
     def create(self, validated_data):
         items_data = validated_data.pop('prestamoitem_set')
         usuario = self.context['request'].user
@@ -32,6 +36,7 @@ class PrestamoSerializer(serializers.ModelSerializer):
             PrestamoItem.objects.create(prestamo=prestamo, item=item, cantidad=item_data['cantidad'])
         return prestamo
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         request = self.context['request']
 
