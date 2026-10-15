@@ -62,8 +62,8 @@ class _EditItemFormState extends State<EditItemForm> {
         const SizedBox(height: 20),
         StringField(
           controller: linkController,
-          hintText: 'Link',
-          labelText: 'Link',
+          hintText: 'Enlace',
+          labelText: 'Enlace',
           width: MediaQuery.of(context).size.width * 0.8,
         ),
         const SizedBox(height: 20),

@@ -37,7 +37,7 @@ class LoginPageState extends State<LoginScreen>{
           mainAxisSize: MainAxisSize.min,
           children: [
             StringField(
-              labelText: "email",
+              labelText: "Correo electrónico",
               controller: userController,
               hintText: "",
               width: 300, // Ancho del campo de texto

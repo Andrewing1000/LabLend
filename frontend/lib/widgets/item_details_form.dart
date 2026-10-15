@@ -152,7 +152,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
                     _buildTextField(nameController, "Nombre", newItem.nombre),
                     _buildTextField(descriptionController, "Descripción",
                         newItem.description),
-                    _buildTextField(linkController, "Link", newItem.link),
+                    _buildTextField(linkController, "Enlace", newItem.link),
                     _buildTextField(serialNumberController, "Número de Serie",
                         newItem.serialNumber),
                     _buildTextField(quantityController, "Cantidad",

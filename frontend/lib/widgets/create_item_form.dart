@@ -83,7 +83,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       required: false,
                       controller: linkController,
                       hintText: '',
-                      labelText: 'Link',
+                      labelText: 'Enlace',
                       width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(height: 20),

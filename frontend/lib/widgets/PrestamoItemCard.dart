@@ -138,7 +138,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  item!.serialNumber ?? 'No serial number',
+                                  item!.serialNumber ?? 'Sin número de serie',
                                   style: const TextStyle(
                                     color: Colors.white54,
                                     fontSize: 12,

@@ -158,7 +158,7 @@ class SessionManager with ChangeNotifier {
     if(_session is! AnonymousSession){
       if(await sessionCheck()){
         if(_session.user.email == email){
-          notification(notification: "Ya ha iniciado seción.");
+          notification(notification: "Ya ha iniciado sesión.");
           return _session;
         }
         else{

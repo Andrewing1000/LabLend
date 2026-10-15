@@ -93,7 +93,7 @@ class UserManager {
     }
 
     if (password.isEmpty) {
-      manager.errorNotification(error: 'El password no puede estar vacío');
+      manager.errorNotification(error: 'La contraseña no puede estar vacía');
       return null;
     }
 

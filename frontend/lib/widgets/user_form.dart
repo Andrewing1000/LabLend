@@ -60,7 +60,7 @@ class _UserFormState extends State<UserForm> {
           enabled: !updateMode,
           controller: emailController,
           hintText: updateMode ? widget.user!.email : '',
-          labelText: "email",
+          labelText: "Correo electrónico",
           width: MediaQuery.of(context).size.width * 0.8,
         ),
         const SizedBox(height: 20),
