@@ -29,13 +29,33 @@ El backend lee sus secretos de `backend/.env`, que no se sube a git. Desde la ra
 cp backend/.env.example backend/.env
 ```
 
-Genera una clave secreta para Django:
+Genera un valor aleatorio con este comando. Ejecútalo dos veces: un valor es para `DJANGO_SECRET_KEY` y el otro para `DB_PASS`:
 
 ```bash
 docker run --rm python:3.12-alpine3.23 python -c "import secrets; print(secrets.token_urlsafe(50))"
 ```
 
-Pégala en `backend/.env` como valor de `DJANGO_SECRET_KEY`. Cada instalación usa su propia clave: no la compartas ni la subas a git. Sin ella el backend no arranca (`ImproperlyConfigured: Falta DJANGO_SECRET_KEY`).
+| Variable en `backend/.env` | Valor | Si falta |
+| --- | --- | --- |
+| `DJANGO_SECRET_KEY` | Un valor generado | El backend no arranca (`ImproperlyConfigured: Falta DJANGO_SECRET_KEY`) |
+| `DB_NAME`, `DB_USER` | Ya vienen en la plantilla (`devdb`, `devuser`) | `docker compose` se detiene con `Falta DB_NAME en backend/.env` (o `DB_USER`) |
+| `DB_PASS` | El otro valor generado | `docker compose` se detiene con `Falta DB_PASS en backend/.env` |
+
+Cada instalación usa sus propios valores: no los compartas ni los subas a git.
+
+> **Si ya tenías una base de datos local creada con la contraseña `changeme`:** PostgreSQL guarda la contraseña al crear la base, así que cambiar `DB_PASS` no basta. Elige una opción:
+>
+> - Conservar los datos: después de completar `backend/.env`, levanta solo la base y cámbiale la contraseña al valor de `DB_PASS` (dentro del contenedor no se pide la contraseña anterior):
+>
+>   ```bash
+>   docker compose -f backend/docker-compose.yml up -d db
+>   ```
+>
+>   ```bash
+>   docker compose -f backend/docker-compose.yml exec db psql -U devuser -d devdb -c "ALTER USER devuser WITH PASSWORD '<valor de DB_PASS>'"
+>   ```
+>
+> - Empezar de cero (borra los datos locales): `docker compose -f backend/docker-compose.yml down -v`
 
 ### Iniciar
 
@@ -145,6 +165,7 @@ Los valores por defecto de `backend/app/app/settings.py` son para desarrollo loc
 | Variable | Valor en producción | Si no se define |
 | --- | --- | --- |
 | `DJANGO_SECRET_KEY` | Una clave nueva generada para producción con el comando del paso 1, distinta de la de desarrollo, guardada en el gestor de contraseñas | El servidor no arranca |
+| `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` | Los datos de la base de datos de producción, con una contraseña generada para producción y guardada en el gestor de contraseñas; nunca `changeme` ni la de desarrollo | El servidor no puede conectarse a la base de datos |
 | `CORS_ALLOWED_ORIGINS` | El origen del sistema, por ejemplo `https://lablend.example.edu`; varios orígenes separados por comas | Solo se aceptan `http://localhost:58315` y `http://localhost:65420`, así que el navegador bloquea la aplicación web servida desde el dominio real |
 
 Después del primer despliegue, crea la cuenta inicial en el servidor con `python manage.py create_initial_admin` (ver [Crear la cuenta inicial](#crear-la-cuenta-inicial)) y guarda la contraseña en el gestor de contraseñas del equipo.
@@ -155,6 +176,8 @@ Después del primer despliegue, crea la cuenta inicial en el servidor con `pytho
 | --- | --- | --- |
 | `docker compose` dice que no encuentra `backend/.env` | Falta el archivo de variables de entorno | Créalo desde la plantilla (paso 1) |
 | El backend termina con `ImproperlyConfigured: Falta DJANGO_SECRET_KEY` | `DJANGO_SECRET_KEY` no está definida o está vacía en `backend/.env` | Genera una clave y pégala (paso 1) |
+| `docker compose` se detiene con `Falta DB_PASS en backend/.env` (o `DB_NAME`, `DB_USER`) | La variable no está en `backend/.env` o está vacía | Complétala (paso 1) |
+| El backend se detiene al aplicar las migraciones con `password authentication failed for user "devuser"` | La base local se creó con otra contraseña (por ejemplo, `changeme`) | Cambia la contraseña en la base o empieza de cero (nota del paso 1) |
 | La aplicación muestra "Sin conexión" | El backend no está corriendo en el puerto 8000 | Levántalo (paso 1) y revisa http://localhost:8000/health_check |
 | La consola del navegador muestra un error CORS, o guardar un cambio responde 403 | La aplicación web corre en un puerto que no está en `CORS_ALLOWED_ORIGINS` ni en `CSRF_TRUSTED_ORIGINS` | Ejecútala con `--web-port 58315` |
 | El inicio de sesión responde 429 | Límite de 3 inicios de sesión por minuto por usuario; cada reinicio de la aplicación cuenta como uno | Espera un minuto; usa `r` en lugar de `R` mientras editas |
