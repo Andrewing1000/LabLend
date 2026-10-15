@@ -40,8 +40,12 @@ docker run --rm python:3.12-alpine3.23 python -c "import secrets; print(secrets.
 | `DJANGO_SECRET_KEY` | Un valor generado | El backend no arranca (`ImproperlyConfigured: Falta DJANGO_SECRET_KEY`) |
 | `DB_NAME`, `DB_USER` | Ya vienen en la plantilla (`devdb`, `devuser`) | `docker compose` se detiene con `Falta DB_NAME en backend/.env` (o `DB_USER`) |
 | `DB_PASS` | El otro valor generado | `docker compose` se detiene con `Falta DB_PASS en backend/.env` |
+| `DJANGO_DEBUG` | Ya viene en la plantilla (`True`): muestra el detalle de los errores mientras desarrollas | DEBUG queda desactivado y el backend exige las variables de producción (sección 5) |
+| `DJANGO_ALLOWED_HOSTS` | Ya viene en la plantilla (`localhost,127.0.0.1,10.0.2.2`). Para probar desde un teléfono físico en tu red, agrega la IP de tu computadora | Django responde 400 (Bad Request) a las peticiones que llegan por otra dirección |
 
 Cada instalación usa sus propios valores: no los compartas ni los subas a git.
+
+> **Si ya tenías un `backend/.env` anterior:** agrégale las líneas `DJANGO_DEBUG` y `DJANGO_ALLOWED_HOSTS` de la plantilla (`backend/.env.example`). Sin ellas el backend no arranca (`ImproperlyConfigured: Falta DJANGO_ALLOWED_HOSTS`).
 
 > **Si ya tenías una base de datos local creada con la contraseña `changeme`:** PostgreSQL guarda la contraseña al crear la base, así que cambiar `DB_PASS` no basta. Elige una opción:
 >
@@ -160,13 +164,21 @@ docker compose -f backend/docker-compose.yml run --rm app_new flake8
 
 ## 5. Despliegue en producción
 
-Los valores por defecto de `backend/app/app/settings.py` son para desarrollo local. Antes de desplegar, define estas variables de entorno en el servidor:
+En producción no se usa `backend/.env` de desarrollo: define estas variables de entorno en el servidor. Sin `DJANGO_DEBUG`, el backend arranca en modo producción y se niega a arrancar si falta alguna variable obligatoria:
 
 | Variable | Valor en producción | Si no se define |
 | --- | --- | --- |
 | `DJANGO_SECRET_KEY` | Una clave nueva generada para producción con el comando del paso 1, distinta de la de desarrollo, guardada en el gestor de contraseñas | El servidor no arranca |
 | `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` | Los datos de la base de datos de producción, con una contraseña generada para producción y guardada en el gestor de contraseñas; nunca `changeme` ni la de desarrollo | El servidor no puede conectarse a la base de datos |
-| `CORS_ALLOWED_ORIGINS` | El origen del sistema, por ejemplo `https://lablend.example.edu`; varios orígenes separados por comas | Solo se aceptan `http://localhost:58315` y `http://localhost:65420`, así que el navegador bloquea la aplicación web servida desde el dominio real |
+| `DJANGO_DEBUG` | No se define (o `False`). Nunca `True`: mostraría el código y la configuración ante un error | — (desactivado, que es lo correcto) |
+| `DJANGO_ALLOWED_HOSTS` | El dominio del servidor, por ejemplo `lablend.example.edu`; varios separados por comas | El servidor no arranca |
+| `CORS_ALLOWED_ORIGINS` | El origen de la aplicación web, por ejemplo `https://lablend.example.edu`; varios separados por comas. Vacía (`CORS_ALLOWED_ORIGINS=`) si la aplicación y la API se sirven desde el mismo dominio | El servidor no arranca |
+
+Antes de abrir el sistema a los usuarios, revisa la configuración con la lista de verificación de Django y corrige lo que reporte:
+
+```bash
+python manage.py check --deploy
+```
 
 Después del primer despliegue, crea la cuenta inicial en el servidor con `python manage.py create_initial_admin` (ver [Crear la cuenta inicial](#crear-la-cuenta-inicial)) y guarda la contraseña en el gestor de contraseñas del equipo.
 
@@ -176,6 +188,8 @@ Después del primer despliegue, crea la cuenta inicial en el servidor con `pytho
 | --- | --- | --- |
 | `docker compose` dice que no encuentra `backend/.env` | Falta el archivo de variables de entorno | Créalo desde la plantilla (paso 1) |
 | El backend termina con `ImproperlyConfigured: Falta DJANGO_SECRET_KEY` | `DJANGO_SECRET_KEY` no está definida o está vacía en `backend/.env` | Genera una clave y pégala (paso 1) |
+| El backend termina con `ImproperlyConfigured: Falta DJANGO_ALLOWED_HOSTS` o `Falta CORS_ALLOWED_ORIGINS` | DEBUG está desactivado (falta `DJANGO_DEBUG=True` en `backend/.env`) y no están las variables de producción | En desarrollo, agrega `DJANGO_DEBUG` y `DJANGO_ALLOWED_HOSTS` de la plantilla (paso 1); en producción, define las variables de la sección 5 |
+| Una petición responde 400 (Bad Request) sin más detalle | La dirección por la que llega no está en `DJANGO_ALLOWED_HOSTS` | Agrégala a `DJANGO_ALLOWED_HOSTS` en `backend/.env` |
 | `docker compose` se detiene con `Falta DB_PASS en backend/.env` (o `DB_NAME`, `DB_USER`) | La variable no está en `backend/.env` o está vacía | Complétala (paso 1) |
 | El backend se detiene al aplicar las migraciones con `password authentication failed for user "devuser"` | La base local se creó con otra contraseña (por ejemplo, `changeme`) | Cambia la contraseña en la base o empieza de cero (nota del paso 1) |
 | La aplicación muestra "Sin conexión" | El backend no está corriendo en el puerto 8000 | Levántalo (paso 1) y revisa http://localhost:8000/health_check |

@@ -29,15 +29,23 @@ if not SECRET_KEY:
     raise ImproperlyConfigured(
         'Falta DJANGO_SECRET_KEY: defínela en backend/.env (ver README).')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = [
-    '10.0.2.2',
-    '127.0.0.1',
-    '172.18.6.46',
-    'localhost',
-]
+def env_list(name):
+    """Lista separada por comas de una variable de entorno, sin vacíos."""
+    return [v.strip() for v in os.environ.get(name, '').split(',')
+            if v.strip()]
+
+
+# DEBUG muestra código y configuración ante un error: solo se activa si
+# DJANGO_DEBUG lo pide explícitamente (en desarrollo, desde backend/.env).
+DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ('true', '1', 'yes')
+
+# Dominios desde los que se puede acceder al servidor.
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS')
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        'Falta DJANGO_ALLOWED_HOSTS: con DEBUG desactivado, define el '
+        'dominio del servidor (ver README).')
 
 
 # Application definition
@@ -240,12 +248,17 @@ STATIC_ROOT = '/vol/web/static'
 
 
 # Solo los orígenes del sistema pueden hacer peticiones con credenciales.
-# En producción, CORS_ALLOWED_ORIGINS lista el dominio del sistema
-# (varios orígenes separados por comas).
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:58315,http://localhost:65420',
-).split(',')
+# CORS_ALLOWED_ORIGINS lista esos orígenes, separados por comas; vacía si la
+# aplicación y la API se sirven desde el mismo dominio. En desarrollo, si no
+# se define, se aceptan los puertos de la aplicación web local.
+if 'CORS_ALLOWED_ORIGINS' in os.environ:
+    CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS')
+elif DEBUG:
+    CORS_ALLOWED_ORIGINS = ['http://localhost:58315', 'http://localhost:65420']
+else:
+    raise ImproperlyConfigured(
+        'Falta CORS_ALLOWED_ORIGINS: con DEBUG desactivado, define el '
+        'origen de la aplicación web (ver README).')
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
