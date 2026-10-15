@@ -1,3 +1,4 @@
+import 'package:frontend/screens/previews/preview_credentials.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
@@ -38,7 +39,7 @@ class _CreateItemScreenTestState extends State<CreateItemScreenTest> {
     // Inicializa la sesión, asegúrate de que el SessionManager esté configurado correctamente
     var manager = SessionManager();
     Session session = await SessionManager()
-        .login("admin@example.com", "#123#AndresHinojosa#123");
+        .login(previewEmail, previewPassword);
   }
 
   @override

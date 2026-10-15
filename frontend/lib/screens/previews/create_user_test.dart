@@ -1,3 +1,4 @@
+import 'package:frontend/screens/previews/preview_credentials.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/create_user.dart';
 
@@ -10,6 +11,6 @@ Future<void> main() async {
 
 
   var manager = SessionManager();
-  Session session = await SessionManager().login("admin@example.com", "#123#AndresHinojosa#123");
+  Session session = await SessionManager().login(previewEmail, previewPassword);
 
 }

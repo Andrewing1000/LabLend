@@ -87,20 +87,6 @@ def createRoles():
     createAssistantRole()
 
 
-def createSuperInstance():
-    data = {
-            'email' : 'admin@example.com',
-            'password' : '#123#AndresHinojosa#123',
-    }
-
-    admin = get_user_model().objects.filter(email = data['email']).first()
-    if admin:
-        print("Admin instance already created")
-        return
-
-    get_user_model().objects.create_superuser(**data)
-    print("Admin instance created")
-
 def getAdminRole():
     try:
         return LabAdmin.objects.get(role_name = LAB_ADMIN)

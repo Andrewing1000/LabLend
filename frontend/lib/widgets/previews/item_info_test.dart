@@ -1,3 +1,4 @@
+import 'package:frontend/screens/previews/preview_credentials.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
@@ -13,7 +14,7 @@ Future<void> main() async {
   // Inicialización de la sesión para autenticación
   var manager = SessionManager();
   Session session = await SessionManager()
-      .login("admin@example.com", "#123#AndresHinojosa#123");
+      .login(previewEmail, previewPassword);
 
   // Crear un ítem de prueba
   Brand dummyBrand = Brand(

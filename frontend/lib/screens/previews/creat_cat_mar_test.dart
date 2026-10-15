@@ -1,3 +1,4 @@
+import 'package:frontend/screens/previews/preview_credentials.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/category_brand_screen.dart';
@@ -7,7 +8,7 @@ void main() async {
 
   var manager = SessionManager();
   Session session = await SessionManager()
-      .login("admin@example.com", "#123#AndresHinojosa#123");
+      .login(previewEmail, previewPassword);
 
   runApp(MyApp(session: session));
 }
