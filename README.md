@@ -65,7 +65,7 @@ flutter run -d chrome --web-port 58315
 
 Para usar Edge, cambia `-d chrome` por `-d edge`.
 
-**Usa el puerto 58315 (o 65420).** Django solo acepta envíos desde los orígenes listados en `CSRF_TRUSTED_ORIGINS` (`backend/app/app/settings.py`). Con otro puerto la aplicación carga, pero guardar cualquier cambio responde 403.
+**Usa el puerto 58315 (o 65420).** Django solo acepta peticiones desde los orígenes listados en `CORS_ALLOWED_ORIGINS` y `CSRF_TRUSTED_ORIGINS` (`backend/app/app/settings.py`). Con otro puerto el navegador bloquea las peticiones a la API (error CORS en la consola) y la aplicación no puede cargar datos.
 
 Teclas útiles mientras corre: `r` recarga el código (hot reload), `R` reinicia la aplicación y `q` la cierra.
 
@@ -91,11 +91,19 @@ docker compose -f backend/docker-compose.yml run --rm app_new sh -c "python mana
 docker compose -f backend/docker-compose.yml run --rm app_new flake8
 ```
 
+## 5. Despliegue en producción
+
+Los valores por defecto de `backend/app/app/settings.py` son para desarrollo local. Antes de desplegar, define estas variables de entorno en el servidor:
+
+| Variable | Valor en producción | Si no se define |
+| --- | --- | --- |
+| `CORS_ALLOWED_ORIGINS` | El origen del sistema, por ejemplo `https://lablend.example.edu`; varios orígenes separados por comas | Solo se aceptan `http://localhost:58315` y `http://localhost:65420`, así que el navegador bloquea la aplicación web servida desde el dominio real |
+
 ## Problemas comunes
 
 | Síntoma | Causa | Solución |
 | --- | --- | --- |
 | La aplicación muestra "Sin conexión" | El backend no está corriendo en el puerto 8000 | Levántalo (paso 1) y revisa http://localhost:8000/health_check |
-| Guardar un cambio responde 403 | La aplicación web corre en un puerto que no está en `CSRF_TRUSTED_ORIGINS` | Ejecútala con `--web-port 58315` |
+| La consola del navegador muestra un error CORS, o guardar un cambio responde 403 | La aplicación web corre en un puerto que no está en `CORS_ALLOWED_ORIGINS` ni en `CSRF_TRUSTED_ORIGINS` | Ejecútala con `--web-port 58315` |
 | El inicio de sesión responde 429 | Límite de 3 inicios de sesión por minuto por usuario; cada reinicio de la aplicación cuenta como uno | Espera un minuto; usa `r` en lugar de `R` mientras editas |
 | `docker compose up` falla porque el puerto 8000 está ocupado | Otro programa o contenedor usa ese puerto | Detén el otro proceso o contenedor |

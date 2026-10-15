@@ -234,7 +234,13 @@ STATIC_ROOT = '/vol/web/static'
 
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+# Solo los orígenes del sistema pueden hacer peticiones con credenciales.
+# En producción, CORS_ALLOWED_ORIGINS lista el dominio del sistema
+# (varios orígenes separados por comas).
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:58315,http://localhost:65420',
+).split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
