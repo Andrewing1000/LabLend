@@ -97,8 +97,8 @@ class PublicAdminAPITests(TestCase):
         ).exists()
         self.assertFalse(user_exists)
 
-    def test_create_token_for_user(self):
-        """Test generates tokem for valid credentials."""
+    def test_login_for_user(self):
+        """Test valid credentials start a session and return the user."""
         user_details = {
             'name' : 'Test Name',
             'email' : 'test@example.com',
@@ -112,8 +112,10 @@ class PublicAdminAPITests(TestCase):
         }
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['email'], user_details['email'])
+        self.assertNotIn('password', res.data)
+        self.assertIn('sessionid', res.cookies)
 
     def test_create_token_bad_credentials(self):
         """Test returns error if credentials invalid."""
@@ -125,8 +127,8 @@ class PublicAdminAPITests(TestCase):
         }
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertNotIn('token', res.data)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('email', res.data)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_token_blank_password(self):
         """Test posting a blank password returns an error."""
@@ -144,7 +146,8 @@ class PublicAdminAPITests(TestCase):
         self.client.logout()
         res = self.client.get(ME_URL)
 
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        # Con autenticación por sesión, DRF responde 403 sin credenciales.
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_reject_random_payload(self):
         """Test posting unformated body in a post return an error"""

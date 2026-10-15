@@ -75,7 +75,8 @@ class ManageUserSerializer(UserSerializer):
                         'role_field': {'read_only': False},}
 
     def to_internal_value(self, data):
-        external_field_value = data.pop('role_field', None)
+        # data puede ser un QueryDict inmutable (formularios): solo leerlo.
+        external_field_value = data.get('role_field', None)
         internal_value = super().to_internal_value(data)
         internal_value['role_field'] = external_field_value
         return internal_value
