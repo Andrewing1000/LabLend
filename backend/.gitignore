@@ -121,6 +121,8 @@ celerybeat.pid
 
 # Environments
 .env
+# La plantilla sí se sube (la regla .env* de la raíz la ignoraría)
+!.env.example
 .venv
 env/
 venv/

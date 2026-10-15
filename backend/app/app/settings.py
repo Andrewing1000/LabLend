@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,8 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-s$c^ea-ryrf$krzr*&xah&&&t80x&+upr@46&snh3gg(y@bagq'
+# La clave secreta viene del entorno (archivo .env en desarrollo) y nunca se
+# escribe en el código. Sin ella el servidor no arranca.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        'Falta DJANGO_SECRET_KEY: defínela en backend/.env (ver README).')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

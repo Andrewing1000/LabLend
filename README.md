@@ -21,6 +21,24 @@ No hace falta instalar Python ni PostgreSQL: ambos corren dentro de Docker.
 
 ## 1. Levantar el backend
 
+### Configurar las variables de entorno (solo la primera vez)
+
+El backend lee sus secretos de `backend/.env`, que no se sube a git. Desde la raíz del repositorio, crea el archivo a partir de la plantilla:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Genera una clave secreta para Django:
+
+```bash
+docker run --rm python:3.12-alpine3.23 python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+Pégala en `backend/.env` como valor de `DJANGO_SECRET_KEY`. Cada instalación usa su propia clave: no la compartas ni la subas a git. Sin ella el backend no arranca (`ImproperlyConfigured: Falta DJANGO_SECRET_KEY`).
+
+### Iniciar
+
 Desde la raíz del repositorio, con Docker Desktop abierto:
 
 ```bash
@@ -126,6 +144,7 @@ Los valores por defecto de `backend/app/app/settings.py` son para desarrollo loc
 
 | Variable | Valor en producción | Si no se define |
 | --- | --- | --- |
+| `DJANGO_SECRET_KEY` | Una clave nueva generada para producción con el comando del paso 1, distinta de la de desarrollo, guardada en el gestor de contraseñas | El servidor no arranca |
 | `CORS_ALLOWED_ORIGINS` | El origen del sistema, por ejemplo `https://lablend.example.edu`; varios orígenes separados por comas | Solo se aceptan `http://localhost:58315` y `http://localhost:65420`, así que el navegador bloquea la aplicación web servida desde el dominio real |
 
 Después del primer despliegue, crea la cuenta inicial en el servidor con `python manage.py create_initial_admin` (ver [Crear la cuenta inicial](#crear-la-cuenta-inicial)) y guarda la contraseña en el gestor de contraseñas del equipo.
@@ -134,6 +153,8 @@ Después del primer despliegue, crea la cuenta inicial en el servidor con `pytho
 
 | Síntoma | Causa | Solución |
 | --- | --- | --- |
+| `docker compose` dice que no encuentra `backend/.env` | Falta el archivo de variables de entorno | Créalo desde la plantilla (paso 1) |
+| El backend termina con `ImproperlyConfigured: Falta DJANGO_SECRET_KEY` | `DJANGO_SECRET_KEY` no está definida o está vacía en `backend/.env` | Genera una clave y pégala (paso 1) |
 | La aplicación muestra "Sin conexión" | El backend no está corriendo en el puerto 8000 | Levántalo (paso 1) y revisa http://localhost:8000/health_check |
 | La consola del navegador muestra un error CORS, o guardar un cambio responde 403 | La aplicación web corre en un puerto que no está en `CORS_ALLOWED_ORIGINS` ni en `CSRF_TRUSTED_ORIGINS` | Ejecútala con `--web-port 58315` |
 | El inicio de sesión responde 429 | Límite de 3 inicios de sesión por minuto por usuario; cada reinicio de la aplicación cuenta como uno | Espera un minuto; usa `r` en lugar de `R` mientras editas |

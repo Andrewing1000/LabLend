@@ -16,6 +16,8 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
 
+    env_file:
+      - .env
     environment:
       - DB_HOST=db
       - DB_NAME=devdb
