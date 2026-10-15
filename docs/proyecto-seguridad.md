@@ -173,7 +173,7 @@ Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfigurati
 
 | N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
 | --- | --- | --- | --- | --- | --- |
-| D20 | Al cambiar una contraseña no se valida la política (UserSerializer.update en user/serializers.py) | Validar la política en toda creación y cambio de contraseña | 9.3 | A07 | Pendiente |
+| D20 | Al cambiar una contraseña no se valida la política (UserSerializer.update en user/serializers.py) | Validar la política en toda creación y cambio de contraseña, respondiendo 400 con los requisitos que no se cumplen | 9.3 | A07 | Implementado |
 | D21 | Las contraseñas no vencen | Vencimiento a los 90 días, con cambio obligatorio | 9.3 | A07 | Pendiente |
 | D22 | El historial de contraseñas está instalado pero no configurado, así que se puede reutilizar una contraseña anterior | Impedir reutilizar las últimas 5 contraseñas | 9.3 | A07 | Pendiente |
 | D23 | No hay bloqueo de cuenta, solo un límite de 3 intentos por minuto que se reinicia solo | Bloquear la cuenta al tercer intento fallido | 9.3 | A07 | Pendiente |
@@ -191,6 +191,8 @@ Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfigurati
 ## Enlaces
 
 **Código fuente (GitHub):** https://github.com/Andrewing1000/LabLend
+
+**Política de contraseñas:** [politica-contrasenas.md](politica-contrasenas.md)
 
 **Sistema publicado (hosting):** [URL del sistema]
 

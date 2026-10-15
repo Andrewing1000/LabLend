@@ -5,6 +5,8 @@ from django.contrib.auth import (
     get_user_model,
     authenticate,
 )
+from django.contrib.auth import password_validation
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
@@ -48,6 +50,14 @@ class UserSerializer(serializers.ModelSerializer):
     def get_role_field(self, obj) -> Optional[str]:
         """Get the role name of the user."""
         return obj.role.role_name if obj.role else "SuperAdmin"
+
+    def validate_password(self, value):
+        """Apply the password policy on every creation and change."""
+        try:
+            password_validation.validate_password(value, user=self.instance)
+        except DjangoValidationError as error:
+            raise serializers.ValidationError(list(error.messages))
+        return value
 
     def create(self, validated_data):
         """Create and return a user with encrypted password"""

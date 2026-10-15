@@ -1,0 +1,70 @@
+# Política de contraseñas de LabLend
+
+Este documento describe las reglas que debe cumplir toda contraseña del sistema, dónde se aplican y cómo se protegen. La política está configurada en `AUTH_PASSWORD_VALIDATORS` (`backend/app/app/settings.py`) y se valida en el servidor: la aplicación Flutter no puede saltársela.
+
+## 1. Reglas
+
+Una contraseña es válida solo si cumple **todas** estas reglas:
+
+| Regla | Requisito | Mensaje si no se cumple |
+| --- | --- | --- |
+| Letras | Al menos 12 letras | La contraseña debe tener al menos 12 letras. |
+| Mayúsculas | Al menos 1 letra mayúscula | La contraseña debe tener al menos 1 mayúscula. |
+| Minúsculas | Al menos 1 letra minúscula | La contraseña debe tener al menos 1 minúscula. |
+| Dígitos | Al menos 1 dígito | La contraseña debe tener al menos 1 dígito. |
+| Caracteres especiales | Al menos 1 de estos: `~ ! @ # $ % ^ & * ( ) _ + { } " : ; ' [ ]` | La contraseña debe tener al menos 1 caracter especial. |
+| No es común | No puede estar en la lista de unas 20 000 contraseñas comunes de Django | Esta contraseña es demasiado común. |
+| No es solo numérica | No puede tener solo dígitos | Esta contraseña es completamente numérica. |
+| No se parece a los datos del usuario | No puede ser demasiado parecida al correo ni al nombre del usuario | La contraseña es demasiado similar a la de email. |
+| Longitud | Al menos 12 caracteres | Asegúrese de que este campo tenga al menos 12 caracteres. |
+
+**Longitud mínima real: 14 caracteres.** Las 12 letras, más un dígito y un caracter especial, suman al menos 14. La regla de longitud (12 caracteres) y el mínimo de 8 caracteres de Django nunca son las que deciden.
+
+**Ejemplo válido:** `Laboratorio#2026Ucb` (14 letras, mayúsculas, minúsculas, un dígito y `#`).
+
+| Ejemplo inválido | Regla que incumple |
+| --- | --- |
+| `laboratorio#2026ucb` | No tiene mayúsculas |
+| `Laboratorio2026Ucb` | No tiene caracter especial |
+| `Laboratorio-2026-Ucb` | `-` no cuenta como caracter especial |
+| `Laborator#2026Uc` | Tiene 11 letras |
+| `Password1234` | Es común, tiene menos de 12 letras y no tiene caracter especial |
+
+> **Limitación conocida:** solo cuentan como especiales los símbolos de la lista. Otros comunes, como `-`, `.`, `?`, `/`, `=` o el espacio, no cuentan, aunque la contraseña los tenga. Ampliar la lista está previsto en la gestión de contraseñas (módulo 5).
+
+## 2. Dónde se aplica
+
+| Situación | Endpoint o comando | Resultado si la contraseña no cumple |
+| --- | --- | --- |
+| Crear un asistente o un administrador | `/user/create/`, `/user/create/admin/` | 400 con las reglas incumplidas; la cuenta no se crea |
+| Cambiar la contraseña propia | `/user/me/` | 400 con las reglas incumplidas; se mantiene la contraseña anterior |
+| Un administrador cambia la contraseña de otra cuenta | `/user/manage/` | 400 con las reglas incumplidas; se mantiene la contraseña anterior |
+| Crear la cuenta inicial | `python manage.py create_initial_admin` | La contraseña la genera el sistema al azar (24 caracteres) y siempre cumple la política |
+| Recuperar la contraseña del administrador desde el servidor | `python manage.py changepassword` | El comando rechaza la contraseña y la vuelve a pedir |
+
+La respuesta 400 indica las reglas incumplidas en el campo `password`. Si la contraseña tiene menos de 12 caracteres, solo se informa la longitud. Con 12 o más, se informan todas las demás reglas incumplidas a la vez, para que el usuario pueda corregirlas en un solo intento.
+
+## 3. Almacenamiento
+
+Las contraseñas nunca se guardan en texto plano. Django guarda solo su hash con **PBKDF2-SHA256 y 1 000 000 de iteraciones**, con una sal aleatoria distinta para cada contraseña. Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por eso la contraseña de la cuenta inicial se muestra una sola vez y debe guardarse en el gestor de contraseñas.
+
+## 4. Protección del inicio de sesión
+
+| Medida | Estado |
+| --- | --- |
+| Límite de 3 intentos de inicio de sesión por minuto por dirección IP (respuesta 429) | Implementado |
+| El inicio de sesión solo se acepta en `/user/token/`, que aplica el límite; la API rechaza credenciales enviadas por HTTP Basic en otros endpoints (D30) | Implementado |
+| La sesión expira a los 15 minutos | Implementado |
+| Mensaje genérico que no revela si la cuenta existe (D12) | Pendiente |
+
+## 5. Pendiente (módulo 5, gestión de contraseñas)
+
+- Vencimiento de las contraseñas.
+- Historial: no reutilizar contraseñas anteriores.
+- Bloqueo de la cuenta al tercer intento fallido.
+- Desbloqueo y reinicio de la contraseña por el administrador de seguridad.
+- Ampliar la lista de caracteres especiales.
+
+## 6. Verificación
+
+Las pruebas de `backend/app/user/tests/test_password_policy.py` comprueban cada regla por separado: cada contraseña de prueba incumple una sola regla y debe rechazarse solo por ella. También comprueban el límite de 11 y 12 letras, los símbolos que no cuentan como especiales y la creación de cuentas con contraseñas débiles. Si una regla se quitara de la configuración, su prueba fallaría.
