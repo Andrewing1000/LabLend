@@ -177,6 +177,12 @@ REST_FRAMEWORK = {
 
     'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema',
 
+    # Solo sesión: Basic auth permitiría probar contraseñas en cualquier
+    # endpoint sin pasar por el límite de intentos del login.
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+
     'EXCEPTION_HANDLER': 'core.exceptions.api_exception_handler',
 
     'DEFAULT_THROTTLE_CLASSES': [
