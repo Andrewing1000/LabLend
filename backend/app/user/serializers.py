@@ -16,8 +16,6 @@ from core.models import (Session, getAdminRole, getAssistantRole,
 
 from rest_framework.exceptions import APIException
 
-from django.contrib.auth.models import AnonymousUser
-
 
 
 class NotValidRole(APIException):
@@ -178,28 +176,18 @@ class AuthTokenSerializer(serializers.Serializer):
         return value.lower()
 
     def validate(self, attrs):
-        """Validate and authenticate the user."""
-        username = attrs.get('username')
-        password = attrs.get('password')
+        """Validate and authenticate the user.
 
-
-        user = get_user_model().objects.filter(username = username)
-
-        if not user.exists():
-            attrs['user'] = AnonymousUser()
-            return attrs
-
-
-        user = authenticate(
+        An unknown User ID, a wrong password and an inactive account all
+        leave 'user' as None, so the view answers them the same way (D12).
+        authenticate() also hashes the password for unknown User IDs, so
+        the response time does not reveal which ones exist.
+        """
+        attrs['user'] = authenticate(
             request=self.context.get('request'),
-            username=username,
-            password=password,
+            username=attrs.get('username'),
+            password=attrs.get('password'),
         )
-        if not user:
-            print("No correcto")
-            return attrs
-
-        attrs['user'] = user
         return attrs
 
 

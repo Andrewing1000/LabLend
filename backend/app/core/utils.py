@@ -1,5 +1,4 @@
 from rest_framework import throttling
-from django.contrib.auth import get_user_model
 
 class LogInThrottle(throttling.UserRateThrottle):
 
@@ -7,21 +6,16 @@ class LogInThrottle(throttling.UserRateThrottle):
 
     def get_cache_key(self, request, view):
 
-        username = ''
-        if 'username' in request.data:
-            username = str(request.data['username']).lower()
-        else: return None
+        if 'username' not in request.data:
+            return None
+        username = str(request.data['username']).lower()
 
-        UserModel = get_user_model()
-        query = UserModel.objects.filter(username = username)
-
-        if query.exists() and (not request.user.is_authenticated or request.user.username != username):
-            ident = username
-        else:
+        # Se limita cualquier código, exista o no: si solo se limitaran los
+        # existentes, la respuesta 429 revelaría cuáles están registrados (D12).
+        if request.user.is_authenticated and request.user.username == username:
             return None
 
         return self.cache_format % {
             'scope': self.scope,
-            'ident': ident
+            'ident': username
         }
-

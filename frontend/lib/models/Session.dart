@@ -189,16 +189,14 @@ class SessionManager with ChangeNotifier {
 
     } on DioException catch(e){
 
-      if(e.response?.statusCode == 404){
+      if(e.response?.statusCode == 401){
 
-        errorNotification(error : 'Usuario no registrado');
-        //Not found
-        return AnonymousSession();
-      }
-      else if(e.response?.statusCode == 401){
-
-        //Bad credentials
-        errorNotification(error: 'Credenciales inválidas');
+        // El servidor no distingue entre código inexistente y contraseña
+        // incorrecta (D12): se muestra su mensaje genérico.
+        final data = e.response?.data;
+        errorNotification(error: data is Map && data['message'] is String
+            ? data['message']
+            : 'Código de usuario o contraseña incorrectos');
         return AnonymousSession();
       }
       else if(e.response?.statusCode == 429){

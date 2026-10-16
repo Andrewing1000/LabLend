@@ -1,6 +1,7 @@
 """
 Tests for the user API
 """
+from django.core.cache import cache
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -39,6 +40,9 @@ class PublicAdminAPITests(TestCase):
     """Test the public features of the user API."""
 
     def setUp(self):
+        # El límite de intentos de login vive en la caché, no en la base de
+        # datos: se limpia para que cada prueba empiece sin intentos.
+        cache.clear()
         self.user = create_lab_admin(
             email = 'admin@example.com',
             password = 'Testpass123#Testpass123#',
@@ -217,6 +221,43 @@ class PublicAdminAPITests(TestCase):
 
         self.assertNotIn('username', res.data)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_login_errors_are_identical(self):
+        """Test unknown User IDs, wrong passwords and inactive accounts
+        get the same response, so it does not reveal who is registered."""
+        user = create_lab_assistant(
+            email='test@example.com', password='Testpass123#Testpass123#',
+            nombres='Test', apellido_paterno='Name')
+        inactive = create_lab_assistant(
+            email='off@example.com', password='Testpass123#Testpass123#',
+            nombres='Inactive', apellido_paterno='User', is_active=False)
+
+        attempts = {
+            'unknown': {'username': 'usr.nadie',
+                        'password': 'Testpass123#Testpass123#'},
+            'wrong_password': {'username': user.username,
+                               'password': 'TestBadd123#Testpass123#'},
+            'inactive': {'username': inactive.username,
+                         'password': 'Testpass123#Testpass123#'},
+        }
+        for case, payload in attempts.items():
+            with self.subTest(case=case):
+                res = self.client.post(TOKEN_URL, payload)
+
+                self.assertEqual(res.status_code,
+                                 status.HTTP_401_UNAUTHORIZED)
+                self.assertEqual(res.data, {
+                    'message': 'Código de usuario o contraseña incorrectos'})
+
+    def test_unknown_user_id_throttled(self):
+        """Test unknown User IDs are rate limited like existing ones."""
+        payload = {'username': 'usr.nadie', 'password': 'BadPass'}
+
+        for _ in range(3):
+            self.client.post(TOKEN_URL, payload)
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
     def test_create_token_blank_password(self):
         """Test posting a blank password returns an error."""

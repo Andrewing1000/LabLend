@@ -35,6 +35,8 @@ from drf_spectacular.utils import extend_schema
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
+LOGIN_FAILED_MESSAGE = 'Código de usuario o contraseña incorrectos'
+
 class UserListPagination(pagination.CursorPagination):
     page_size = 10
     ordering = 'email'
@@ -152,10 +154,10 @@ class CreateTokenView(ObtainAuthToken):
         user = serializer.validated_data.get('user')
 
         if not user:
-            return Response({'message' : 'Credenciales inválidos'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if(isinstance(user, AnonymousUser)):
-            return Response({'message'  : 'El usuario no está registrado'}, status= status.HTTP_404_NOT_FOUND)
+            # Mismo mensaje si el código no existe, la contraseña es
+            # incorrecta o la cuenta está desactivada (D12).
+            return Response({'message': LOGIN_FAILED_MESSAGE},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
         login(request, user)
         logIn(request.user)
