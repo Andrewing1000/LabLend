@@ -92,10 +92,11 @@ docker compose -f backend/docker-compose.yml down -v
 El sistema no trae cuentas predefinidas: las migraciones solo crean los roles, así que la base de datos empieza sin usuarios. Con el backend levantado, crea el primer administrador:
 
 ```bash
-docker compose -f backend/docker-compose.yml run --rm app_new python manage.py create_initial_admin --email admin@lablend.test --name "Administrador"
+docker compose -f backend/docker-compose.yml run --rm app_new python manage.py create_initial_admin --email admin@lablend.test --nombres "Juan Carlos" --apellido-paterno "Pérez" --apellido-materno "Gutiérrez"
 ```
 
-- **Correo y nombre:** los que pases al comando.
+- **Correo y nombre:** los que pases al comando. `--apellido-materno` es opcional.
+- **Código de usuario:** es la credencial para iniciar sesión (el correo ya no sirve para entrar). El comando lo genera y lo muestra: `adm.` + inicial del primer nombre + apellido paterno, en minúsculas y sin tildes ni ñ (en el ejemplo, `adm.jperez`). Las cuentas creadas desde la aplicación reciben el prefijo `usr.` (por ejemplo `usr.mquispe`), y si el código ya existe se le agrega un número (`usr.mquispe2`). El código no cambia aunque después se edite el nombre.
 - **Contraseña:** el comando la genera al azar, cumpliendo la política de contraseñas, y la muestra **una sola vez** en la terminal. Guárdala de inmediato en el gestor de contraseñas: la base de datos solo guarda su hash, así que no hay forma de volver a verla. Nadie la conoce de antemano y no está en el código ni en git.
 - **Rol:** administrador de laboratorio. Cuando exista el rol de administrador de seguridad (D18), la cuenta inicial tendrá ese rol.
 - **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador. Las demás cuentas, administradores y asistentes, se crean desde la aplicación con esa cuenta.
@@ -103,10 +104,12 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 Si se pierde la contraseña del administrador, cámbiala desde el servidor; el comando pide la nueva contraseña y aplica la misma política:
 
 ```bash
-docker compose -f backend/docker-compose.yml run --rm app_new python manage.py changepassword admin@lablend.test
+docker compose -f backend/docker-compose.yml run --rm app_new python manage.py changepassword adm.jperez
 ```
 
 > Si tu base de datos es anterior a este cambio, todavía tiene la cuenta `admin@example.com`, cuya contraseña está publicada en el historial de git. Desactívala, o empieza con una base vacía con `down -v` (borra también los datos locales).
+
+> **Si tu base de datos tiene usuarios creados antes del código de usuario:** esas cuentas no reciben un código y no pueden iniciar sesión, y la migración `0007` falla si hay más de una. Empieza con una base vacía con `down -v` y vuelve a crear la cuenta inicial.
 
 > Si ya tenías el backend con la versión anterior (PostgreSQL 13), la base de datos empieza vacía después de actualizar: Django 5.2 requiere PostgreSQL 14 o superior y los datos anteriores no se migran.
 
@@ -132,12 +135,12 @@ Para usar Edge, cambia `-d chrome` por `-d edge`.
 
 Teclas útiles mientras corre: `r` recarga el código (hot reload), `R` reinicia la aplicación y `q` la cierra.
 
-La aplicación arranca como visitante: inicia sesión desde el menú con la cuenta creada en el paso 1.
+La aplicación arranca como visitante: inicia sesión desde el menú con el código de usuario y la contraseña de la cuenta creada en el paso 1.
 
 Las vistas previas de `lib/screens/previews/` y `lib/widgets/previews/` inician sesión con una cuenta que se les pasa al ejecutarlas:
 
 ```bash
-flutter run -d chrome --web-port 58315 -t lib/screens/previews/list_user_test.dart --dart-define=PREVIEW_EMAIL=admin@lablend.test --dart-define=PREVIEW_PASSWORD=<contraseña>
+flutter run -d chrome --web-port 58315 -t lib/screens/previews/list_user_test.dart --dart-define=PREVIEW_USER=adm.jperez --dart-define=PREVIEW_PASSWORD=<contraseña>
 ```
 
 ## 3. Ejecutar la aplicación en Android (opcional)

@@ -9,7 +9,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
-from core.models import LAB_ADMIN
+from core.models import ADMIN_USERNAME_PREFIX, LAB_ADMIN
 
 PASSWORD_LENGTH = 24
 SPECIAL_CHARACTERS = '~!@#$%^&*()_+{}":;\'[]'
@@ -36,7 +36,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--email', required=True)
-        parser.add_argument('--name', required=True)
+        parser.add_argument('--nombres', required=True)
+        parser.add_argument('--apellido-paterno', required=True)
+        parser.add_argument('--apellido-materno', default='')
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -46,14 +48,22 @@ class Command(BaseCommand):
             raise CommandError('A user with that email already exists.')
 
         password = generate_password()
-        User.objects.create_lab_admin(
-            email=options['email'],
-            password=password,
-            name=options['name'],
-        )
+        try:
+            user = User.objects.create_lab_admin(
+                email=options['email'],
+                password=password,
+                nombres=options['nombres'],
+                apellido_paterno=options['apellido_paterno'],
+                apellido_materno=options['apellido_materno'],
+                username_prefix=ADMIN_USERNAME_PREFIX,
+            )
+        except ValueError:
+            raise CommandError(
+                '--nombres and --apellido-paterno must contain letters.')
 
         self.stdout.write(self.style.SUCCESS(
-            f"Administrator {options['email']} created."))
+            f'Administrator {user.username} created.'))
+        self.stdout.write(f'User ID: {user.username}')
         self.stdout.write(f'Password: {password}')
         self.stdout.write(self.style.WARNING(
             'Store this password in the password manager now; '

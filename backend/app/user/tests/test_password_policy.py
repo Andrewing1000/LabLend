@@ -20,11 +20,12 @@ class PasswordChangePolicyTests(TestCase):
 
     def setUp(self):
         self.admin = get_user_model().objects.create_lab_admin(
-            email='admin@example.com', password=PASSWORD, name='Admin',
+            email='admin@example.com', password=PASSWORD,
+            nombres='Admin', apellido_paterno='Prueba',
         )
         self.assistant = get_user_model().objects.create_lab_assistant(
             email='assistant@example.com', password=PASSWORD,
-            name='Assistant',
+            nombres='Assistant', apellido_paterno='Prueba',
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.admin)
@@ -65,7 +66,8 @@ class PasswordRulesTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_lab_admin(
-            email='admin@example.com', password=PASSWORD, name='Admin',
+            email='admin@example.com', password=PASSWORD,
+            nombres='Admin', apellido_paterno='Prueba',
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
@@ -131,7 +133,8 @@ class PasswordRulesTests(TestCase):
         payload = {
             'email': 'nuevo@example.com',
             'password': 'laboratorio2026ucb',
-            'name': 'Nuevo',
+            'nombres': 'Nuevo',
+            'apellido_paterno': 'Prueba',
         }
         res = self.client.post(reverse('user:create'), payload)
 

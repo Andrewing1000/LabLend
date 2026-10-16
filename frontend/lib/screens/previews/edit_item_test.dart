@@ -11,7 +11,7 @@ Future<void> main() async {
   // Inicialización de la sesión para autenticación
   var manager = SessionManager();
   Session session = await SessionManager()
-      .login(previewEmail, previewPassword);
+      .login(previewUser, previewPassword);
 
   Item dummyItem = Item(
     id: 1,

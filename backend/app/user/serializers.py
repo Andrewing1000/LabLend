@@ -11,7 +11,8 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 
-from core.models import Session, getAdminRole, getAssistantRole, LAB_ADMIN, LAB_ASSIST
+from core.models import (Session, getAdminRole, getAssistantRole,
+                         LAB_ADMIN, LAB_ASSIST, username_part)
 
 from rest_framework.exceptions import APIException
 
@@ -36,10 +37,13 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer for the user object."""
 
     role_field = serializers.SerializerMethodField()
+    name = serializers.ReadOnlyField()
 
     class Meta:
         model = get_user_model()
-        fields = ['email', 'password', 'name', 'is_active', 'role_field']
+        fields = ['username', 'email', 'password', 'nombres',
+                  'apellido_paterno', 'apellido_materno', 'name',
+                  'is_active', 'role_field']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
             'email': {'required':False},
@@ -50,6 +54,20 @@ class UserSerializer(serializers.ModelSerializer):
     def get_role_field(self, obj) -> Optional[str]:
         """Get the role name of the user."""
         return obj.role.role_name if obj.role else "SuperAdmin"
+
+    def validate_nombres(self, value):
+        """The User ID needs a letter from the first name."""
+        if not username_part(value):
+            raise serializers.ValidationError(
+                'Los nombres deben contener al menos una letra.')
+        return value
+
+    def validate_apellido_paterno(self, value):
+        """The User ID needs the letters of the paternal surname."""
+        if not username_part(value):
+            raise serializers.ValidationError(
+                'El apellido paterno debe contener al menos una letra.')
+        return value
 
     def validate_password(self, value):
         """Apply the password policy on every creation and change."""
@@ -80,7 +98,9 @@ class ManageUserSerializer(UserSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['email', 'password', 'name', 'is_active', 'role_field']
+        fields = ['username', 'email', 'password', 'nombres',
+                  'apellido_paterno', 'apellido_materno', 'name',
+                  'is_active', 'role_field']
         extra_kwargs = {'password':{'write_only': True, 'min_length': 12},
                         'role_field': {'read_only': False},}
 
@@ -147,29 +167,32 @@ class AdminSerializer(ManageUserSerializer):
 
 class AuthTokenSerializer(serializers.Serializer):
     """Serializer for the user auth token."""
-    email = serializers.EmailField()
+    username = serializers.CharField()
     password = serializers.CharField(
         style = {'input_type': 'password'},
         trim_whitespace=False,
     )
 
+    def validate_username(self, value):
+        """User IDs are lowercase: accept 'ADM.JPerez' as 'adm.jperez'."""
+        return value.lower()
+
     def validate(self, attrs):
         """Validate and authenticate the user."""
-        email = attrs.get('email')
+        username = attrs.get('username')
         password = attrs.get('password')
 
 
-        user = get_user_model().objects.filter(email = email)
+        user = get_user_model().objects.filter(username = username)
 
         if not user.exists():
-            print("No hay")
             attrs['user'] = AnonymousUser()
             return attrs
 
 
         user = authenticate(
             request=self.context.get('request'),
-            username=email,
+            username=username,
             password=password,
         )
         if not user:

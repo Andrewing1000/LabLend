@@ -41,7 +41,7 @@ class UserCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  user.email,
+                  '${user.username} · ${user.email}',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: const TextStyle(

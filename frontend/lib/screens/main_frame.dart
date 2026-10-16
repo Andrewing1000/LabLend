@@ -337,9 +337,10 @@ class MainFrameState extends State<MainFrame> {
                 ),
               ),
             if (onLogin) LoginScreen(
-              onSubmit: (email, password) async {
-                  await SessionManager().login(email, password);
-                  if(SessionManager().session.user.email == email){
+              onSubmit: (username, password) async {
+                  await SessionManager().login(username, password);
+                  if(SessionManager().session.user.username ==
+                      username.trim().toLowerCase()){
                   setState(() {
                   onLogin = false;
                     });

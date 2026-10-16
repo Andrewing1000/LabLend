@@ -11,6 +11,6 @@ Future<void> main() async {
 
 
   var manager = SessionManager();
-  Session session = await SessionManager().login(previewEmail, previewPassword);
+  Session session = await SessionManager().login(previewUser, previewPassword);
 
 }

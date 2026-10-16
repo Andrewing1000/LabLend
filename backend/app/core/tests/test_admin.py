@@ -15,12 +15,15 @@ class AdminSiteTest(TestCase):
         self.admin_user = get_user_model().objects.create_superuser(
             email='admin@example.com',
             password='Testpass123#Testpass123#',
+            nombres='Admin',
+            apellido_paterno='Prueba',
         )
         self.client.force_login(self.admin_user)
         self.user = get_user_model().objects.create_user(
             email='user@example.com',
             password='Testpass123#Testpass123#',
-            name='Test User'
+            nombres='Test',
+            apellido_paterno='User',
         )
 
     def test_users_list(self):
@@ -28,6 +31,7 @@ class AdminSiteTest(TestCase):
         url = reverse("admin:core_user_changelist")
         res = self.client.get(url) #HTTP request
 
+        self.assertContains(res, self.user.username)
         self.assertContains(res, self.user.name)
         self.assertContains(res, self.user.email)
 

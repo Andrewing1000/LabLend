@@ -7,7 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var manager = SessionManager();
   Session session =
-      await manager.login(previewEmail, previewPassword);
+      await manager.login(previewUser, previewPassword);
 
   runApp(const MaterialApp(
     home: UserListPage(),

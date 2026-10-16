@@ -44,7 +44,8 @@ class CreateInitialAdminTests(TestCase):
     def create_admin(self, email='admin@lablend.test'):
         out = StringIO()
         call_command('create_initial_admin', email=email,
-                     name='Admin', stdout=out)
+                     nombres='Juan Carlos', apellido_paterno='Pérez',
+                     apellido_materno='Gutiérrez', stdout=out)
         return out.getvalue().split('Password: ')[1].splitlines()[0]
 
     def test_migrations_create_no_users(self):
@@ -59,6 +60,13 @@ class CreateInitialAdminTests(TestCase):
         self.assertEqual(user.role.role_name, LAB_ADMIN)
         self.assertFalse(user.is_superuser)
         self.assertTrue(user.check_password(password))
+
+    def test_initial_admin_user_id(self):
+        """Test the initial admin gets the adm. prefix in its User ID."""
+        self.create_admin()
+
+        user = get_user_model().objects.get(email='admin@lablend.test')
+        self.assertEqual(user.username, 'adm.jperez')
 
     def test_passwords_are_unique(self):
         """Test each run generates a different password."""

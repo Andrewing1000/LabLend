@@ -18,23 +18,34 @@ class Role{
 
 abstract class User extends ChangeNotifier{
   int? id;
+  /// Código de usuario (User ID) generado por el servidor, p. ej. usr.jperez.
+  String username;
   String email;
-  String name;
+  String nombres;
+  String apellidoPaterno;
+  String apellidoMaterno;
   bool isActive;
   Role role;
   bool superAdmin = false;
 
   User({
         int? id,
+        this.username = '',
         required this.email,
-        required this.name,
+        required this.nombres,
+        required this.apellidoPaterno,
+        this.apellidoMaterno = '',
         this.isActive = true,
         this.role = Role.assistantRole}){
-    if(name.isEmpty || name == "Super User" || name == "SUPER_USER"){
-      name = "SUPER_USER";
+    if(nombres.isEmpty || nombres == "Super User" || nombres == "SUPER_USER"){
+      nombres = "SUPER_USER";
       superAdmin = true;
     }
   }
+
+  String get name => [nombres, apellidoPaterno, apellidoMaterno]
+      .where((part) => part.isNotEmpty)
+      .join(' ');
 
 
   factory User.fromJson(Map<String, dynamic> userData){
@@ -43,16 +54,22 @@ abstract class User extends ChangeNotifier{
     if(roleField == Role.adminRole.name || roleField == Role.superAdminRole.name){
       user = AdminUser(
         id: userData['id'],
+        username: userData['username'] ?? '',
         email: userData['email'],
-        name: userData['name'],
+        nombres: userData['nombres'] ?? '',
+        apellidoPaterno: userData['apellido_paterno'] ?? '',
+        apellidoMaterno: userData['apellido_materno'] ?? '',
         isActive : userData['is_active'],
       );
     }
     else if(roleField == Role.assistantRole.name){
       user = AssistUser(
         id: userData['id'],
+        username: userData['username'] ?? '',
         email: userData['email'],
-        name: userData['name'],
+        nombres: userData['nombres'] ?? '',
+        apellidoPaterno: userData['apellido_paterno'] ?? '',
+        apellidoMaterno: userData['apellido_materno'] ?? '',
         isActive : userData['is_active'],
       );
     }
@@ -64,8 +81,11 @@ abstract class User extends ChangeNotifier{
   Map<String, dynamic> toJson(){
     return {
       'id' : id,
+      'username' : username,
       'email' : email,
-      'name' : name,
+      'nombres' : nombres,
+      'apellido_paterno' : apellidoPaterno,
+      'apellido_materno' : apellidoMaterno,
       'role_field' : role.name,
       'is_active' : isActive,
     };
@@ -94,8 +114,11 @@ abstract class User extends ChangeNotifier{
   }
 
   void updateData({required User newUser}) {
+    username = newUser.username;
     email = newUser.email;
-    name = newUser.name;
+    nombres = newUser.nombres;
+    apellidoPaterno = newUser.apellidoPaterno;
+    apellidoMaterno = newUser.apellidoMaterno;
     isActive =  newUser.isActive;
     role = newUser.role;
     notifyListeners();
@@ -105,20 +128,25 @@ abstract class User extends ChangeNotifier{
 class VisitorUser extends User{
   static
 
-  User anonymousUser = VisitorUser(email: "", name: "");
+  User anonymousUser = VisitorUser(email: "", nombres: "", apellidoPaterno: "");
 
-  VisitorUser({required super.email, required super.name, super.id}):
+  VisitorUser({required super.email, required super.nombres,
+    required super.apellidoPaterno, super.id}):
         super(role: Role.visitorRole);
 }
 
 class AdminUser extends User{
-  AdminUser({required super.email, required super.name, super.isActive, super.id}):
+  AdminUser({super.username, required super.email, required super.nombres,
+    required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
+    super.id}):
         super(role: Role.adminRole);
 }
 
 
 class AssistUser extends User{
-  AssistUser({required super.email, required super.name, super.isActive, super.id}):
+  AssistUser({super.username, required super.email, required super.nombres,
+    required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
+    super.id}):
         super(role: Role.assistantRole);
 
 }

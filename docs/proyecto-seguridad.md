@@ -50,7 +50,7 @@ Tiene dos partes: una API REST en Django que guarda los datos en PostgreSQL, y u
 **Funcionamiento general**
 
 1. El visitante abre la aplicación y consulta el catálogo sin iniciar sesión.
-2. El personal inicia sesión con correo y contraseña; el servidor abre una sesión de 15 minutos y registra la hora de ingreso.
+2. El personal inicia sesión con su código de usuario (por ejemplo, `usr.jperez`) y su contraseña; el servidor abre una sesión de 15 minutos y registra la hora de ingreso.
 3. Para prestar, el usuario agrega equipos y cantidades a un carrito y define las fechas de préstamo y devolución.
 4. El servidor verifica que haya unidades disponibles (cantidad total menos cantidad prestada) y, si las hay, registra el préstamo y aumenta la cantidad prestada.
 5. Al marcar el préstamo como devuelto, las unidades vuelven a quedar disponibles.
@@ -117,9 +117,9 @@ Al terminar la reingeniería, LabLend tendrá 9 módulos: 7 que ya existen y 2 n
 
 | Módulo | Funciones | Roles con acceso | Ruta en la API | Estado |
 | --- | --- | --- | --- | --- |
-| 1. Autenticación y sesión | Inicio de sesión con código de usuario (User ID) y contraseña; cierre de sesión; expiración de la sesión a los 15 minutos; mensaje de error genérico que no revela si el usuario existe | Todos los usuarios registrados | /user/token/, /user/logout/ | Parcial: hoy se inicia sesión con el correo y el mensaje de error revela si el correo está registrado |
+| 1. Autenticación y sesión | Inicio de sesión con código de usuario (User ID) y contraseña; cierre de sesión; expiración de la sesión a los 15 minutos; mensaje de error genérico que no revela si el usuario existe | Todos los usuarios registrados | /user/token/, /user/logout/ | Parcial: el mensaje de error revela si el código de usuario está registrado (D12) |
 | 2. Perfil de usuario | Ver y editar el nombre y el correo propios; cambiar la contraseña propia pidiendo la actual y validando la política | Todos los usuarios registrados | /user/me/ | Parcial: el cambio de contraseña no pide la actual ni valida la política |
-| 3. Gestión de usuarios (ABM) | Listar usuarios con filtros por rol, estado y correo; crear, modificar y desactivar usuarios; código de usuario (User ID) con formato estándar | Administrador de seguridad | /user/list/, /user/create/, /user/create/admin/, /user/manage/ | Parcial: falta el User ID con formato estándar; hoy lo usa el administrador de laboratorio |
+| 3. Gestión de usuarios (ABM) | Listar usuarios con filtros por rol, estado y correo; crear, modificar y desactivar usuarios; código de usuario (User ID) con formato estándar | Administrador de seguridad | /user/list/, /user/create/, /user/create/admin/, /user/manage/ | Parcial: hoy lo usa el administrador de laboratorio |
 | 4. Gestión de roles | Crear, modificar y eliminar roles; asignar permisos por función; asignar y quitar roles a usuarios; matriz de accesos | Administrador de seguridad | Por definir | Pendiente: hoy hay dos roles fijos en el código |
 | 5. Gestión de contraseñas | Política de complejidad y longitud; vencimiento; historial de contraseñas; bloqueo al tercer intento fallido; desbloqueo y reinicio por el administrador; contraseñas iniciales generadas y guardadas en un gestor de contraseñas | Administrador de seguridad | Por definir | Parcial: solo existe la regla de complejidad y longitud; hay un límite de 3 intentos por minuto, pero no bloqueo |
 | 6. Bitácora de sesiones | Consultar las horas de inicio y cierre de sesión de un usuario | Administrador de seguridad | /user/log/ | Implementado; hoy lo usa el administrador de laboratorio |
@@ -152,7 +152,7 @@ Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfigurati
 
 | N.º | Deficiencia encontrada | Corrección | Se demuestra en | OWASP | Estado |
 | --- | --- | --- | --- | --- | --- |
-| D11 | No existe un código de usuario: se inicia sesión con el correo | Código de usuario (User ID) con formato estándar, generado al crear la cuenta y usado para iniciar sesión | 9.1 | — (requisito del curso) | Pendiente |
+| D11 | No existe un código de usuario: se inicia sesión con el correo | Código de usuario (User ID) con formato estándar, generado al crear la cuenta y usado para iniciar sesión: prefijo + inicial del primer nombre + apellido paterno, en minúsculas y sin tildes ni ñ. El administrador de seguridad usa `adm.` (`adm.jperez`) y los demás usuarios `usr.` (`usr.mquispe`); si el código ya existe se agrega un número (`usr.mquispe2`). El nombre se guarda en tres campos (nombres, apellido paterno y apellido materno) para no confundir apellidos compuestos (`usr.jdelacruz`). El código no se puede elegir ni cambiar, y el correo deja de servir para iniciar sesión | 9.1 | — (requisito del curso) | Implementado |
 | D12 | El login responde distinto si el correo no existe (404) o si la contraseña es incorrecta (401), lo que permite averiguar qué correos están registrados | Un solo mensaje genérico para ambos casos | 10 (fallar de forma segura) | A07 | Pendiente |
 | D13 | Un administrador de laboratorio puede editar cualquier cuenta, incluida la del superadministrador, y cambiarle la contraseña (/user/manage/) | Solo el administrador de seguridad gestiona cuentas, y nadie puede modificar una cuenta con más privilegios que la suya | 9.1 y 10 (mínimo privilegio) | A01 | Pendiente |
 | D14 | Un usuario puede cambiar su correo y su contraseña sin confirmar la contraseña actual (/user/me/) | Pedir la contraseña actual para cambiar la contraseña o el correo | 9.3 | A07 | Pendiente |

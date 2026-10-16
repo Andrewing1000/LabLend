@@ -1,6 +1,8 @@
 """
 Database models
 """
+import unicodedata
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -102,14 +104,42 @@ def getAssistantRole():
         return LabAssistant.objects.get(role_name = LAB_ASSIST)
 
 
+ADMIN_USERNAME_PREFIX = 'adm'
+USER_USERNAME_PREFIX = 'usr'
+
+
+def username_part(value):
+    """Lowercase ASCII letters of a name: 'De la Peña' -> 'delapena'."""
+    decomposed = unicodedata.normalize('NFKD', value or '')
+    return ''.join(c for c in decomposed.lower() if 'a' <= c <= 'z')
+
+
 class UserManager(BaseUserManager):
     """Manager for users."""
 
-    def create_user(self, email, password=None, **extra_fields):
-        """Create, save and return a new user."""
+    def generate_username(self, prefix, nombres, apellido_paterno):
+        """Build the User ID: prefix.initial+surname, with a number if taken."""
+        initial = username_part(nombres)[:1]
+        surname = username_part(apellido_paterno)
+        if not initial or not surname:
+            raise ValueError('User must have nombres and apellido_paterno')
+        base = f'{prefix}.{initial}{surname}'
+        username = base
+        suffix = 2
+        while self.filter(username=username).exists():
+            username = f'{base}{suffix}'
+            suffix += 1
+        return username
+
+    def create_user(self, email, password=None,
+                    username_prefix=USER_USERNAME_PREFIX, **extra_fields):
+        """Create, save and return a new user with a generated User ID."""
         if not email:
             raise ValueError('User must have an email address')
+        extra_fields.pop('username', None)
         user = self.model(email=self.normalize_email(email), **extra_fields)
+        user.username = self.generate_username(
+            username_prefix, user.nombres, user.apellido_paterno)
         validate_password(password)
         user.set_password(password)
         user.save(using=self._db)
@@ -117,28 +147,22 @@ class UserManager(BaseUserManager):
         return user
 
     def create_lab_admin(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('User must have an email address')
-        user = self.model(email=self.normalize_email(email), **extra_fields)
+        user = self.create_user(email, password, **extra_fields)
         user.role = getAdminRole()
-        validate_password(password)
-        user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_lab_assistant(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('User must have an email address')
-        user = self.model(email=self.normalize_email(email), **extra_fields)
+        user = self.create_user(email, password, **extra_fields)
         user.role = getAssistantRole()
-        validate_password(password)
-        user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password):
+    def create_superuser(self, email, password, **extra_fields):
         """Create and return a new superuser."""
-        user = self.create_user(email, password)
+        user = self.create_user(email, password,
+                                username_prefix=ADMIN_USERNAME_PREFIX,
+                                **extra_fields)
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
@@ -153,18 +177,28 @@ class User(AbstractBaseUser, RolePermissionsMixin):
         permissions = [("own_password_modification", "Modification of self's account password"),
                        ("own_phone_modification", "Modification of self's account phone number"),]
 
+    username = models.CharField(max_length=150, unique=True, editable=False)
     email = models.EmailField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
+    nombres = models.CharField(max_length=255)
+    apellido_paterno = models.CharField(max_length=255)
+    apellido_materno = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'nombres', 'apellido_paterno']
 
+    @property
+    def name(self):
+        """Full name, for display."""
+        return ' '.join(part for part in (
+            self.nombres, self.apellido_paterno, self.apellido_materno)
+            if part)
 
     def __str__(self):
-        return self.email
+        return self.username
 
 
 

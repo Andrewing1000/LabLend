@@ -8,7 +8,7 @@ void main() async {
 
   var manager = SessionManager();
   Session session = await SessionManager()
-      .login(previewEmail, previewPassword);
+      .login(previewUser, previewPassword);
 
   runApp(MyApp(session: session));
 }

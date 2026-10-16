@@ -104,13 +104,15 @@ class UserManager {
       if (user.role == Role.adminRole || user.role == Role.superAdminRole) {
         var response = await requestHandler.postRequest('/user/create/admin/',
             body: userData);
-        manager.notification(notification: 'Administrador creado');
+        manager.notification(notification:
+            'Administrador creado. Código de usuario: ${response.data['username']}');
         user.updateData(newUser: User.fromJson(response.data));
         return User.fromJson(response.data);
       } else if (user.role == Role.assistantRole) {
         var response =
             await requestHandler.postRequest('/user/create/', body: userData);
-        manager.notification(notification: 'Asistente creado');
+        manager.notification(notification:
+            'Asistente creado. Código de usuario: ${response.data['username']}');
         user.updateData(newUser: User.fromJson(response.data));
         return User.fromJson(response.data);
       } else {

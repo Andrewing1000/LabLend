@@ -22,7 +22,7 @@ class Session {
 
 
   void logIn(String password){
-    manager.login(user.email, password);
+    manager.login(user.username, password);
   }
   void logOut(){
     if(manager.session == this){
@@ -152,12 +152,13 @@ class SessionManager with ChangeNotifier {
   ///
   ///
   ///Login management
-  Future<Session> login(String email, String password) async {
+  Future<Session> login(String username, String password) async {
     if(!(await connectionCheck())){return AnonymousSession();}
+    username = username.trim().toLowerCase();
 
     if(_session is! AnonymousSession){
       if(await sessionCheck()){
-        if(_session.user.email == email){
+        if(_session.user.username == username){
           notification(notification: "Ya ha iniciado sesión.");
           return _session;
         }
@@ -168,7 +169,7 @@ class SessionManager with ChangeNotifier {
     }
 
     Map<String, String> data = {
-      'email' : email,
+      'username' : username,
       'password' : password,
     };
 

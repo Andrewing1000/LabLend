@@ -16,6 +16,7 @@ from unittest.mock import patch
 from core.models import LAB_ADMIN, LAB_ASSIST
 
 CREATE_USER_URL = reverse("user:create")
+CREATE_ADMIN_URL = reverse("user:create/admin")
 TOKEN_URL = reverse("user:token")
 ME_URL = reverse("user:me")
 
@@ -41,7 +42,8 @@ class PublicAdminAPITests(TestCase):
         self.user = create_lab_admin(
             email = 'admin@example.com',
             password = 'Testpass123#Testpass123#',
-            name ='Test Name',
+            nombres = 'Admin',
+            apellido_paterno = 'Prueba',
         )
 
         self.client = APIClient()
@@ -55,25 +57,73 @@ class PublicAdminAPITests(TestCase):
         payload = {
             'email' : 'test@example.com',
             'password' : 'Testpass123#Testpass123#',
-            'name' : 'TestName',
+            'nombres' : 'Juan Carlos',
+            'apellido_paterno' : 'Pérez',
+            'apellido_materno' : 'Gutiérrez',
         }
 
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-        #create_user(**payload)
         user = get_user_model().objects.get(email = payload['email'])
 
         self.assertTrue(user.check_password(payload['password']))
         self.assertNotIn('password', res.data)
+        self.assertEqual(res.data['username'], 'usr.jperez')
+        self.assertEqual(res.data['name'], 'Juan Carlos Pérez Gutiérrez')
+
+    def test_created_admin_gets_usr_prefix(self):
+        """Test lab admins created from the app use the usr. prefix."""
+        payload = {
+            'email' : 'maria@example.com',
+            'password' : 'Testpass123#Testpass123#',
+            'nombres' : 'María',
+            'apellido_paterno' : 'Quispe',
+        }
+
+        res = self.client.post(CREATE_ADMIN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['username'], 'usr.mquispe')
+        self.assertEqual(res.data['role_field'], LAB_ADMIN)
+
+    def test_username_is_read_only(self):
+        """Test the User ID cannot be chosen by the client."""
+        payload = {
+            'email' : 'test@example.com',
+            'password' : 'Testpass123#Testpass123#',
+            'nombres' : 'Ana',
+            'apellido_paterno' : 'López',
+            'username' : 'adm.root',
+        }
+
+        res = self.client.post(CREATE_USER_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data['username'], 'usr.alopez')
+
+    def test_name_without_letters_error(self):
+        """Test the User ID needs letters in nombres and apellido paterno."""
+        payload = {
+            'email' : 'test@example.com',
+            'password' : 'Testpass123#Testpass123#',
+            'nombres' : 'Ana',
+            'apellido_paterno' : '123',
+        }
+
+        res = self.client.post(CREATE_USER_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('apellido_paterno', res.data)
 
     def test_user_with_email_exists_error(self):
         """Test error returned if user with email exists"""
         payload = {
             'email' : 'test@example.com',
             'password' : 'Testpass123#Testpass123#',
-            'name' : 'Test Name',
+            'nombres' : 'Test',
+            'apellido_paterno' : 'Name',
         }
 
         create_user(**payload)
@@ -87,7 +137,8 @@ class PublicAdminAPITests(TestCase):
         payload  = {
             'email' : 'test@example.com',
             'password' : 'pw',
-            'name' : 'TestName',
+            'nombres' : 'Test',
+            'apellido_paterno' : 'Name',
         }
         res = self.client.post(CREATE_USER_URL, payload)
 
@@ -99,41 +150,78 @@ class PublicAdminAPITests(TestCase):
 
     def test_login_for_user(self):
         """Test valid credentials start a session and return the user."""
-        user_details = {
-            'name' : 'Test Name',
-            'email' : 'test@example.com',
-            'password' : 'Testpass123#Testpass123#',
-        }
-        create_lab_admin(**user_details)
+        user = create_lab_admin(
+            nombres = 'Test',
+            apellido_paterno = 'Name',
+            email = 'test@example.com',
+            password = 'Testpass123#Testpass123#',
+        )
 
         payload = {
-            'email' : user_details['email'],
-            'password' : user_details['password'],
+            'username' : user.username,
+            'password' : 'Testpass123#Testpass123#',
         }
         res = self.client.post(TOKEN_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data['email'], user_details['email'])
+        self.assertEqual(res.data['username'], user.username)
         self.assertNotIn('password', res.data)
         self.assertIn('sessionid', res.cookies)
 
-    def test_create_token_bad_credentials(self):
-        """Test returns error if credentials invalid."""
-        create_lab_admin(email='test@example.com', password ='Testpass123#Testpass123#',)
+    def test_login_user_id_case_insensitive(self):
+        """Test the User ID is accepted regardless of letter case."""
+        user = create_lab_assistant(
+            nombres = 'Test',
+            apellido_paterno = 'Name',
+            email = 'test@example.com',
+            password = 'Testpass123#Testpass123#',
+        )
+
+        payload = {
+            'username' : user.username.upper(),
+            'password' : 'Testpass123#Testpass123#',
+        }
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_login_with_email_rejected(self):
+        """Test the email is no longer a login credential."""
+        create_lab_admin(
+            nombres = 'Test',
+            apellido_paterno = 'Name',
+            email = 'test@example.com',
+            password = 'Testpass123#Testpass123#',
+        )
 
         payload = {
             'email' : 'test@example.com',
+            'password' : 'Testpass123#Testpass123#',
+        }
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('sessionid', res.cookies)
+
+    def test_create_token_bad_credentials(self):
+        """Test returns error if credentials invalid."""
+        user = create_lab_admin(email='test@example.com',
+                                password ='Testpass123#Testpass123#',
+                                nombres='Test', apellido_paterno='Name')
+
+        payload = {
+            'username' : user.username,
             'password' : 'TestBadd123#Testpass123#',
         }
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertNotIn('email', res.data)
+        self.assertNotIn('username', res.data)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_token_blank_password(self):
         """Test posting a blank password returns an error."""
         payload = {
-            'email' : 'test@example.com',
+            'username' : 'usr.tname',
             'password' : '',
         }
         res = self.client.post(TOKEN_URL, payload)
@@ -154,7 +242,8 @@ class PublicAdminAPITests(TestCase):
         payload = {
             'email1' : 'test@example.com',
             'password' : 'Testpass123#Testpass123#',
-            'name' : 'Test Name',
+            'nombres' : 'Test',
+            'apellido_paterno' : 'Name',
             'gender' : 'Why do you care?'}
         res = self.client.post(CREATE_USER_URL, payload)
 
@@ -164,16 +253,15 @@ class PublicAdminAPITests(TestCase):
 
     def test_token_request_throtling(self):
         """Test that too many failed authentication requests block the API for a period."""
-        user_info = {
-            'name' : 'Test Name',
-            'email' : "test@example.com",
-            'password' : 'Testpass123#Testpass123#',
-        }
-
-        create_lab_admin(**user_info)
+        user = create_lab_admin(
+            nombres = 'Test',
+            apellido_paterno = 'Name',
+            email = "test@example.com",
+            password = 'Testpass123#Testpass123#',
+        )
 
         payload = {
-            'email' : user_info['email'],
+            'username' : user.username,
             'password' : "BadPass",
         }
 
@@ -183,8 +271,8 @@ class PublicAdminAPITests(TestCase):
         self.client.post(TOKEN_URL, payload)
 
         payload = {
-            'email' : user_info['email'],
-            'password' : user_info['password'],
+            'username' : user.username,
+            'password' : 'Testpass123#Testpass123#',
         }
         res = self.client.post(TOKEN_URL, payload)
 
@@ -198,7 +286,8 @@ class PrivateUserAPITests(TestCase):
         self.user = create_lab_admin(
             email = 'test@example.com',
             password = 'Testpass123#Testpass123#',
-            name ='Test Name',
+            nombres = 'Test',
+            apellido_paterno = 'Name',
         )
 
         self.client = APIClient()
@@ -211,8 +300,12 @@ class PrivateUserAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, {
-                'name' : self.user.name,
+                'username' : 'usr.tname',
                 'email' : self.user.email,
+                'nombres' : 'Test',
+                'apellido_paterno' : 'Name',
+                'apellido_materno' : '',
+                'name' : 'Test Name',
                 'is_active' : True,
                 'role_field' : LAB_ADMIN,
             }
@@ -226,11 +319,19 @@ class PrivateUserAPITests(TestCase):
 
     def test_update_user_profile(self):
         """Test updating the user profile for the authenticated user."""
-        payload = {'name': 'Updated name', 'password':  'Testpass123#Testpass123#',}
+        payload = {'nombres': 'Updated', 'password':  'Testpass123#Testpass123#',}
 
         res = self.client.patch(ME_URL, payload)
 
         self.user.refresh_from_db()
-        self.assertEqual(self.user.name, payload['name'])
+        self.assertEqual(self.user.nombres, payload['nombres'])
         self.assertTrue(self.user.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_name_change_keeps_user_id(self):
+        """Test the User ID never changes after the account is created."""
+        res = self.client.patch(ME_URL, {'apellido_paterno': 'Otro'})
+
+        self.user.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.user.username, 'usr.tname')

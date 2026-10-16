@@ -28,7 +28,7 @@ class LoanAPITests(TestCase):
         self.user = get_user_model().objects.create_lab_admin(
             email='prestamos@example.com',
             password='Testpass123#Testpass123#',
-            name='Test Name',
+            nombres='Test', apellido_paterno='Name',
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)

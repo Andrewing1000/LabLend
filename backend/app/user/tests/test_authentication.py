@@ -22,11 +22,11 @@ class BasicAuthTests(TestCase):
         user = get_user_model().objects.create_lab_admin(
             email='basic@example.com',
             password='Testpass123#Testpass123#',
-            name='Test Name',
+            nombres='Test', apellido_paterno='Name',
         )
         logIn(user)
         credentials = base64.b64encode(
-            b'basic@example.com:Testpass123#Testpass123#').decode()
+            f'{user.username}:Testpass123#Testpass123#'.encode()).decode()
 
         client = APIClient()
         res = client.get(ME_URL, HTTP_AUTHORIZATION=f'Basic {credentials}')

@@ -28,15 +28,16 @@ class CreateUserScreen extends PageBase{
 class _CreateUserScreenState extends State<CreateUserScreen> {
 
 
-  Future<void> _createUser(String email, String name, String password,
+  Future<void> _createUser(String email, String nombres,
+      String apellidoPaterno, String apellidoMaterno, String password,
       Role role, bool isActive) async {
     if (email.isEmpty){
       SessionManager().errorNotification(error: "Se requiere el email de usuario");
       return;
     }
 
-    if (name.isEmpty){
-      SessionManager().errorNotification(error: "Se requiere el nombre de usuario");
+    if (nombres.trim().isEmpty || apellidoPaterno.trim().isEmpty){
+      SessionManager().errorNotification(error: "Se requieren los nombres y el apellido paterno");
       return;
     }
 
@@ -47,15 +48,19 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
     User user;
     if (role == Role.adminRole) {
-      user = AdminUser(email: email, name: name, isActive: isActive);
+      user = AdminUser(email: email, nombres: nombres.trim(),
+          apellidoPaterno: apellidoPaterno.trim(),
+          apellidoMaterno: apellidoMaterno.trim(), isActive: isActive);
     } else {
-      user = AssistUser(email: email, name: name, isActive: isActive);
+      user = AssistUser(email: email, nombres: nombres.trim(),
+          apellidoPaterno: apellidoPaterno.trim(),
+          apellidoMaterno: apellidoMaterno.trim(), isActive: isActive);
     }
 
-    final pass = await SessionManager().confirmNotification(message: "Se creará el usuario con email \"$email\"");
+    final pass = await SessionManager().confirmNotification(message: "Se creará el usuario ${user.name} con email \"$email\"");
 
     if(pass){
-      var res = user.create(password: password);
+      var res = await user.create(password: password);
       if(res!=null){
         widget.manager?.removePage();
       }

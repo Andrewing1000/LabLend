@@ -7,7 +7,9 @@ import '../models/User.dart';
 
 class UserForm extends StatefulWidget {
   final User? user;
-  final Function(String, String, String, Role, bool) onFormSubmit;
+  /// email, nombres, apellido paterno, apellido materno, contraseña, rol, activo
+  final Function(String, String, String, String, String, Role, bool)
+      onFormSubmit;
 
   const UserForm({
     super.key,
@@ -21,7 +23,10 @@ class UserForm extends StatefulWidget {
 
 class _UserFormState extends State<UserForm> {
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController nombresController = TextEditingController();
+  final TextEditingController apellidoPaternoController = TextEditingController();
+  final TextEditingController apellidoMaternoController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final List<Role> roles = [Role.adminRole, Role.assistantRole];
   Role selectedRole = Role.assistantRole;
@@ -33,8 +38,11 @@ class _UserFormState extends State<UserForm> {
   void initState() {
     super.initState();
     if (updateMode) {
+      usernameController.text = widget.user?.username ?? '';
       emailController.text = widget.user?.email ?? '';
-      nameController.text = widget.user?.name ?? '';
+      nombresController.text = widget.user?.nombres ?? '';
+      apellidoPaternoController.text = widget.user?.apellidoPaterno ?? '';
+      apellidoMaternoController.text = widget.user?.apellidoMaterno ?? '';
       isActive = widget.user?.isActive ?? true;
       selectedRole = widget.user?.role ?? Role.assistantRole;
     }
@@ -42,8 +50,11 @@ class _UserFormState extends State<UserForm> {
 
   @override
   void dispose() {
+    usernameController.dispose();
     emailController.dispose();
-    nameController.dispose();
+    nombresController.dispose();
+    apellidoPaternoController.dispose();
+    apellidoMaternoController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -53,8 +64,21 @@ class _UserFormState extends State<UserForm> {
     bool activeSwitch = !updateMode || (!SessionManager().session.user.superAdmin &&
         SessionManager().session.user.email != widget.user!.email);
 
+    double fieldWidth = MediaQuery.of(context).size.width * 0.8;
+
     return Column(
       children: [
+        if (updateMode) ...[
+          StringField(
+            required: false,
+            enabled: false,
+            controller: usernameController,
+            hintText: widget.user!.username,
+            labelText: "Código de usuario",
+            width: fieldWidth,
+          ),
+          const SizedBox(height: 20),
+        ],
         StringField(
           required: !updateMode,
           enabled: !updateMode,
@@ -66,11 +90,29 @@ class _UserFormState extends State<UserForm> {
         const SizedBox(height: 20),
         StringField(
           required: !updateMode,
-          controller: nameController,
+          controller: nombresController,
           enabled: activeSwitch,
-          hintText: updateMode ? widget.user!.name : '',
-          labelText: "Nombre",
-          width: MediaQuery.of(context).size.width * 0.8,
+          hintText: updateMode ? widget.user!.nombres : 'Juan Carlos',
+          labelText: "Nombres",
+          width: fieldWidth,
+        ),
+        const SizedBox(height: 20),
+        StringField(
+          required: !updateMode,
+          controller: apellidoPaternoController,
+          enabled: activeSwitch,
+          hintText: updateMode ? widget.user!.apellidoPaterno : 'Pérez',
+          labelText: "Apellido paterno",
+          width: fieldWidth,
+        ),
+        const SizedBox(height: 20),
+        StringField(
+          required: false,
+          controller: apellidoMaternoController,
+          enabled: activeSwitch,
+          hintText: updateMode ? widget.user!.apellidoMaterno : 'Gutiérrez (opcional)',
+          labelText: "Apellido materno",
+          width: fieldWidth,
         ),
         const SizedBox(height: 20),
         PasswordCreationField(
@@ -124,7 +166,9 @@ class _UserFormState extends State<UserForm> {
           onPressed: () {
             widget.onFormSubmit(
               emailController.text,
-              nameController.text,
+              nombresController.text,
+              apellidoPaternoController.text,
+              apellidoMaternoController.text,
               passwordController.text,
               selectedRole,
               isActive,

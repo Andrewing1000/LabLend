@@ -11,16 +11,18 @@ from item import models as item_models
 class UserAdmin(BaseUserAdmin):
     """Define the admin pages for users."""
     ordering = ['id']
-    list_display = ['email', 'name']
+    list_display = ['username', 'email', 'name']
+    readonly_fields = ['username', 'last_login']
     fieldsets = (
         (None,
-            {'fields':('email', 'password',)}),
+            {'fields':('username', 'email', 'password',)}),
+        (_("Name"),
+            {'fields':('nombres', 'apellido_paterno', 'apellido_materno',)}),
         (_("Permissions"),
             {'fields':('is_active', 'is_staff', 'is_superuser',)}),
         (_("Important dates"),
             {'fields':('last_login',)})
     )
-    readonly_fields = ['last_login']
     add_fieldsets = (
         (None, {
             'classes':('wide',),
@@ -28,7 +30,9 @@ class UserAdmin(BaseUserAdmin):
                 'email',
                 'password1',
                 'password2',
-                'name',
+                'nombres',
+                'apellido_paterno',
+                'apellido_materno',
                 'is_active',
                 'is_staff',
                 'is_superuser',

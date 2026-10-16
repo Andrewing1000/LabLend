@@ -56,7 +56,7 @@ class _UserCardState extends State<UserCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user.email,
+                              '${user.username} · ${user.email}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

@@ -7,16 +7,16 @@ class LogInThrottle(throttling.UserRateThrottle):
 
     def get_cache_key(self, request, view):
 
-        email = ''
-        if 'email' in request.data:
-            email = request.data['email']
+        username = ''
+        if 'username' in request.data:
+            username = str(request.data['username']).lower()
         else: return None
 
         UserModel = get_user_model()
-        query = UserModel.objects.filter(email = UserModel.objects.normalize_email(email))
+        query = UserModel.objects.filter(username = username)
 
-        if query.exists() and (not request.user.is_authenticated or request.user.email != email):
-            ident = email
+        if query.exists() and (not request.user.is_authenticated or request.user.username != username):
+            ident = username
         else:
             return None
 

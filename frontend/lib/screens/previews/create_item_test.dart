@@ -39,7 +39,7 @@ class _CreateItemScreenTestState extends State<CreateItemScreenTest> {
     // Inicializa la sesión, asegúrate de que el SessionManager esté configurado correctamente
     var manager = SessionManager();
     Session session = await SessionManager()
-        .login(previewEmail, previewPassword);
+        .login(previewUser, previewPassword);
   }
 
   @override

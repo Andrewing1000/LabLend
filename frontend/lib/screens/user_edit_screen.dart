@@ -30,25 +30,30 @@ class EditUserScreen extends PageBase{
 class EditUserScreenState extends State<EditUserScreen> {
 
 
-  Future<void> _updateUser(String email, String name, String password,
+  Future<void> _updateUser(String email, String nombres,
+      String apellidoPaterno, String apellidoMaterno, String password,
       Role role, bool isActive) async {
-    if (email.isEmpty && name.isEmpty && password.isEmpty &&
-        role==widget.user.role &&
-        isActive==widget.user.isActive) {
-      SessionManager().errorNotification(error: "No se registraron cambios");
-      return;
-    }
-
     User newUser = widget.user.clone();
+    nombres = nombres.trim();
+    apellidoPaterno = apellidoPaterno.trim();
+    apellidoMaterno = apellidoMaterno.trim();
 
     bool noEdits = true;
     if(email != newUser.email && email.isNotEmpty){
       noEdits = false;
       newUser.email = email;
     }
-    if(name != newUser.name && name.isNotEmpty){
+    if(nombres != newUser.nombres && nombres.isNotEmpty){
       noEdits = false;
-      newUser.name = name;
+      newUser.nombres = nombres;
+    }
+    if(apellidoPaterno != newUser.apellidoPaterno && apellidoPaterno.isNotEmpty){
+      noEdits = false;
+      newUser.apellidoPaterno = apellidoPaterno;
+    }
+    if(apellidoMaterno != newUser.apellidoMaterno){
+      noEdits = false;
+      newUser.apellidoMaterno = apellidoMaterno;
     }
     if(password.isNotEmpty){
       noEdits = false;

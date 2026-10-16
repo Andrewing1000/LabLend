@@ -14,7 +14,7 @@ Future<void> main() async {
   // Inicialización de la sesión para autenticación
   var manager = SessionManager();
   Session session = await SessionManager()
-      .login(previewEmail, previewPassword);
+      .login(previewUser, previewPassword);
 
   // Crear un ítem de prueba
   Brand dummyBrand = Brand(

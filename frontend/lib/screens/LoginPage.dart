@@ -7,7 +7,7 @@ import '../widgets/string_field.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends StatefulWidget {
-  final Function(String email, String password) onSubmit;
+  final Function(String username, String password) onSubmit;
   final Function() onPasswordReset;
 
   const LoginScreen({super.key, required this.onSubmit, required this.onPasswordReset});
@@ -37,9 +37,9 @@ class LoginPageState extends State<LoginScreen>{
           mainAxisSize: MainAxisSize.min,
           children: [
             StringField(
-              labelText: "Correo electrónico",
+              labelText: "Código de usuario",
               controller: userController,
-              hintText: "",
+              hintText: "usr.jperez",
               width: 300, // Ancho del campo de texto
             ),
             const SizedBox(height: 20),
@@ -54,9 +54,6 @@ class LoginPageState extends State<LoginScreen>{
                 // Validar los campos
                 if (userController.text.isNotEmpty &&
                     passwordController.text.isNotEmpty) {
-                  print("Usuario: ${userController.text}");
-                  print("Contraseña: ${passwordController.text}");
-
                   widget.onSubmit(userController.text, passwordController.text);
                 } else {
                   SessionManager().errorNotification(error: "Todos los campos son requeridos");

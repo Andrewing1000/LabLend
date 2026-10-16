@@ -9,7 +9,8 @@ Future<void> main() async {
     home: EditUserScreen(
     user : AdminUser(
       email: "",
-      name: "",
+      nombres: "",
+      apellidoPaterno: "",
       id: 1,
       isActive: true,
     )),
@@ -17,5 +18,5 @@ Future<void> main() async {
 
   var manager = SessionManager();
   Session session = await SessionManager()
-      .login(previewEmail, previewPassword);
+      .login(previewUser, previewPassword);
 }
