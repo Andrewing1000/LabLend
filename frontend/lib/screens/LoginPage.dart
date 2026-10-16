@@ -4,8 +4,6 @@ import 'package:frontend/models/Session.dart';
 import '../widgets/password_field.dart';
 import '../widgets/string_field.dart';
 
-import 'package:url_launcher/url_launcher.dart';
-
 class LoginScreen extends StatefulWidget {
   final Function(String username, String password) onSubmit;
   final Function() onPasswordReset;
@@ -73,33 +71,6 @@ class LoginPageState extends State<LoginScreen>{
                 TextStyle(color: Colors.white),
               ),
             ),
-            const SizedBox(height: 40),
-            GestureDetector(
-              onTap: () async {
-                var url = 'https://accounts.google.com/';
-                  if (await canLaunch( url)) {
-                    // ignore: deprecated_member_use
-                    await launch(url);
-                  } else {
-                    throw 'Could not launch $url';
-                    }
-                },
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(200),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(200),
-                  clipBehavior: Clip.hardEdge,
-                  child: Image.network(
-                    'assets/images/google_auth.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            )
           ],
         ),
       ),

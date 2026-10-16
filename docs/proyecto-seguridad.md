@@ -129,9 +129,9 @@ Al terminar la reingeniería, LabLend tendrá 9 módulos: 7 que ya existen y 2 n
 
 ## 8. Alcance de la reingeniería del sistema
 
-La revisión del código del servidor (backend/app) y de la aplicación (frontend/lib) encontró 30 deficiencias de seguridad, y la reingeniería planifica corregirlas todas. Cada fila indica la deficiencia, su corrección, la sección donde se demuestra y su categoría en el [OWASP Top 10:2025](https://top10.owasp.org/2025); la columna Estado indica el avance al 14 de octubre de 2026.
+La revisión del código del servidor (backend/app) y de la aplicación (frontend/lib) encontró 31 deficiencias de seguridad, y la reingeniería planifica corregirlas todas. Cada fila indica la deficiencia, su corrección, la sección donde se demuestra y su categoría en el [OWASP Top 10:2025](https://top10.owasp.org/2025); la columna Estado indica el avance al 16 de octubre de 2026.
 
-Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfiguration, A03 Software Supply Chain Failures, A04 Cryptographic Failures, A06 Insecure Design, A07 Authentication Failures, A09 Security Logging and Alerting Failures, A10 Mishandling of Exceptional Conditions. La revisión no encontró casos de A05 Injection ni de A08 Software or Data Integrity Failures: el código no usa SQL directo, y todas las consultas pasan por el ORM de Django, que trata los datos del usuario como parámetros.
+Categorías OWASP usadas: A01 Control de acceso roto, A02 Configuración de seguridad incorrecta, A03 Fallas en la cadena de suministro de software, A04 Fallas criptográficas, A06 Diseño inseguro, A07 Fallas de autenticación, A09 Fallas en el registro y las alertas de seguridad, A10 Manejo incorrecto de condiciones excepcionales. La revisión no encontró casos de A05 Inyección ni de A08 Fallas de integridad del software o de los datos: el código no usa SQL directo, y todas las consultas pasan por el ORM de Django, que trata los datos del usuario como parámetros. La descripción de cada categoría, en español y en inglés, y las deficiencias que le corresponden están en [owasp-top10.md](owasp-top10.md).
 
 ### 8.1 Configuración, secretos y despliegue
 
@@ -157,6 +157,7 @@ Categorías OWASP usadas: A01 Broken Access Control, A02 Security Misconfigurati
 | D13 | Un administrador de laboratorio puede editar cualquier cuenta, incluida la del superadministrador, y cambiarle la contraseña (/user/manage/) | Solo el administrador de seguridad gestiona cuentas, y nadie puede modificar una cuenta con más privilegios que la suya | 9.1 y 10 (mínimo privilegio) | A01 | Pendiente |
 | D14 | Un usuario puede cambiar su correo y su contraseña sin confirmar la contraseña actual (/user/me/) | Pedir la contraseña actual para cambiar la contraseña o el correo | 9.3 | A07 | Pendiente |
 | D30 | La API acepta credenciales HTTP Basic en cualquier endpoint (configuración por defecto de Django REST Framework), y esa verificación ocurre antes del límite de intentos, así que se pueden probar contraseñas sin pasar por el login ni su límite de 3 intentos por minuto | Aceptar solo la autenticación por sesión que se obtiene en /user/token/ | 10 (economía del mecanismo, mediación completa) | A07 | Implementado |
+| D31 | La pantalla de login muestra un botón con el logo de inicio de sesión de Google que no autentica: solo abre accounts.google.com en otra pestaña, lo que hace creer que existe un segundo método de ingreso y acostumbra a los usuarios a escribir sus credenciales en una página a la que los envía la aplicación | Quitar el botón: el único método de ingreso es el código de usuario y la contraseña | 10 (menos asombro, minimizar la superficie de ataque) | A06 | Implementado |
 
 ### 8.3 Roles y permisos
 
