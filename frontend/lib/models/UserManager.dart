@@ -101,7 +101,7 @@ class UserManager {
     userData['password'] = password;
 
     try {
-      if (user.role == Role.adminRole || user.role == Role.superAdminRole) {
+      if (user.role == Role.adminRole) {
         var response = await requestHandler.postRequest('/user/create/admin/',
             body: userData);
         manager.notification(notification:
@@ -201,7 +201,7 @@ class UserManager {
       return null;
     }
 
-    if (user.role == Role.adminRole || user.role == Role.superAdminRole) {
+    if (user.role == Role.adminRole) {
       manager.notification(notification: 'Ya es administrador');
       return user;
     }

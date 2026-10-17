@@ -49,7 +49,9 @@ class RolePermissionsMixin(Models.PermissionsMixin):
     class Meta:
         abstract = True
 
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, null = True, default=None)
+    # PROTECT: borrar un rol con usuarios falla, en lugar de borrar también
+    # a todos sus usuarios (D27).
+    role = models.ForeignKey(Role, on_delete=models.PROTECT, null = True, default=None)
 
     def has_perm(self, perm, obj = None):
         super_perm = super().has_perm(perm, obj)

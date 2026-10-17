@@ -131,26 +131,60 @@ class RoleSegregationTests(TestCase):
         self.assertEqual(self.lab_admin.nombres, 'María')
 
     def test_cannot_remove_security_admin_role(self):
-        """Test a security admin cannot be turned into a lab role."""
+        """Test a security admin cannot be turned into a lab role: the
+        account cannot be modified at all from /user/manage/ (D27)."""
         for role in [LAB_ADMIN, LAB_ASSIST]:
             with self.subTest(role=role):
                 res = self.patch(self.security_admin, {'role_field': role})
 
                 self.assertEqual(res.status_code,
-                                 status.HTTP_400_BAD_REQUEST)
+                                 status.HTTP_403_FORBIDDEN)
                 self.security_admin.refresh_from_db()
                 self.assertEqual(self.security_admin.role.role_name,
                                  SEC_ADMIN)
 
     def test_same_role_is_not_a_change(self):
-        """Test editing a security admin while sending its own role works,
+        """Test editing an account while sending its own role works,
         as the app sends the current role on every edit."""
-        res = self.patch(self.security_admin,
-                         {'role_field': SEC_ADMIN, 'nombres': 'Juan Carlos'})
+        res = self.patch(self.lab_admin,
+                         {'role_field': LAB_ADMIN, 'nombres': 'María José'})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.lab_admin.refresh_from_db()
+        self.assertEqual(self.lab_admin.nombres, 'María José')
+
+    def test_cannot_edit_another_security_admin(self):
+        """Test a security admin cannot modify or deactivate another one
+        (D27)."""
+        other = Users.create_security_admin(
+            email='seg2@example.com', password=PASSWORD,
+            nombres='Beto', apellido_paterno='Rojas')
+
+        for data in [{'is_active': False}, {'password': 'Otrapass456$Otrapass456$'},
+                     {'nombres': 'Otro'}]:
+            with self.subTest(data=data):
+                res = self.patch(other, data)
+
+                self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        other.refresh_from_db()
+        self.assertTrue(other.is_active)
+        self.assertEqual(other.nombres, 'Beto')
+        self.assertTrue(other.check_password(PASSWORD))
+
+    def test_cannot_edit_own_account_from_manage(self):
+        """Test a security admin edits their own data only from /user/me/
+        (D27)."""
+        res = self.patch(self.security_admin, {'is_active': False})
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.security_admin.refresh_from_db()
-        self.assertEqual(self.security_admin.nombres, 'Juan Carlos')
+        self.assertTrue(self.security_admin.is_active)
+
+    def test_can_view_security_admin_account(self):
+        """Test reading a security admin account is still allowed."""
+        res = self.client.get(MANAGE_URL, {'email': self.security_admin.email})
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_lab_roles_can_still_change(self):
         """Test lab admin and assistant roles can still be swapped."""

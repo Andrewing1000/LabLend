@@ -6,7 +6,6 @@ import 'package:frontend/models/Session.dart';
 
 class Role{
   static const Role adminRole = Role(name : "AdministradorLaboratorio");
-  static const Role superAdminRole = Role(name : "SuperAdmin");
   static const Role assistantRole = Role(name : "AsistenteLaboratorio");
   static const Role securityAdminRole = Role(name : "AdministradorSeguridad");
   static const Role visitorRole = Role(name : "VisitorRole");
@@ -27,7 +26,6 @@ abstract class User extends ChangeNotifier{
   String apellidoMaterno;
   bool isActive;
   Role role;
-  bool superAdmin = false;
 
   User({
         int? id,
@@ -37,12 +35,7 @@ abstract class User extends ChangeNotifier{
         required this.apellidoPaterno,
         this.apellidoMaterno = '',
         this.isActive = true,
-        this.role = Role.assistantRole}){
-    if(nombres.isEmpty || nombres == "Super User" || nombres == "SUPER_USER"){
-      nombres = "SUPER_USER";
-      superAdmin = true;
-    }
-  }
+        this.role = Role.assistantRole});
 
   String get name => [nombres, apellidoPaterno, apellidoMaterno]
       .where((part) => part.isNotEmpty)
@@ -50,9 +43,9 @@ abstract class User extends ChangeNotifier{
 
 
   factory User.fromJson(Map<String, dynamic> userData){
-    String roleField = userData['role_field'];
+    String? roleField = userData['role_field'];
     User user = VisitorUser.anonymousUser;
-    if(roleField == Role.adminRole.name || roleField == Role.superAdminRole.name){
+    if(roleField == Role.adminRole.name){
       user = AdminUser(
         id: userData['id'],
         username: userData['username'] ?? '',

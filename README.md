@@ -111,6 +111,8 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 
 > **Si tu base de datos tiene usuarios creados antes del código de usuario:** esas cuentas no reciben un código y no pueden iniciar sesión, y la migración `0007` falla si hay más de una. Empieza con una base vacía con `down -v` y vuelve a crear la cuenta inicial.
 
+> **No hay superusuarios:** `python manage.py createsuperuser` está deshabilitado y responde con un error; toda cuenta tiene un rol. Si tu base de datos tenía un superusuario creado con ese comando, después de las migraciones queda sin rol y sin permisos: crea la cuenta inicial con `create_initial_admin`.
+
 > **Si tu cuenta inicial se creó antes del rol de administrador de seguridad:** sigue siendo administrador de laboratorio y ya no puede gestionar cuentas. Con el backend levantado (las migraciones crean el rol nuevo), vuelve a ejecutar `create_initial_admin` con otro correo: crea el administrador de seguridad, y la cuenta anterior queda como administrador de laboratorio.
 
 > Si ya tenías el backend con la versión anterior (PostgreSQL 13), la base de datos empieza vacía después de actualizar: Django 5.2 requiere PostgreSQL 14 o superior y los datos anteriores no se migran.

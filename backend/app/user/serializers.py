@@ -59,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_role_field(self, obj) -> Optional[str]:
         """Get the role name of the user."""
-        return obj.role.role_name if obj.role else "SuperAdmin"
+        return roleName(obj)
 
     def validate_nombres(self, value):
         """The User ID needs a letter from the first name."""

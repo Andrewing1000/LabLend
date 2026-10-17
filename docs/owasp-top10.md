@@ -29,7 +29,7 @@ D11 (código de usuario) no tiene categoría OWASP: es un requisito del curso.
 
 **Deficiencias:** D6, D13, D15, D16, D17, D18, D19, D27.
 
-**Ejemplo en LabLend:** un administrador de laboratorio puede cambiar la contraseña de cualquier cuenta, incluida la del superadministrador (D13).
+**Ejemplo en LabLend:** un administrador de laboratorio podía cambiar la contraseña de cualquier cuenta, incluida la del superadministrador (D13).
 
 ## A02 — Configuración de seguridad incorrecta (Security Misconfiguration)
 

@@ -51,6 +51,9 @@ if not DEBUG and not ALLOWED_HOSTS:
 # Application definition
 
 INSTALLED_APPS = [
+    # core va primero para que su comando createsuperuser, que lo
+    # deshabilita (D27), reemplace al de django.contrib.auth.
+    'core',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -59,7 +62,6 @@ INSTALLED_APPS = [
     'django_password_validators',
     'django_password_validators.password_history',
     'corsheaders',
-    'core',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',

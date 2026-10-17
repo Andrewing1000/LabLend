@@ -9,7 +9,8 @@ from rest_framework.settings import api_settings
 from rest_framework import pagination
 from rest_framework import status
 
-from core.models import IsSecurityAdmin, IsLogged, getAdminRole, getAssistantRole
+from core.models import (IsSecurityAdmin, IsLogged, getAdminRole,
+                         getAssistantRole, isSecurityAdmin)
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
@@ -213,7 +214,17 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
         email_param = self.request.query_params.get('email', None)
         if not email_param:
             raise MissingQueryParameterException(detail="Ingrese el parámetro de email")
-        return get_object_or_404(get_user_model(), email = email_param)
+        user = get_object_or_404(get_user_model(), email = email_param)
+
+        # D27: las cuentas de administrador de seguridad no se modifican
+        # desde la gestión de cuentas, ni la propia ni la de otro; cada uno
+        # cambia sus datos desde su perfil (/user/me/).
+        if self.request.method not in permissions.SAFE_METHODS \
+                and isSecurityAdmin(user):
+            raise exceptions.PermissionDenied(
+                'Las cuentas de administrador de seguridad no se pueden '
+                'modificar desde la gestión de cuentas.')
+        return user
 
 
 

@@ -38,6 +38,11 @@ class _UserFormState extends State<UserForm> {
   /// en su cuenta el rol se muestra, pero no se puede cambiar.
   bool get roleLocked => selectedRole == Role.securityAdminRole;
 
+  /// Cuenta de administrador de seguridad abierta para editar: el servidor
+  /// rechaza cualquier cambio (D27), así que el formulario es de solo lectura.
+  bool get lockedAccount =>
+      updateMode && widget.user!.role == Role.securityAdminRole;
+
   @override
   void initState() {
     super.initState();
@@ -68,8 +73,9 @@ class _UserFormState extends State<UserForm> {
 
   @override
   Widget build(BuildContext context) {
-    bool activeSwitch = !updateMode || (!SessionManager().session.user.superAdmin &&
-        SessionManager().session.user.email != widget.user!.email);
+    // D27: las cuentas de administrador de seguridad (la propia incluida)
+    // no se editan desde aquí; cada uno usa su perfil.
+    bool activeSwitch = !updateMode || !lockedAccount;
 
     double fieldWidth = MediaQuery.of(context).size.width * 0.8;
 
@@ -122,12 +128,14 @@ class _UserFormState extends State<UserForm> {
           width: fieldWidth,
         ),
         const SizedBox(height: 20),
-        PasswordCreationField(
-          controller: passwordController,
-          hintText: 'Contraseña',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        const SizedBox(height: 20),
+        if (!lockedAccount) ...[
+          PasswordCreationField(
+            controller: passwordController,
+            hintText: 'Contraseña',
+            width: MediaQuery.of(context).size.width * 0.8,
+          ),
+          const SizedBox(height: 20),
+        ],
         DropdownButton<Role>(
           value: selectedRole,
           dropdownColor: Colors.grey[900],
@@ -168,6 +176,13 @@ class _UserFormState extends State<UserForm> {
           ],
         ),
         const SizedBox(height: 20),
+        if (lockedAccount)
+          const Text(
+            'Las cuentas de administrador de seguridad no se modifican desde '
+            'aquí: cada uno cambia sus datos desde su perfil.',
+            style: TextStyle(color: Colors.white70),
+          )
+        else
         BotonAgregar(
           icon: updateMode ? Icons.update : Icons.add,
           onPressed: () {

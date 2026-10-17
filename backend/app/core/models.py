@@ -14,6 +14,7 @@ from django.contrib.auth.models import (
 from core.permissions import Role, RolePermissionsMixin
 
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from django.utils import timezone
 
@@ -30,24 +31,20 @@ def roleName(user):
     return role.role_name if role else None
 
 
+# Sin excepciones para superusuarios (D27): todo permiso sale del rol.
+
 def isAdmin(user):
     """Lab admin: manages inventory and sees every loan."""
-    if(user.is_superuser):
-        return True
     return roleName(user) == LAB_ADMIN
 
 
 def isSecurityAdmin(user):
     """Security admin: manages user accounts only (D18)."""
-    if(user.is_superuser):
-        return True
     return roleName(user) == SEC_ADMIN
 
 
 def isLabStaff(user):
     """Lab admin or assistant: the roles that work with loans."""
-    if(user.is_superuser):
-        return True
     return roleName(user) in (LAB_ADMIN, LAB_ASSIST)
 
 
@@ -229,16 +226,8 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, **extra_fields):
-        """Create and return a new superuser."""
-        user = self.create_user(email, password,
-                                username_prefix=ADMIN_USERNAME_PREFIX,
-                                **extra_fields)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-
-        return user
+    # Sin create_superuser (D27): ninguna cuenta queda fuera de los roles.
+    # La cuenta inicial se crea con create_initial_admin.
 
 
 class User(AbstractBaseUser, RolePermissionsMixin):
@@ -254,12 +243,29 @@ class User(AbstractBaseUser, RolePermissionsMixin):
     apellido_paterno = models.CharField(max_length=255)
     apellido_materno = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'nombres', 'apellido_paterno']
+
+    # D27: sin superusuarios. Reemplaza el campo is_superuser de
+    # PermissionsMixin; Django lo sigue consultando, así que siempre es False.
+    @property
+    def is_superuser(self):
+        return False
+
+    def save(self, *args, **kwargs):
+        """Never leave the system without an active security admin (D27),
+        not even from the server shell."""
+        if (self.pk and not self.is_active and roleName(self) == SEC_ADMIN
+                and not User.objects.filter(
+                    role__role_name=SEC_ADMIN, is_active=True,
+                ).exclude(pk=self.pk).exists()):
+            raise ValidationError(
+                'No se puede desactivar al último administrador de '
+                'seguridad activo.')
+        super().save(*args, **kwargs)
 
     @property
     def name(self):
@@ -331,7 +337,6 @@ class IsLogged(BasePermission):
 
     def has_permission(self, request, view):
 
-        user = request.user
-        return isLogged(user) or user.is_superuser
+        return isLogged(request.user)
 
 
