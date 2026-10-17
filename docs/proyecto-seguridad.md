@@ -125,7 +125,7 @@ Al terminar la reingeniería, LabLend tendrá 9 módulos: 7 que ya existen y 2 n
 | 6. Bitácora de sesiones | Consultar las horas de inicio y cierre de sesión de un usuario | Administrador de seguridad | /user/log/ | Implementado; hoy lo usa el administrador de laboratorio |
 | 7. Inventario | Alta, edición y baja de equipos (nombre, descripción, enlace, número de serie, cantidad, imagen); gestión de marcas y categorías; búsqueda por similitud de nombre y filtros por marca y categoría | Administrador de laboratorio para editar; todos, incluso visitantes, para consultar | /item/items/, /item/brands/, /item/categories/, /item/list/ | Implementado |
 | 8. Préstamos | Carrito de equipos; registro del préstamo con fechas y cantidades; validación de disponibilidad; marcar como devuelto; búsqueda por rango de fechas, estado y correo. El asistente ve solo sus préstamos y el administrador ve todos | Administrador de laboratorio, asistente | /loan/loan/ | Implementado |
-| 9. Soporte técnico | Documentación interactiva Swagger y verificación del estado del servidor | Desarrolladores | /api/docs/, /health_check | Implementado; falta desactivar en producción el panel /admin/, que hoy usa el superusuario |
+| 9. Soporte técnico | Documentación interactiva Swagger y verificación del estado del servidor | Desarrolladores | /api/docs/, /health_check | Implementado; el panel /admin/ de Django se eliminó (D9) |
 
 ## 8. Alcance de la reingeniería del sistema
 
@@ -145,7 +145,7 @@ Categorías OWASP usadas: A01 Control de acceso roto, A02 Configuración de segu
 | D6 | CORS acepta peticiones con credenciales desde cualquier origen | Aceptar solo el dominio del sistema, configurado en la variable de entorno CORS_ALLOWED_ORIGINS | 10 (minimizar la superficie de ataque) | A01 | Implementado |
 | D7 | La cookie de sesión se puede leer desde JavaScript (SESSION_COOKIE_HTTPONLY=False) | Cookie HttpOnly y SameSite=Lax, sirviendo la aplicación y la API desde el mismo dominio | 10 (defensa en profundidad) | A02 | Pendiente |
 | D8 | El sistema funciona por HTTP con el servidor de desarrollo de Django (runserver) | HTTPS del hosting con HSTS y redirección, y un servidor de producción (Gunicorn) | 10 (seguridad por defecto) | A04 | Pendiente |
-| D9 | El panel de administración de Django está activo en /admin/ y permite gestionar usuarios fuera de la aplicación | Desactivarlo en producción: usuarios y roles se gestionan desde la aplicación | 10 (minimizar la superficie de ataque) | A02 | Pendiente |
+| D9 | El panel de administración de Django está activo en /admin/ y permite gestionar usuarios fuera de la aplicación | Eliminar el panel en todos los entornos, no solo en producción: se quitan la ruta /admin/ y la aplicación django.contrib.admin, así que /admin/ responde 404. Usuarios y roles se gestionan solo desde la aplicación, donde pasan por los permisos y el registro de sesiones | 10 (minimizar la superficie de ataque) | A02 | Implementado |
 | D10 | Django 3.2 y Pillow 8.2 ya no reciben parches de seguridad (Django 3.2 perdió soporte en abril de 2024) | Actualizar a Django 5.2 LTS con Python 3.12 y PostgreSQL 17, y a versiones con soporte de las demás librerías | 10 (seguridad por defecto) | A03 | Implementado |
 
 ### 8.2 Usuarios y autenticación
