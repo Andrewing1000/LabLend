@@ -8,6 +8,7 @@ class Role{
   static const Role adminRole = Role(name : "AdministradorLaboratorio");
   static const Role superAdminRole = Role(name : "SuperAdmin");
   static const Role assistantRole = Role(name : "AsistenteLaboratorio");
+  static const Role securityAdminRole = Role(name : "AdministradorSeguridad");
   static const Role visitorRole = Role(name : "VisitorRole");
 
   final String name;
@@ -64,6 +65,17 @@ abstract class User extends ChangeNotifier{
     }
     else if(roleField == Role.assistantRole.name){
       user = AssistUser(
+        id: userData['id'],
+        username: userData['username'] ?? '',
+        email: userData['email'],
+        nombres: userData['nombres'] ?? '',
+        apellidoPaterno: userData['apellido_paterno'] ?? '',
+        apellidoMaterno: userData['apellido_materno'] ?? '',
+        isActive : userData['is_active'],
+      );
+    }
+    else if(roleField == Role.securityAdminRole.name){
+      user = SecurityAdminUser(
         id: userData['id'],
         username: userData['username'] ?? '',
         email: userData['email'],
@@ -140,6 +152,16 @@ class AdminUser extends User{
     required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
     super.id}):
         super(role: Role.adminRole);
+}
+
+
+/// Administrador de seguridad: gestiona cuentas de usuario, no el
+/// inventario ni los préstamos (D18).
+class SecurityAdminUser extends User{
+  SecurityAdminUser({super.username, required super.email, required super.nombres,
+    required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
+    super.id}):
+        super(role: Role.securityAdminRole);
 }
 
 

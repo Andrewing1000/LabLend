@@ -114,7 +114,8 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(homePage);
           },
           title: "Home",
-          permissions: [Role.adminRole, Role.assistantRole, Role.visitorRole],
+          permissions: [Role.adminRole, Role.assistantRole,
+            Role.securityAdminRole, Role.visitorRole],
       ),
       NavItem(
           iconNormal: Icons.biotech_outlined,
@@ -123,7 +124,8 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(searchItemPage);
           },
           title: "Search",
-          permissions: [Role.adminRole, Role.assistantRole, Role.visitorRole],
+          permissions: [Role.adminRole, Role.assistantRole,
+            Role.securityAdminRole, Role.visitorRole],
       ),
 
       NavItem(
@@ -142,7 +144,8 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(searchUserPage);
           },
           title: "Search",
-          permissions: [Role.adminRole],
+          // Cuentas de usuario: solo el administrador de seguridad (D18).
+          permissions: [Role.securityAdminRole],
       ),
       NavItem(
           iconNormal: Icons.swap_horiz_outlined,

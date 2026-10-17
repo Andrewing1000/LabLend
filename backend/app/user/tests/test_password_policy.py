@@ -19,7 +19,7 @@ class PasswordChangePolicyTests(TestCase):
     """Test password changes must satisfy the password policy."""
 
     def setUp(self):
-        self.admin = get_user_model().objects.create_lab_admin(
+        self.admin = get_user_model().objects.create_security_admin(
             email='admin@example.com', password=PASSWORD,
             nombres='Admin', apellido_paterno='Prueba',
         )
@@ -65,7 +65,7 @@ class PasswordRulesTests(TestCase):
     """Test each rule of the password policy on its own."""
 
     def setUp(self):
-        self.user = get_user_model().objects.create_lab_admin(
+        self.user = get_user_model().objects.create_security_admin(
             email='admin@example.com', password=PASSWORD,
             nombres='Admin', apellido_paterno='Prueba',
         )

@@ -28,11 +28,15 @@ class _UserFormState extends State<UserForm> {
   final TextEditingController apellidoPaternoController = TextEditingController();
   final TextEditingController apellidoMaternoController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final List<Role> roles = [Role.adminRole, Role.assistantRole];
+  List<Role> roles = [Role.adminRole, Role.assistantRole];
   Role selectedRole = Role.assistantRole;
   bool isActive = true;
 
   bool get updateMode => widget.user != null;
+
+  /// El rol de administrador de seguridad no se asigna ni se quita (D18):
+  /// en su cuenta el rol se muestra, pero no se puede cambiar.
+  bool get roleLocked => selectedRole == Role.securityAdminRole;
 
   @override
   void initState() {
@@ -45,6 +49,9 @@ class _UserFormState extends State<UserForm> {
       apellidoMaternoController.text = widget.user?.apellidoMaterno ?? '';
       isActive = widget.user?.isActive ?? true;
       selectedRole = widget.user?.role ?? Role.assistantRole;
+      if (!roles.contains(selectedRole)) {
+        roles = [selectedRole];
+      }
     }
   }
 
@@ -134,7 +141,7 @@ class _UserFormState extends State<UserForm> {
               ),
             );
           }).toList(),
-          onChanged: (Role? newRole) {
+          onChanged: roleLocked ? null : (Role? newRole) {
             setState(() {
               selectedRole = newRole!;
             });

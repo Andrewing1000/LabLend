@@ -211,9 +211,10 @@ class UserManager {
     return await updateUser(user, newUser: newUser);
   }
 
+  /// La gestión de cuentas corresponde al administrador de seguridad (D18).
   bool isAdmin() {
     final session = SessionManager().session;
-    return session.isAdmin();
+    return session.isSecurityAdmin();
   }
 
   Future<bool> isReady() async {

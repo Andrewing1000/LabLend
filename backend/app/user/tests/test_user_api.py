@@ -43,7 +43,7 @@ class PublicAdminAPITests(TestCase):
         # El límite de intentos de login vive en la caché, no en la base de
         # datos: se limpia para que cada prueba empiece sin intentos.
         cache.clear()
-        self.user = create_lab_admin(
+        self.user = get_user_model().objects.create_security_admin(
             email = 'admin@example.com',
             password = 'Testpass123#Testpass123#',
             nombres = 'Admin',

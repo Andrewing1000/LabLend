@@ -89,7 +89,7 @@ docker compose -f backend/docker-compose.yml down -v
 
 ### Crear la cuenta inicial
 
-El sistema no trae cuentas predefinidas: las migraciones solo crean los roles, así que la base de datos empieza sin usuarios. Con el backend levantado, crea el primer administrador:
+El sistema no trae cuentas predefinidas: las migraciones solo crean los roles, así que la base de datos empieza sin usuarios. Con el backend levantado, crea el administrador de seguridad inicial:
 
 ```bash
 docker compose -f backend/docker-compose.yml run --rm app_new python manage.py create_initial_admin --email admin@lablend.test --nombres "Juan Carlos" --apellido-paterno "Pérez" --apellido-materno "Gutiérrez"
@@ -98,10 +98,10 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 - **Correo y nombre:** los que pases al comando. `--apellido-materno` es opcional.
 - **Código de usuario:** es la credencial para iniciar sesión (el correo ya no sirve para entrar). El comando lo genera y lo muestra: `adm.` + inicial del primer nombre + apellido paterno, en minúsculas y sin tildes ni ñ (en el ejemplo, `adm.jperez`). Las cuentas creadas desde la aplicación reciben el prefijo `usr.` (por ejemplo `usr.mquispe`), y si el código ya existe se le agrega un número (`usr.mquispe2`). El código no cambia aunque después se edite el nombre.
 - **Contraseña:** el comando la genera al azar, cumpliendo la política de contraseñas, y la muestra **una sola vez** en la terminal. Guárdala de inmediato en el gestor de contraseñas: la base de datos solo guarda su hash, así que no hay forma de volver a verla. Nadie la conoce de antemano y no está en el código ni en git.
-- **Rol:** administrador de laboratorio. Cuando exista el rol de administrador de seguridad (D18), la cuenta inicial tendrá ese rol.
-- **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador. Las demás cuentas, administradores y asistentes, se crean desde la aplicación con esa cuenta.
+- **Rol:** administrador de seguridad. Gestiona las cuentas y consulta la bitácora de sesiones, pero no el inventario ni los préstamos (D18).
+- **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador de seguridad. Las demás cuentas, administradores de laboratorio y asistentes, se crean desde la aplicación con esa cuenta. Para gestionar el inventario, crea primero un administrador de laboratorio.
 
-Si se pierde la contraseña del administrador, cámbiala desde el servidor; el comando pide la nueva contraseña y aplica la misma política:
+Si se pierde la contraseña del administrador de seguridad, cámbiala desde el servidor; el comando pide la nueva contraseña y aplica la misma política:
 
 ```bash
 docker compose -f backend/docker-compose.yml run --rm app_new python manage.py changepassword adm.jperez
@@ -110,6 +110,8 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 > Si tu base de datos es anterior a este cambio, todavía tiene la cuenta `admin@example.com`, cuya contraseña está publicada en el historial de git. Desactívala, o empieza con una base vacía con `down -v` (borra también los datos locales).
 
 > **Si tu base de datos tiene usuarios creados antes del código de usuario:** esas cuentas no reciben un código y no pueden iniciar sesión, y la migración `0007` falla si hay más de una. Empieza con una base vacía con `down -v` y vuelve a crear la cuenta inicial.
+
+> **Si tu cuenta inicial se creó antes del rol de administrador de seguridad:** sigue siendo administrador de laboratorio y ya no puede gestionar cuentas. Con el backend levantado (las migraciones crean el rol nuevo), vuelve a ejecutar `create_initial_admin` con otro correo: crea el administrador de seguridad, y la cuenta anterior queda como administrador de laboratorio.
 
 > Si ya tenías el backend con la versión anterior (PostgreSQL 13), la base de datos empieza vacía después de actualizar: Django 5.2 requiere PostgreSQL 14 o superior y los datos anteriores no se migran.
 

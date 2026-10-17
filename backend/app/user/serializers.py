@@ -12,7 +12,8 @@ from rest_framework import serializers
 
 
 from core.models import (Session, getAdminRole, getAssistantRole,
-                         LAB_ADMIN, LAB_ASSIST, username_part)
+                         LAB_ADMIN, LAB_ASSIST, SEC_ADMIN, roleName,
+                         username_part)
 
 from rest_framework.exceptions import APIException
 
@@ -21,6 +22,13 @@ from rest_framework.exceptions import APIException
 class NotValidRole(APIException):
     status_code = 400
     default_detail = 'Ingrese un rol válido'
+    default_code = 'role_field'
+
+
+class SecurityRoleSegregation(APIException):
+    status_code = 400
+    default_detail = ('El rol de administrador de seguridad no se puede '
+                      'asignar ni quitar a una cuenta existente.')
     default_code = 'role_field'
 
 
@@ -129,19 +137,30 @@ class ManageUserSerializer(UserSerializer):
 
 
     def update(self, instance, validated_data):
-        """Update and return user."""
-        role_name = validated_data.pop('role_field', None)
-        user = super().update(instance, validated_data)
+        """Update and return user.
 
-        if role_name:
+        The role is checked before saving anything, so a rejected role
+        change leaves the account untouched.
+        """
+        role_name = validated_data.pop('role_field', None)
+        new_role = None
+        if role_name and role_name != roleName(instance):
+            # Segregación de roles (D18): el rol de administrador de
+            # seguridad no se asigna ni se quita a una cuenta existente.
+            if SEC_ADMIN in (role_name, roleName(instance)):
+                raise SecurityRoleSegregation()
             if(role_name == LAB_ASSIST):
-                user.role = getAssistantRole()
+                new_role = getAssistantRole()
             elif(role_name == LAB_ADMIN):
-                user.role = getAdminRole()
+                new_role = getAdminRole()
             else:
                 raise NotValidRole()
 
-        user.save()
+        user = super().update(instance, validated_data)
+
+        if new_role:
+            user.role = new_role
+            user.save()
 
         return user
 

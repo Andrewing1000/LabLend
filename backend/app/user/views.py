@@ -9,7 +9,7 @@ from rest_framework.settings import api_settings
 from rest_framework import pagination
 from rest_framework import status
 
-from core.models import IsLabAdmin, IsLogged, getAdminRole, getAssistantRole
+from core.models import IsSecurityAdmin, IsLogged, getAdminRole, getAssistantRole
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
@@ -61,7 +61,7 @@ class LogListPagination(pagination.CursorPagination):
 class ListUsersView(generics.ListAPIView):
     """List shows users in the api"""
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
     #pagination_class = UserListPagination
     queryset = get_user_model().objects.all().order_by('email')
     filterset_class = UserFilter
@@ -97,7 +97,7 @@ class ListUsersView(generics.ListAPIView):
 class ListUserLogsView(generics.ListAPIView):
     """List shows user logs in the api"""
     serializer_class = SessionSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
     #pagination_class = LogListPagination
     queryset = Session.objects.all()
 
@@ -131,12 +131,12 @@ class ListUserLogsView(generics.ListAPIView):
 
 class CreateLabAssistantView(generics.CreateAPIView):
     serializer_class = AssistanSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
 
 
 class CreateLabAdminView(generics.CreateAPIView):
     serializer_class = AdminSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
 
 
 class CreateTokenView(ObtainAuthToken):
@@ -198,7 +198,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Edit user profiles"""
     serializer_class = ManageUserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLabAdmin, IsLogged]
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
 
     @extend_schema(parameters=[
         OpenApiParameter(

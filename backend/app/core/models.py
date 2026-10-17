@@ -21,16 +21,34 @@ from rest_framework.permissions import BasePermission
 
 LAB_ADMIN = 'AdministradorLaboratorio'
 LAB_ASSIST = 'AsistenteLaboratorio'
+SEC_ADMIN = 'AdministradorSeguridad'
+
+
+def roleName(user):
+    """Role name of the user, or None if it has no role."""
+    role = getattr(user, 'role', None)
+    return role.role_name if role else None
 
 
 def isAdmin(user):
-
-    role = user.role
+    """Lab admin: manages inventory and sees every loan."""
     if(user.is_superuser):
         return True
-    if(role.role_name == LAB_ADMIN):
+    return roleName(user) == LAB_ADMIN
+
+
+def isSecurityAdmin(user):
+    """Security admin: manages user accounts only (D18)."""
+    if(user.is_superuser):
         return True
-    return False
+    return roleName(user) == SEC_ADMIN
+
+
+def isLabStaff(user):
+    """Lab admin or assistant: the roles that work with loans."""
+    if(user.is_superuser):
+        return True
+    return roleName(user) in (LAB_ADMIN, LAB_ASSIST)
 
 
 
@@ -38,6 +56,18 @@ class IsLabAdmin(BasePermission):
 
     def has_permission(self, request, view):
         return isAdmin(request.user)
+
+
+class IsSecurityAdmin(BasePermission):
+
+    def has_permission(self, request, view):
+        return isSecurityAdmin(request.user)
+
+
+class IsLabStaff(BasePermission):
+
+    def has_permission(self, request, view):
+        return isLabStaff(request.user)
 
 class LabAdmin(Role):
     """Lab Administrator role"""
@@ -68,6 +98,19 @@ class LabAssistant(Role):
         super().save(*args, **kwargs)
 
 
+class SecurityAdmin(Role):
+    """Security Administrator role: manages user accounts, separated
+    from the lab administrator (D18)"""
+
+    class Meta:
+        permissions = []
+        proxy = True
+
+    def save(self, *args, **kwargs):
+        self.role_name = SEC_ADMIN
+        super().save(*args, **kwargs)
+
+
 def createAdminRole():
     try:
         Role.objects.get(role_name = LAB_ADMIN)
@@ -84,9 +127,18 @@ def createAssistantRole():
         LabAssistant.objects.create()
         print(LAB_ASSIST + "LabAssistant Added")
 
+def createSecurityAdminRole():
+    try:
+        Role.objects.get(role_name = SEC_ADMIN)
+        print(SEC_ADMIN + "SecurityAdmin Already Added")
+    except:
+        SecurityAdmin.objects.create()
+        print(SEC_ADMIN + "SecurityAdmin Added")
+
 def createRoles():
     createAdminRole()
     createAssistantRole()
+    createSecurityAdminRole()
 
 
 def getAdminRole():
@@ -101,7 +153,16 @@ def getAssistantRole():
     try:
         return LabAssistant.objects.get(role_name = LAB_ASSIST)
     except:
+        createAssistantRole()
         return LabAssistant.objects.get(role_name = LAB_ASSIST)
+
+
+def getSecurityAdminRole():
+    try:
+        return SecurityAdmin.objects.get(role_name = SEC_ADMIN)
+    except:
+        createSecurityAdminRole()
+        return SecurityAdmin.objects.get(role_name = SEC_ADMIN)
 
 
 ADMIN_USERNAME_PREFIX = 'adm'
@@ -155,6 +216,16 @@ class UserManager(BaseUserManager):
     def create_lab_assistant(self, email, password=None, **extra_fields):
         user = self.create_user(email, password, **extra_fields)
         user.role = getAssistantRole()
+        user.save(using=self._db)
+        return user
+
+    def create_security_admin(self, email, password=None, **extra_fields):
+        """Security admins always get the adm. prefix in their User ID."""
+        extra_fields.pop('username_prefix', None)
+        user = self.create_user(email, password,
+                                username_prefix=ADMIN_USERNAME_PREFIX,
+                                **extra_fields)
+        user.role = getSecurityAdminRole()
         user.save(using=self._db)
         return user
 

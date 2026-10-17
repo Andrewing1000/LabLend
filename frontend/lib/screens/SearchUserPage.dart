@@ -149,7 +149,7 @@ class SearchUserPage extends BrowsablePage {
                   ),
                 ],
               ),
-              if (SessionManager().session.user.role == Role.adminRole)
+              if (SessionManager().session.user.role == Role.securityAdminRole)
                 Align(
                   alignment: const Alignment(1, 1),
                   child: Container(

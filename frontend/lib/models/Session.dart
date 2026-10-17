@@ -39,8 +39,15 @@ class Session {
   }
 
   bool isAdmin(){
-    print('------------------->${user.email}');
     if(user is AdminUser){
+      return true;
+    }
+    manager.errorNotification(error: "Acción denegada");
+    return false ;
+  }
+
+  bool isSecurityAdmin(){
+    if(user is SecurityAdminUser){
       return true;
     }
     manager.errorNotification(error: "Acción denegada");

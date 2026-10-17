@@ -4,12 +4,14 @@ from rest_framework.exceptions import PermissionDenied
 from loan.models import Prestamo
 from loan.serializers import PrestamoSerializer
 from rest_framework import permissions
-from core.models import IsLogged, IsLabAdmin, isAdmin
+from core.models import IsLogged, IsLabStaff, isAdmin
 
 from loan.filters import PrestamoFilter
 
 class PrestamoViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsLogged]
+    # Solo el personal del laboratorio presta equipos: el administrador de
+    # seguridad gestiona cuentas, no préstamos (D18).
+    permission_classes = [permissions.IsAuthenticated, IsLogged, IsLabStaff]
     queryset = Prestamo.objects.all()
     serializer_class = PrestamoSerializer
     filterset_class = PrestamoFilter
