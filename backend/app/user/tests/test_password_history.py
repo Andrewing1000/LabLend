@@ -5,6 +5,7 @@ from io import StringIO
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
@@ -44,9 +45,16 @@ class PasswordHistoryTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.admin)
         logIn(self.admin)
+        self.current_password = PASSWORD
 
     def change_own_password(self, password):
-        return self.client.patch(ME_URL, {'password': password})
+        """Change the admin's password, confirming the current one."""
+        cache.clear()
+        res = self.client.patch(ME_URL, {
+            'password': password, 'current_password': self.current_password})
+        if res.status_code == status.HTTP_200_OK:
+            self.current_password = password
+        return res
 
     def test_current_password_rejected(self):
         """Test the current password cannot be set again."""

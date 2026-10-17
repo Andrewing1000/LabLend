@@ -38,7 +38,7 @@ Una contraseña es válida solo si cumple **todas** estas reglas:
 | Situación | Endpoint o comando | Resultado si la contraseña no cumple |
 | --- | --- | --- |
 | Crear un asistente o un administrador | `/user/create/`, `/user/create/admin/` | 400 con las reglas incumplidas; la cuenta no se crea |
-| Cambiar la contraseña propia | `/user/me/` | 400 con las reglas incumplidas; se mantiene la contraseña anterior |
+| Cambiar la contraseña propia | `/user/me/`, con la contraseña actual en `current_password` (D14) | 400 con las reglas incumplidas; se mantiene la contraseña anterior. Si falta la contraseña actual o es incorrecta, 400 en `current_password`, antes de revisar la política |
 | Un administrador cambia la contraseña de otra cuenta | `/user/manage/` | 400 con las reglas incumplidas; se mantiene la contraseña anterior |
 | Crear la cuenta inicial | `python manage.py create_initial_admin` | La contraseña la genera el sistema al azar (24 caracteres) y siempre cumple la política |
 | Recuperar la contraseña del administrador desde el servidor | `python manage.py changepassword` | El comando rechaza la contraseña y la vuelve a pedir |
@@ -74,6 +74,7 @@ Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por e
 | El inicio de sesión solo se acepta en `/user/token/`, que aplica el límite; la API rechaza credenciales enviadas por HTTP Basic en otros endpoints (D30) | Implementado |
 | La sesión expira a los 15 minutos | Implementado |
 | Mensaje genérico que no revela si la cuenta existe (D12) | Implementado |
+| Cambiar la contraseña propia exige la contraseña actual, con un límite de 3 intentos por minuto por usuario (respuesta 429); un intento con la contraseña actual incorrecta queda en la bitácora de seguridad. El correo de una cuenta no se puede cambiar. Así una sesión robada no basta para tomar la cuenta, ni para adivinar la contraseña fuera del límite del login (D14) | Implementado |
 
 ## 5. Pendiente (módulo 5, gestión de contraseñas)
 
@@ -88,7 +89,7 @@ Ninguna contraseña se entrega por correo ni la conoce el administrador. Cada si
 
 Además:
 
-- Pedir la contraseña actual para cambiar la propia (D14).
+- El administrador de seguridad deja de escribir contraseñas ajenas en `/user/manage/`: para otra cuenta genera un enlace de restablecimiento (D14, con D24).
 - Ampliar la lista de caracteres especiales.
 
 ## 6. Verificación
@@ -98,3 +99,5 @@ Las pruebas de `backend/app/user/tests/test_password_policy.py` comprueban cada 
 Las pruebas de `backend/app/user/tests/test_password_hashing.py` comprueban que una contraseña nueva se guarda con Argon2id y que no se acepta un hash de otro algoritmo (PBKDF2), aunque la contraseña sea correcta.
 
 Las pruebas de `backend/app/user/tests/test_password_history.py` comprueban que se rechazan la contraseña actual y cada una de las 4 anteriores, que la sexta más reciente se acepta de nuevo, que el historial se aplica al cambio propio, al cambio hecho por un administrador y al comando `changepassword`, y que guarda como máximo 5 hashes por cuenta, nunca la contraseña.
+
+Las pruebas de `backend/app/user/tests/test_current_password.py` comprueban que la contraseña propia no cambia sin la contraseña actual o con una incorrecta, que el intento incorrecto queda registrado, que la contraseña actual se verifica antes que la política, que el nombre se cambia sin ella, que el cuarto intento en un minuto recibe 429 y que ni el usuario ni el administrador de seguridad pueden cambiar el correo.

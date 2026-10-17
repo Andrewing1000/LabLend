@@ -231,6 +231,8 @@ REST_FRAMEWORK = {
         'user': '500/min',
 
         'login' : '3/min',
+
+        'current_password': '3/min',
     },
 
 }

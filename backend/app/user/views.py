@@ -16,7 +16,7 @@ from core.audit import record_event, safe_attempted_username
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
-from core.utils import LogInThrottle
+from core.utils import CurrentPasswordThrottle, LogInThrottle
 
 from django.contrib.auth import get_user_model
 
@@ -26,6 +26,7 @@ from user.serializers import (
     AssistanSerializer,
     AdminSerializer,
     ManageUserSerializer,
+    ProfileSerializer,
     SecurityEventSerializer,
     SessionSerializer,
     HealthCheckSerializer,
@@ -261,8 +262,10 @@ class LogoutView(generics.CreateAPIView):
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     """Manage the authenticated user."""
-    serializer_class = UserSerializer
+    serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated, IsLogged]
+    throttle_classes = (api_settings.DEFAULT_THROTTLE_CLASSES
+                        + [CurrentPasswordThrottle])
 
     def get_object(self):
         """Retrieve and return the authenticated user."""

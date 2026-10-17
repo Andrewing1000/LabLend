@@ -17,6 +17,8 @@ from core.models import (Session, SecurityEvent, getAdminRole, getAssistantRole,
 
 from rest_framework.exceptions import APIException
 
+from core.audit import record_event
+
 
 
 class NotValidRole(APIException):
@@ -77,6 +79,14 @@ class UserSerializer(serializers.ModelSerializer):
                 'El apellido paterno debe contener al menos una letra.')
         return value
 
+    def validate_email(self, value):
+        """The email is set when the account is created and never changes,
+        neither in the own profile nor by an admin (D14). Sending the same
+        email is accepted, since the app sends the whole account."""
+        if self.instance is not None and value != self.instance.email:
+            raise serializers.ValidationError('El correo no se puede cambiar.')
+        return value
+
     def validate_password(self, value):
         """Apply the password policy on every creation and change."""
         try:
@@ -99,6 +109,46 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
+class ProfileSerializer(UserSerializer):
+    """Serializer for the authenticated user's own profile (/user/me/).
+
+    Changing the password requires the current password (D14), so a
+    stolen session is not enough to take over the account. The email
+    cannot be changed at all (validate_email).
+    """
+
+    current_password = serializers.CharField(
+        write_only=True, required=False,
+        style={'input_type': 'password'}, trim_whitespace=False,
+    )
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ['current_password']
+
+    def to_internal_value(self, data):
+        # La contraseña actual se verifica antes que la política: si no,
+        # el historial (D22) respondería si una contraseña probada es la
+        # actual, sin conocerla.
+        if 'password' in data:
+            self.check_current_password(data.get('current_password'))
+        return super().to_internal_value(data)
+
+    def check_current_password(self, current_password):
+        if not current_password:
+            raise serializers.ValidationError({'current_password': [
+                'Ingrese su contraseña actual para cambiar la '
+                'contraseña.']})
+        if not self.instance.check_password(current_password):
+            record_event(SecurityEvent.CURRENT_PASSWORD_FAILED,
+                         self.context.get('request'), target=self.instance)
+            raise serializers.ValidationError({'current_password': [
+                'La contraseña actual es incorrecta.']})
+
+    def validate(self, attrs):
+        attrs.pop('current_password', None)
+        return attrs
+
 
 class ManageUserSerializer(UserSerializer):
 

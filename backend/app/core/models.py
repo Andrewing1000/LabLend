@@ -308,6 +308,7 @@ class SecurityEvent(models.Model):
     ACCOUNT_UPDATED = 'cuenta_modificada'
     PROFILE_UPDATED = 'perfil_modificado'
     OWN_PASSWORD_CHANGED = 'contrasena_propia_cambiada'
+    CURRENT_PASSWORD_FAILED = 'contrasena_actual_incorrecta'
     ACCESS_DENIED = 'acceso_denegado'
 
     EVENT_TYPES = [
@@ -319,6 +320,8 @@ class SecurityEvent(models.Model):
         (ACCOUNT_UPDATED, 'Cuenta modificada por el administrador'),
         (PROFILE_UPDATED, 'Perfil propio modificado'),
         (OWN_PASSWORD_CHANGED, 'Contraseña propia cambiada'),
+        (CURRENT_PASSWORD_FAILED,
+         'Contraseña actual incorrecta al cambiar la contraseña'),
         (ACCESS_DENIED, 'Acción rechazada'),
     ]
 

@@ -154,7 +154,8 @@ class EventRecordingTests(TestCase):
     def test_own_profile_and_password_recorded(self):
         """Test changes through /user/me/ are recorded separately."""
         client_for(self.assistant).patch(
-            ME_URL, {'nombres': 'Ana María', 'password': NEW_PASSWORD})
+            ME_URL, {'nombres': 'Ana María', 'password': NEW_PASSWORD,
+                     'current_password': PASSWORD})
 
         profile = last_event(SecurityEvent.PROFILE_UPDATED)
         self.assertEqual(profile.detail['cambios'],

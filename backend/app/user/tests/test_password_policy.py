@@ -2,6 +2,7 @@
 Tests for the password policy on password changes
 """
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -35,7 +36,9 @@ class PasswordChangePolicyTests(TestCase):
         """Test a user cannot change their own password to a weak one."""
         for weak in WEAK_PASSWORDS:
             with self.subTest(password=weak):
-                res = self.client.patch(ME_URL, {'password': weak})
+                cache.clear()
+                res = self.client.patch(ME_URL, {
+                    'password': weak, 'current_password': PASSWORD})
 
                 self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
                 self.assertIn('password', res.data)
@@ -54,7 +57,8 @@ class PasswordChangePolicyTests(TestCase):
     def test_strong_password_accepted(self):
         """Test a password that satisfies the policy is saved."""
         new_password = 'Otrapass456$Otrapass456$'
-        res = self.client.patch(ME_URL, {'password': new_password})
+        res = self.client.patch(ME_URL, {
+            'password': new_password, 'current_password': PASSWORD})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.admin.refresh_from_db()
@@ -74,7 +78,9 @@ class PasswordRulesTests(TestCase):
         logIn(self.user)
 
     def change_password(self, password):
-        return self.client.patch(ME_URL, {'password': password})
+        cache.clear()
+        return self.client.patch(ME_URL, {
+            'password': password, 'current_password': PASSWORD})
 
     def test_each_rule_rejected_alone(self):
         """Test a password breaking only one rule is rejected for it."""
