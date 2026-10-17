@@ -158,8 +158,14 @@ AUTH_PASSWORD_VALIDATORS = [
                 'special_characters': "~!@#$%^&*()_+{}\":;'[]"
             }
     },
+    {
+        'NAME': 'core.passwords.PasswordHistoryValidator',
+        'OPTIONS': {'last_passwords': 5},
+    },
 
 ]
+
+DPV_DEFAULT_HISTORY_HASHER = 'core.passwords.PasswordHistoryHasher'
 
 
 # Internationalization

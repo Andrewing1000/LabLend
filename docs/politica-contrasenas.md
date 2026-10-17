@@ -17,6 +17,7 @@ Una contraseña es válida solo si cumple **todas** estas reglas:
 | No es solo numérica | No puede tener solo dígitos | Esta contraseña es completamente numérica. |
 | No se parece a los datos del usuario | No puede ser demasiado parecida al código de usuario ni al correo | La contraseña es demasiado similar a la de email. |
 | Longitud | Al menos 12 caracteres | Asegúrese de que este campo tenga al menos 12 caracteres. |
+| Historial | No puede ser igual a la contraseña actual ni a las 4 anteriores de la cuenta, es decir, a ninguna de las últimas 5. Una contraseña más antigua sí se puede volver a usar | La contraseña no puede ser igual a la actual ni a las 4 anteriores. |
 
 **Longitud mínima real: 14 caracteres.** Las 12 letras, más un dígito y un caracter especial, suman al menos 14. La regla de longitud (12 caracteres) y el mínimo de 8 caracteres de Django nunca son las que deciden.
 
@@ -42,6 +43,8 @@ Una contraseña es válida solo si cumple **todas** estas reglas:
 | Crear la cuenta inicial | `python manage.py create_initial_admin` | La contraseña la genera el sistema al azar (24 caracteres) y siempre cumple la política |
 | Recuperar la contraseña del administrador desde el servidor | `python manage.py changepassword` | El comando rechaza la contraseña y la vuelve a pedir |
 
+El historial se aplica en todos los cambios de esta tabla, también cuando un administrador cambia la contraseña de otra cuenta. Los cambios que se agreguen con el módulo 5 (vencimiento, enlaces de restablecimiento y de activación) deben validar la contraseña con la cuenta (`validate_password(contraseña, user=cuenta)`) para que el historial los cubra.
+
 La respuesta 400 indica las reglas incumplidas en el campo `password`. Si la contraseña tiene menos de 12 caracteres, solo se informa la longitud. Con 12 o más, se informan todas las demás reglas incumplidas a la vez, para que el usuario pueda corregirlas en un solo intento.
 
 ## 3. Almacenamiento
@@ -56,6 +59,8 @@ Las contraseñas nunca se guardan en texto plano. Django guarda solo su hash con
 | Paralelismo | 8 | Valor de Django |
 
 Calcular un hash tarda unos 100 ms, lo que no se nota al iniciar sesión pero limita los intentos de quien robe la base de datos.
+
+**Historial (D22):** para comparar una contraseña nueva con las anteriores, el historial guarda un hash de cada una de las últimas 5 contraseñas de la cuenta, incluida la actual; las más antiguas se borran. Usa **PBKDF2-SHA256 con 1 000 000 de iteraciones** (el valor de Django, por encima de las 600 000 que pide OWASP) y una sal aleatoria por usuario, definido en `DPV_DEFAULT_HISTORY_HASHER` (`backend/app/core/passwords.py`). No usa Argon2id porque el paquete del historial compara hashes con un número de iteraciones guardado, que Argon2 no tiene. Las iteraciones están fijas en el código, para que una actualización de Django no las cambie y deje de reconocer las contraseñas anteriores. Calcular cada hash tarda unos 0,4 segundos, así que cambiar una contraseña tarda cerca de un segundo.
 
 **Único algoritmo aceptado:** antes de D25 se usaba PBKDF2-SHA256, el algoritmo por omisión de Django. No se mantiene para verificar hashes anteriores, porque el sistema entra en producción con la base de datos vacía. Un hash guardado con otro algoritmo no se acepta, aunque la contraseña sea correcta.
 
@@ -84,7 +89,6 @@ Ninguna contraseña se entrega por correo ni la conoce el administrador. Cada si
 Además:
 
 - Pedir la contraseña actual para cambiar la propia (D14).
-- Historial: no reutilizar las últimas 5 contraseñas en ningún cambio (D22).
 - Ampliar la lista de caracteres especiales.
 
 ## 6. Verificación
@@ -92,3 +96,5 @@ Además:
 Las pruebas de `backend/app/user/tests/test_password_policy.py` comprueban cada regla por separado: cada contraseña de prueba incumple una sola regla y debe rechazarse solo por ella. También comprueban el límite de 11 y 12 letras, los símbolos que no cuentan como especiales y la creación de cuentas con contraseñas débiles. Si una regla se quitara de la configuración, su prueba fallaría.
 
 Las pruebas de `backend/app/user/tests/test_password_hashing.py` comprueban que una contraseña nueva se guarda con Argon2id y que no se acepta un hash de otro algoritmo (PBKDF2), aunque la contraseña sea correcta.
+
+Las pruebas de `backend/app/user/tests/test_password_history.py` comprueban que se rechazan la contraseña actual y cada una de las 4 anteriores, que la sexta más reciente se acepta de nuevo, que el historial se aplica al cambio propio, al cambio hecho por un administrador y al comando `changepassword`, y que guarda como máximo 5 hashes por cuenta, nunca la contraseña.

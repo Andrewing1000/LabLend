@@ -165,6 +165,8 @@ Con el backend levantado:
 docker compose -f backend/docker-compose.yml run --rm app_new sh -c "python manage.py wait_for_db && python manage.py test"
 ```
 
+Las pruebas tardan cerca de un minuto y medio: cada cuenta que crean guarda su contraseña con Argon2id y en el historial de contraseñas, con los mismos parámetros que en producción.
+
 ```bash
 docker compose -f backend/docker-compose.yml run --rm app_new flake8
 ```
