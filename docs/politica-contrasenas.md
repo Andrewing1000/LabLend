@@ -15,7 +15,7 @@ Una contraseña es válida solo si cumple **todas** estas reglas:
 | Caracteres especiales | Al menos 1 de estos: `~ ! @ # $ % ^ & * ( ) _ + { } " : ; ' [ ]` | La contraseña debe tener al menos 1 caracter especial. |
 | No es común | No puede estar en la lista de unas 20 000 contraseñas comunes de Django | Esta contraseña es demasiado común. |
 | No es solo numérica | No puede tener solo dígitos | Esta contraseña es completamente numérica. |
-| No se parece a los datos del usuario | No puede ser demasiado parecida al correo ni al nombre del usuario | La contraseña es demasiado similar a la de email. |
+| No se parece a los datos del usuario | No puede ser demasiado parecida al código de usuario ni al correo | La contraseña es demasiado similar a la de email. |
 | Longitud | Al menos 12 caracteres | Asegúrese de que este campo tenga al menos 12 caracteres. |
 
 **Longitud mínima real: 14 caracteres.** Las 12 letras, más un dígito y un caracter especial, suman al menos 14. La regla de longitud (12 caracteres) y el mínimo de 8 caracteres de Django nunca son las que deciden.
@@ -52,17 +52,26 @@ Las contraseñas nunca se guardan en texto plano. Django guarda solo su hash con
 
 | Medida | Estado |
 | --- | --- |
-| Límite de 3 intentos de inicio de sesión por minuto por dirección IP (respuesta 429) | Implementado |
+| Límite de 3 intentos de inicio de sesión por minuto por código de usuario, exista o no (respuesta 429) | Implementado |
 | El inicio de sesión solo se acepta en `/user/token/`, que aplica el límite; la API rechaza credenciales enviadas por HTTP Basic en otros endpoints (D30) | Implementado |
 | La sesión expira a los 15 minutos | Implementado |
-| Mensaje genérico que no revela si la cuenta existe (D12) | Pendiente |
+| Mensaje genérico que no revela si la cuenta existe (D12) | Implementado |
 
 ## 5. Pendiente (módulo 5, gestión de contraseñas)
 
-- Vencimiento de las contraseñas.
-- Historial: no reutilizar contraseñas anteriores.
-- Bloqueo de la cuenta al tercer intento fallido.
-- Desbloqueo y reinicio de la contraseña por el administrador de seguridad.
+Ninguna contraseña se entrega por correo ni la conoce el administrador. Cada situación tiene su propio camino:
+
+| Situación | Quién la resuelve | Cómo |
+| --- | --- | --- |
+| Cuenta nueva (D26) | Automático | Al crear la cuenta, el sistema genera un enlace de activación de un solo uso (24 horas) y lo muestra una vez al administrador de seguridad, que lo entrega a la persona; ella elige su contraseña. La cuenta inicial es la excepción: `create_initial_admin` genera su contraseña y la muestra una vez |
+| Contraseña vencida, a los 90 días (D21) | El propio usuario | Inicia sesión con la contraseña vencida y debe cambiarla, ingresando la actual y una nueva, antes de cualquier otra acción |
+| Contraseña olvidada (D24) | El administrador de seguridad, a pedido | Genera un enlace de restablecimiento de un solo uso (24 horas); la contraseña anterior deja de funcionar y se cierran las sesiones abiertas |
+| Cuenta bloqueada al tercer intento fallido (D23) | El administrador de seguridad, a pedido | El mismo enlace de restablecimiento la desbloquea |
+
+Además:
+
+- Pedir la contraseña actual para cambiar la propia (D14).
+- Historial: no reutilizar las últimas 5 contraseñas en ningún cambio (D22).
 - Ampliar la lista de caracteres especiales.
 
 ## 6. Verificación
