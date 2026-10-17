@@ -46,7 +46,20 @@ La respuesta 400 indica las reglas incumplidas en el campo `password`. Si la con
 
 ## 3. Almacenamiento
 
-Las contraseñas nunca se guardan en texto plano. Django guarda solo su hash con **PBKDF2-SHA256 y 1 000 000 de iteraciones**, con una sal aleatoria distinta para cada contraseña. Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por eso la contraseña de la cuenta inicial se muestra una sola vez y debe guardarse en el gestor de contraseñas.
+Las contraseñas nunca se guardan en texto plano. Django guarda solo su hash con **Argon2id** (D25), con una sal aleatoria distinta para cada contraseña. La configuración está en `PASSWORD_HASHERS` (`backend/app/app/settings.py`).
+
+| Parámetro | Valor | Motivo |
+| --- | --- | --- |
+| Algoritmo | Argon2id | Primera opción de OWASP (Password Storage Cheat Sheet) y algoritmo recomendado por Django; ganador de la Password Hashing Competition, estandarizado en RFC 9106 |
+| Memoria | 100 MiB por hash | Cada intento ocupa esa memoria, lo que encarece los ataques con GPU o hardware dedicado (OWASP pide al menos 19 MiB) |
+| Pasadas | 2 | Valor de Django, igual al de OWASP |
+| Paralelismo | 8 | Valor de Django |
+
+Calcular un hash tarda unos 100 ms, lo que no se nota al iniciar sesión pero limita los intentos de quien robe la base de datos.
+
+**Único algoritmo aceptado:** antes de D25 se usaba PBKDF2-SHA256, el algoritmo por omisión de Django. No se mantiene para verificar hashes anteriores, porque el sistema entra en producción con la base de datos vacía. Un hash guardado con otro algoritmo no se acepta, aunque la contraseña sea correcta.
+
+Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por eso la contraseña de la cuenta inicial se muestra una sola vez y debe guardarse en el gestor de contraseñas.
 
 ## 4. Protección del inicio de sesión
 
@@ -77,3 +90,5 @@ Además:
 ## 6. Verificación
 
 Las pruebas de `backend/app/user/tests/test_password_policy.py` comprueban cada regla por separado: cada contraseña de prueba incumple una sola regla y debe rechazarse solo por ella. También comprueban el límite de 11 y 12 letras, los símbolos que no cuentan como especiales y la creación de cuentas con contraseñas débiles. Si una regla se quitara de la configuración, su prueba fallaría.
+
+Las pruebas de `backend/app/user/tests/test_password_hashing.py` comprueban que una contraseña nueva se guarda con Argon2id y que no se acepta un hash de otro algoritmo (PBKDF2), aunque la contraseña sea correcta.

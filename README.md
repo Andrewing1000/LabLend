@@ -187,6 +187,8 @@ Antes de abrir el sistema a los usuarios, revisa la configuración con la lista 
 python manage.py check --deploy
 ```
 
+Las contraseñas se guardan con Argon2id, que usa unos 100 MiB de memoria y unos 100 ms por cada inicio de sesión o cambio de contraseña. Elige un servidor con memoria suficiente para los inicios de sesión simultáneos que esperas, más la que usa Django.
+
 Después del primer despliegue, crea la cuenta inicial en el servidor con `python manage.py create_initial_admin` (ver [Crear la cuenta inicial](#crear-la-cuenta-inicial)) y guarda la contraseña en el gestor de contraseñas del equipo.
 
 ## Problemas comunes
@@ -202,4 +204,6 @@ Después del primer despliegue, crea la cuenta inicial en el servidor con `pytho
 | La aplicación muestra "Sin conexión" | El backend no está corriendo en el puerto 8000 | Levántalo (paso 1) y revisa http://localhost:8000/health_check |
 | La consola del navegador muestra un error CORS, o guardar un cambio responde 403 | La aplicación web corre en un puerto que no está en `CORS_ALLOWED_ORIGINS` ni en `CSRF_TRUSTED_ORIGINS` | Ejecútala con `--web-port 58315` |
 | El inicio de sesión responde 429 | Límite de 3 inicios de sesión por minuto por usuario; cada reinicio de la aplicación cuenta como uno | Espera un minuto; usa `r` en lugar de `R` mientras editas |
+| El backend termina con `Couldn't load 'Argon2PasswordHasher' algorithm library: No module named 'argon2'` | La imagen se construyó antes de que se agregara `argon2-cffi` a `requirements.txt` | Reconstruye la imagen: `docker compose -f backend/docker-compose.yml up --build` |
+| Una cuenta de tu base local ya no puede iniciar sesión con su contraseña correcta | La cuenta se creó antes de que las contraseñas se guardaran con Argon2id; su hash usa otro algoritmo, que ya no se acepta | Asígnale una contraseña nueva con `python manage.py changepassword <código de usuario>` (ver [Crear la cuenta inicial](#crear-la-cuenta-inicial)), o empieza de cero (nota del paso 1) |
 | `docker compose up` falla porque el puerto 8000 está ocupado | Otro programa o contenedor usa ese puerto | Detén el otro proceso o contenedor |

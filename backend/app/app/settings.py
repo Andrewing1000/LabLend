@@ -119,6 +119,16 @@ DATABASES = {
 }
 
 
+# Password hashing
+# Argon2id, recommended by OWASP and Django. It is the only accepted
+# algorithm: production starts with an empty database, so there are no
+# hashes from other algorithms to verify.
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+]
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
