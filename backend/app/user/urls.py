@@ -15,5 +15,6 @@ urlpatterns = [
     path('token/', views.CreateTokenView.as_view(), name='token'),
     path('me/', views.UserProfileView.as_view(), name = 'me'),
     path('log/', views.ListUserLogsView.as_view(), name = 'log' ),
+    path('events/', views.ListSecurityEventsView.as_view(), name='events'),
     path('logout/', views.LogoutView.as_view(), name = 'logout'),
 ]

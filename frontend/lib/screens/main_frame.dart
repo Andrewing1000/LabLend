@@ -29,6 +29,7 @@ import "PageContainer.dart";
 import "SearchItemPage.dart";
 import "SearchLoanPage.dart";
 import "SearchUserPage.dart";
+import "SecurityEventsPage.dart";
 
 class MainFrame extends StatefulWidget {
   ContextMessageService messageService;
@@ -57,6 +58,7 @@ class MainFrameState extends State<MainFrame> {
   late HomePage homePage;
   late SearchItemPage searchItemPage;
   late SearchUserPage searchUserPage;
+  late SecurityEventsPage securityEventsPage;
   late SearchLoanPage searchLoanPage;
   late CreateItemScreen createItemPage;
   late CategoryBrandScreen categoryBrandPage;
@@ -76,6 +78,7 @@ class MainFrameState extends State<MainFrame> {
     homePage = HomePage(selectedItem: selectedItem);
     searchItemPage = SearchItemPage(selectedItem: selectedItem);
     searchUserPage = SearchUserPage();
+    securityEventsPage = SecurityEventsPage();
     searchLoanPage = SearchLoanPage();
     createItemPage = CreateItemScreen();
     categoryBrandPage = CategoryBrandScreen();
@@ -145,6 +148,16 @@ class MainFrameState extends State<MainFrame> {
           },
           title: "Search",
           // Cuentas de usuario: solo el administrador de seguridad (D18).
+          permissions: [Role.securityAdminRole],
+      ),
+      NavItem(
+          iconNormal: Icons.shield_outlined,
+          iconSelected: Icons.shield,
+          onPressed: () {
+            pageManager.setPage(securityEventsPage);
+          },
+          title: "Bitácora de seguridad",
+          // Bitácora de seguridad (D28): solo el administrador de seguridad.
           permissions: [Role.securityAdminRole],
       ),
       NavItem(

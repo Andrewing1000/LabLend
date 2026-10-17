@@ -105,7 +105,7 @@ D11 (código de usuario) no tiene categoría OWASP: es un requisito del curso.
 
 **Deficiencias:** D28.
 
-**Ejemplo en LabLend:** solo se registran el inicio y el cierre de sesión; los intentos fallidos y los cambios de roles no dejan rastro (D28).
+**Ejemplo en LabLend:** solo se registraban el inicio y el cierre de sesión; los intentos fallidos y los cambios de roles no dejaban rastro (D28).
 
 ## A10 — Manejo incorrecto de condiciones excepcionales (Mishandling of Exceptional Conditions)
 

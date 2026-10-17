@@ -9,7 +9,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
-from core.models import SEC_ADMIN
+from core.audit import record_event
+from core.models import SEC_ADMIN, SecurityEvent
 
 PASSWORD_LENGTH = 24
 SPECIAL_CHARACTERS = '~!@#$%^&*()_+{}":;\'[]'
@@ -61,6 +62,8 @@ class Command(BaseCommand):
         except ValueError:
             raise CommandError(
                 '--nombres and --apellido-paterno must contain letters.')
+        record_event(SecurityEvent.ACCOUNT_CREATED, target=user,
+                     rol=SEC_ADMIN, origen='create_initial_admin')
 
         self.stdout.write(self.style.SUCCESS(
             f'Security administrator {user.username} created.'))

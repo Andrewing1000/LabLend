@@ -1,7 +1,8 @@
 import django_filters
 from django_filters import rest_framework as filters
 from django.contrib.postgres.search import TrigramSimilarity
-from core.models import User, getAdminRole, getAssistantRole
+from django.db.models import Q
+from core.models import SecurityEvent, User, getAdminRole, getAssistantRole
 
 
 class UserFilter(filters.FilterSet):
@@ -31,3 +32,24 @@ class UserFilter(filters.FilterSet):
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
         return queryset
+
+
+class SecurityEventFilter(filters.FilterSet):
+    """Filters for the security event log (D28)."""
+
+    usuario = filters.CharFilter(method='filter_by_username',
+                                 label='Código de usuario (actor o afectado)')
+    tipo = filters.ChoiceFilter(field_name='event_type',
+                                choices=SecurityEvent.EVENT_TYPES)
+    desde = filters.DateFilter(field_name='timestamp', lookup_expr='date__gte')
+    hasta = filters.DateFilter(field_name='timestamp', lookup_expr='date__lte')
+
+    class Meta:
+        model = SecurityEvent
+        fields = ['usuario', 'tipo', 'desde', 'hasta']
+
+    def filter_by_username(self, queryset, name, value):
+        value = value.strip().lower()
+        return queryset.filter(
+            Q(actor_username=value) | Q(target_username=value)
+            | Q(detail__codigo_ingresado=value))

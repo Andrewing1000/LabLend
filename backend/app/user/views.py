@@ -9,8 +9,10 @@ from rest_framework.settings import api_settings
 from rest_framework import pagination
 from rest_framework import status
 
-from core.models import (IsSecurityAdmin, IsLogged, getAdminRole,
-                         getAssistantRole, isSecurityAdmin)
+from core.models import (IsSecurityAdmin, IsLogged, SecurityEvent,
+                         getAdminRole, getAssistantRole, isSecurityAdmin,
+                         roleName)
+from core.audit import record_event, safe_attempted_username
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
@@ -24,11 +26,12 @@ from user.serializers import (
     AssistanSerializer,
     AdminSerializer,
     ManageUserSerializer,
+    SecurityEventSerializer,
     SessionSerializer,
     HealthCheckSerializer,
 )
 
-from user.filters import UserFilter
+from user.filters import SecurityEventFilter, UserFilter
 
 from django.shortcuts import get_object_or_404
 
@@ -130,12 +133,57 @@ class ListUserLogsView(generics.ListAPIView):
 
 
 
-class CreateLabAssistantView(generics.CreateAPIView):
+# Datos de la cuenta que se comparan para registrar qué cambió (D28).
+# La contraseña nunca se compara ni se registra: solo si cambió.
+ACCOUNT_FIELDS = ['email', 'nombres', 'apellido_paterno', 'apellido_materno',
+                  'is_active']
+
+
+def account_snapshot(user):
+    data = {field: getattr(user, field) for field in ACCOUNT_FIELDS}
+    data['rol'] = roleName(user)
+    return data
+
+
+def account_changes(before, after):
+    """{field: [before, after]} for the fields that changed."""
+    return {field: [before[field], after[field]]
+            for field in before if before[field] != after[field]}
+
+
+class CreateAccountMixin:
+    """Record every account creation in the security event log."""
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        record_event(SecurityEvent.ACCOUNT_CREATED, self.request,
+                     target=serializer.instance,
+                     rol=roleName(serializer.instance))
+
+
+class SecurityEventPagination(pagination.LimitOffsetPagination):
+    default_limit = 100
+    max_limit = 500
+
+
+class ListSecurityEventsView(generics.ListAPIView):
+    """Security event log (D28): read-only, for the security admin.
+
+    There is no endpoint to edit or delete events.
+    """
+    serializer_class = SecurityEventSerializer
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
+    pagination_class = SecurityEventPagination
+    queryset = SecurityEvent.objects.all()
+    filterset_class = SecurityEventFilter
+
+
+class CreateLabAssistantView(CreateAccountMixin, generics.CreateAPIView):
     serializer_class = AssistanSerializer
     permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
 
 
-class CreateLabAdminView(generics.CreateAPIView):
+class CreateLabAdminView(CreateAccountMixin, generics.CreateAPIView):
     serializer_class = AdminSerializer
     permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
 
@@ -155,6 +203,8 @@ class CreateTokenView(ObtainAuthToken):
         user = serializer.validated_data.get('user')
 
         if not user:
+            self.record_failed_login(SecurityEvent.LOGIN_FAILED,
+                                     serializer.validated_data['username'])
             # Mismo mensaje si el código no existe, la contraseña es
             # incorrecta o la cuenta está desactivada (D12).
             return Response({'message': LOGIN_FAILED_MESSAGE},
@@ -162,9 +212,28 @@ class CreateTokenView(ObtainAuthToken):
 
         login(request, user)
         logIn(request.user)
+        record_event(SecurityEvent.LOGIN, request, actor=user)
         response_serializer  = UserSerializer(instance = user)
         #response_serializer.is_valid(raise_exception=True)
         return Response(data = response_serializer.data, status=status.HTTP_200_OK)
+
+    def throttled(self, request, wait):
+        """Record logins rejected by the attempt limit, then answer 429."""
+        self.record_failed_login(SecurityEvent.LOGIN_THROTTLED,
+                                 request.data.get('username', ''))
+        super().throttled(request, wait)
+
+    def record_failed_login(self, event_type, typed_username):
+        """Record a failed login. The account is linked when it exists;
+        otherwise the typed text is kept only if it looks like a User ID."""
+        typed_username = str(typed_username or '').strip().lower()
+        target = get_user_model().objects.filter(
+            username=typed_username).first()
+        detail = {}
+        if target is None:
+            detail['codigo_ingresado'] = safe_attempted_username(
+                typed_username)
+        record_event(event_type, self.request, target=target, **detail)
 
 
 
@@ -179,8 +248,12 @@ class LogoutView(generics.CreateAPIView):
         if(isinstance(request.user, AnonymousUser)):
             return Response(status=status.HTTP_412_PRECONDITION_FAILED)
 
+        # Se guarda el usuario antes de logout(), que lo reemplaza por un
+        # usuario anónimo: antes, la bitácora nunca registraba la salida.
+        user = request.user
+        record_event(SecurityEvent.LOGOUT, request, actor=user)
         logout(request)  # Delete user's auth token
-        logOut(request.user)
+        logOut(user)
 
 
         return Response(status=status.HTTP_202_ACCEPTED)
@@ -194,6 +267,19 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         """Retrieve and return the authenticated user."""
         return self.request.user
+
+    def perform_update(self, serializer):
+        before = account_snapshot(serializer.instance)
+        password_changed = 'password' in serializer.validated_data
+        super().perform_update(serializer)
+
+        changes = account_changes(before, account_snapshot(serializer.instance))
+        if changes:
+            record_event(SecurityEvent.PROFILE_UPDATED, self.request,
+                         target=serializer.instance, cambios=changes)
+        if password_changed:
+            record_event(SecurityEvent.OWN_PASSWORD_CHANGED, self.request,
+                         target=serializer.instance)
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
@@ -225,6 +311,17 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
                 'Las cuentas de administrador de seguridad no se pueden '
                 'modificar desde la gestión de cuentas.')
         return user
+
+    def perform_update(self, serializer):
+        before = account_snapshot(serializer.instance)
+        password_changed = 'password' in serializer.validated_data
+        super().perform_update(serializer)
+
+        changes = account_changes(before, account_snapshot(serializer.instance))
+        if changes or password_changed:
+            record_event(SecurityEvent.ACCOUNT_UPDATED, self.request,
+                         target=serializer.instance, cambios=changes,
+                         contrasena_cambiada=password_changed)
 
 
 

@@ -14,7 +14,7 @@ from django.contrib.auth.models import (
 from core.permissions import Role, RolePermissionsMixin
 
 from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 
 from django.utils import timezone
 
@@ -279,6 +279,77 @@ class User(AbstractBaseUser, RolePermissionsMixin):
 
 
 
+
+
+class SecurityEventQuerySet(models.QuerySet):
+    """Bulk update() and delete() skip the model's save() and delete():
+    block them too."""
+
+    def update(self, **kwargs):
+        raise PermissionDenied(
+            'Los eventos de seguridad no se pueden modificar.')
+
+    def delete(self):
+        raise PermissionDenied(
+            'Los eventos de seguridad no se pueden eliminar.')
+
+
+class SecurityEvent(models.Model):
+    """Security event log (D28). Rows are only ever added: they cannot be
+    edited or deleted, so whoever acts cannot erase the trace."""
+
+    objects = SecurityEventQuerySet.as_manager()
+
+    LOGIN = 'inicio_sesion'
+    LOGIN_FAILED = 'inicio_sesion_fallido'
+    LOGIN_THROTTLED = 'inicio_sesion_limitado'
+    LOGOUT = 'cierre_sesion'
+    ACCOUNT_CREATED = 'cuenta_creada'
+    ACCOUNT_UPDATED = 'cuenta_modificada'
+    PROFILE_UPDATED = 'perfil_modificado'
+    OWN_PASSWORD_CHANGED = 'contrasena_propia_cambiada'
+    ACCESS_DENIED = 'acceso_denegado'
+
+    EVENT_TYPES = [
+        (LOGIN, 'Inicio de sesión'),
+        (LOGIN_FAILED, 'Inicio de sesión fallido'),
+        (LOGIN_THROTTLED, 'Inicio de sesión rechazado por el límite de intentos'),
+        (LOGOUT, 'Cierre de sesión'),
+        (ACCOUNT_CREATED, 'Cuenta creada'),
+        (ACCOUNT_UPDATED, 'Cuenta modificada por el administrador'),
+        (PROFILE_UPDATED, 'Perfil propio modificado'),
+        (OWN_PASSWORD_CHANGED, 'Contraseña propia cambiada'),
+        (ACCESS_DENIED, 'Acción rechazada'),
+    ]
+
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    event_type = models.CharField(max_length=40, choices=EVENT_TYPES,
+                                  db_index=True)
+    # Quién actuó y sobre qué cuenta. Se guarda también el código de usuario
+    # como texto, para que el registro se lea igual aunque la cuenta cambie.
+    actor = models.ForeignKey(User, null=True, blank=True,
+                              on_delete=models.SET_NULL, related_name='+')
+    actor_username = models.CharField(max_length=150, blank=True)
+    target = models.ForeignKey(User, null=True, blank=True,
+                               on_delete=models.SET_NULL, related_name='+')
+    target_username = models.CharField(max_length=150, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    # Detalle del evento: campos cambiados, rol, ruta rechazada... Nunca
+    # contiene contraseñas.
+    detail = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-timestamp', '-id']
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            raise PermissionDenied(
+                'Los eventos de seguridad no se pueden modificar.')
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise PermissionDenied(
+            'Los eventos de seguridad no se pueden eliminar.')
 
 
 class Session(models.Model):

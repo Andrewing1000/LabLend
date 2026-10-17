@@ -11,7 +11,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 
-from core.models import (Session, getAdminRole, getAssistantRole,
+from core.models import (Session, SecurityEvent, getAdminRole, getAssistantRole,
                          LAB_ADMIN, LAB_ASSIST, SEC_ADMIN, roleName,
                          username_part)
 
@@ -30,6 +30,8 @@ class SecurityRoleSegregation(APIException):
     default_detail = ('El rol de administrador de seguridad no se puede '
                       'asignar ni quitar a una cuenta existente.')
     default_code = 'role_field'
+    # Se registra en la bitácora de seguridad como acción rechazada (D28).
+    security_event = True
 
 
 from rest_framework import serializers
@@ -208,6 +210,19 @@ class AuthTokenSerializer(serializers.Serializer):
             password=attrs.get('password'),
         )
         return attrs
+
+
+class SecurityEventSerializer(serializers.ModelSerializer):
+    """Read-only view of a security event (D28)."""
+
+    event_label = serializers.CharField(source='get_event_type_display',
+                                        read_only=True)
+
+    class Meta:
+        model = SecurityEvent
+        fields = ['id', 'timestamp', 'event_type', 'event_label',
+                  'actor_username', 'target_username', 'ip', 'detail']
+        read_only_fields = fields
 
 
 class  SessionSerializer(serializers.ModelSerializer):

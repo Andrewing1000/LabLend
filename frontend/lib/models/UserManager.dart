@@ -1,3 +1,4 @@
+import 'SecurityEvent.dart';
 import 'Session.dart';
 import 'User.dart';
 import 'package:dio/dio.dart';
@@ -209,6 +210,39 @@ class UserManager {
     User newUser = user.clone();
     newUser.role = Role.adminRole;
     return await updateUser(user, newUser: newUser);
+  }
+
+  /// Bitácora de seguridad (D28): los eventos más recientes primero.
+  Future<List<SecurityEvent>> getSecurityEvents(
+      {String? username, String? eventType}) async {
+    if (!await isReady()) {
+      return [];
+    }
+    if (!isAdmin()) {
+      return [];
+    }
+    if (!await sessionCheck()) {
+      return [];
+    }
+
+    Map<String, dynamic> query = {'limit': '200'};
+    if (username != null && username.trim().isNotEmpty) {
+      query['usuario'] = username.trim().toLowerCase();
+    }
+    if (eventType != null) {
+      query['tipo'] = eventType;
+    }
+
+    try {
+      var response =
+          await requestHandler.getRequest('/user/events/', query: query);
+      return [
+        for (var data in response.data['results']) SecurityEvent.fromJson(data)
+      ];
+    } on DioException catch (e) {
+      manager.errorNotification(error: '', details: e.response?.data);
+      return [];
+    }
   }
 
   /// La gestión de cuentas corresponde al administrador de seguridad (D18).
