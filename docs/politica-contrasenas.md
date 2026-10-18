@@ -76,6 +76,7 @@ Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por e
 | El inicio de sesión solo se acepta en `/user/token/`, que aplica el límite; la API rechaza credenciales enviadas por HTTP Basic en otros endpoints (D30) | Implementado |
 | La sesión expira a los 15 minutos | Implementado |
 | Mensaje genérico que no revela si la cuenta existe (D12) | Implementado |
+| La cuenta se bloquea al tercer inicio de sesión fallido seguido; un inicio exitoso reinicia el conteo. Bloqueada, no entra ni con la contraseña correcta y recibe la misma respuesta genérica, que no revela el bloqueo. Se desbloquea al elegir una contraseña nueva con un enlace de restablecimiento (sección 5) o, si es de administrador de seguridad, con `changepassword` en el servidor (D23) | Implementado |
 | Cambiar la contraseña propia exige la contraseña actual, con un límite de 3 intentos por minuto por usuario (respuesta 429); un intento con la contraseña actual incorrecta queda en la bitácora de seguridad. El correo de una cuenta no se puede cambiar. Así una sesión robada no basta para tomar la cuenta, ni para adivinar la contraseña fuera del límite del login (D14) | Implementado |
 
 ## 5. Cuentas nuevas y contraseñas olvidadas: enlaces de activación y de restablecimiento (D26, D24)
@@ -83,7 +84,7 @@ Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por e
 Ninguna contraseña viaja por correo ni por otro medio, y el administrador nunca la conoce. La persona elige su contraseña con un enlace que genera el administrador de seguridad:
 
 - **Cuenta nueva (D26):** al crear la cuenta, el sistema genera automáticamente un **enlace de activación**. La cuenta queda sin contraseña, "pendiente de activación", y no puede iniciar sesión hasta que su dueño elija la contraseña con el enlace. Si el enlace vence antes, el administrador abre la cuenta y pulsa **Generar enlace de activación** para obtener otro.
-- **Contraseña olvidada (D24):** la persona se lo pide al administrador de seguridad, que abre la cuenta y pulsa **Generar enlace de restablecimiento** (`/user/manage/reset-link/`). En ese momento la contraseña actual deja de funcionar y se cierran las sesiones abiertas de la cuenta, por si estaba comprometida.
+- **Contraseña olvidada o cuenta bloqueada (D24, D23):** la persona se lo pide al administrador de seguridad, que abre la cuenta y pulsa **Generar enlace de restablecimiento** (`/user/manage/reset-link/`). En ese momento la contraseña actual deja de funcionar y se cierran las sesiones abiertas de la cuenta, por si estaba comprometida.
 
 El mismo botón genera uno u otro según el estado de la cuenta. Los dos enlaces funcionan igual:
 
@@ -107,7 +108,6 @@ Cada situación que falta tiene su propio camino:
 | Situación | Quién la resuelve | Cómo |
 | --- | --- | --- |
 | Contraseña vencida, a los 90 días (D21) | El propio usuario | Inicia sesión con la contraseña vencida y debe cambiarla, ingresando la actual y una nueva, antes de cualquier otra acción |
-| Cuenta bloqueada al tercer intento fallido (D23) | El administrador de seguridad, a pedido | El mismo enlace de restablecimiento (sección 5) la desbloquea |
 
 Además:
 
@@ -126,3 +126,5 @@ Las pruebas de `backend/app/user/tests/test_current_password.py` comprueban que 
 Las pruebas de `backend/app/user/tests/test_reset_link.py` comprueban que solo el administrador de seguridad genera enlaces, que no se generan para administradores de seguridad ni cuentas desactivadas, que al generarlo la contraseña anterior deja de funcionar y se cierran las sesiones, que la base de datos y la bitácora no guardan el enlace, que un enlace nuevo anula el anterior, y que el enlace muestra el código de usuario, exige la política, sirve una sola vez y deja de funcionar al vencer o si la cuenta se desactiva. `test_password_policy.py` comprueba que `/user/manage/` rechaza cualquier contraseña.
 
 Las pruebas de `backend/app/user/tests/test_activation_link.py` comprueban que una cuenta nueva nace sin contraseña y no puede iniciar sesión, que la respuesta de creación trae el enlace de activación una sola vez (sin caché) y la base de datos guarda solo su hash, que la creación y el enlace quedan en la bitácora, que con el enlace la persona elige su contraseña e inicia sesión, que si el enlace vence el administrador genera otro de activación, y que una cuenta ya activada recibe uno de restablecimiento. `test_password_policy.py` comprueba que la creación rechaza cualquier contraseña.
+
+Las pruebas de `backend/app/user/tests/test_lockout.py` comprueban que dos fallos no bloquean y el tercero sí, que bloqueada la cuenta rechaza la contraseña correcta con la misma respuesta que un código inexistente, que un inicio exitoso reinicia el conteo, que el bloqueo queda una sola vez en la bitácora, que un enlace de restablecimiento la desbloquea, que `changepassword` desbloquea a un administrador de seguridad y que el administrador ve el bloqueo.

@@ -294,6 +294,9 @@ else:
 # Vigencia de los enlaces de restablecimiento de contraseña (D24).
 PASSWORD_LINK_HOURS = 24
 
+# La cuenta se bloquea al tercer inicio de sesión fallido seguido (D23).
+LOGIN_MAX_FAILED_ATTEMPTS = 3
+
 CORS_ALLOW_HEADERS = [
     'authorization',
     'content-type',

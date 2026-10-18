@@ -11,12 +11,13 @@ from django.contrib.auth.hashers import PBKDF2PasswordHasher
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from django_password_validators.password_history.password_validation import (
     UniquePasswordsValidator,
 )
 
-from core.models import PasswordLink, logOut
+from core.models import PasswordLink, User, logOut
 
 
 class PasswordHistoryHasher(PBKDF2PasswordHasher):
@@ -128,8 +129,38 @@ def use_link(token, password):
 
     user = link.user
     validate_password(password, user=user)
+    # set_password también desbloquea la cuenta (D23).
+    link.unlocked_account = user.is_locked
     user.set_password(password)
     user.save()
     link.used_at = timezone.now()
     link.save(update_fields=['used_at'])
     return link
+
+
+def register_failed_login(username):
+    """Count a failed login for the account with username, if it exists
+    and is not locked yet, and lock it on the last allowed attempt (D23).
+
+    Returns the account if this attempt locked it, else None. The counter
+    is updated in the database, so simultaneous attempts all count.
+    """
+    accounts = User.objects.filter(username=username, locked_at__isnull=True)
+    if not accounts.update(failed_login_attempts=F('failed_login_attempts')
+                           + 1):
+        return None
+    newly_locked = accounts.filter(
+        failed_login_attempts__gte=settings.LOGIN_MAX_FAILED_ATTEMPTS,
+    ).update(locked_at=timezone.now())
+    return User.objects.get(username=username) if newly_locked else None
+
+
+def is_locked(user):
+    """Whether the account is locked, read from the database: the user
+    object from authenticate() may have been changed in memory."""
+    return User.objects.filter(pk=user.pk, locked_at__isnull=False).exists()
+
+
+def register_successful_login(user):
+    """A successful login restarts the count of failed attempts."""
+    User.objects.filter(pk=user.pk).update(failed_login_attempts=0)

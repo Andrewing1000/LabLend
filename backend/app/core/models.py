@@ -252,6 +252,10 @@ class User(AbstractBaseUser, RolePermissionsMixin):
     # espera su activación (D26); el vencimiento a los 90 días (D21) se
     # cuenta desde aquí.
     password_changed_at = models.DateTimeField(null=True, blank=True)
+    # Bloqueo por intentos fallidos (D23): inicios de sesión fallidos
+    # seguidos, y cuándo se bloqueó la cuenta (vacío si no lo está).
+    failed_login_attempts = models.PositiveSmallIntegerField(default=0)
+    locked_at = models.DateTimeField(null=True, blank=True)
 
     objects = UserManager()
 
@@ -277,8 +281,18 @@ class User(AbstractBaseUser, RolePermissionsMixin):
         super().save(*args, **kwargs)
 
     def set_password(self, raw_password):
+        """Choosing a new password also unlocks the account (D23): it is
+        only possible with a reset link, from an open session or with
+        changepassword on the server."""
         super().set_password(raw_password)
         self.password_changed_at = timezone.now()
+        self.failed_login_attempts = 0
+        self.locked_at = None
+
+    @property
+    def is_locked(self):
+        """Locked after too many failed logins in a row (D23)."""
+        return self.locked_at is not None
 
     @property
     def activation_pending(self):
@@ -332,6 +346,8 @@ class SecurityEvent(models.Model):
     PASSWORD_RESET = 'contrasena_restablecida'
     ACTIVATION_LINK_CREATED = 'enlace_activacion_generado'
     ACCOUNT_ACTIVATED = 'cuenta_activada'
+    ACCOUNT_LOCKED = 'cuenta_bloqueada'
+    ACCOUNT_UNLOCKED = 'cuenta_desbloqueada'
     ACCESS_DENIED = 'acceso_denegado'
 
     EVENT_TYPES = [
@@ -349,6 +365,8 @@ class SecurityEvent(models.Model):
         (PASSWORD_RESET, 'Contraseña restablecida con un enlace'),
         (ACTIVATION_LINK_CREATED, 'Enlace de activación generado'),
         (ACCOUNT_ACTIVATED, 'Cuenta activada con un enlace'),
+        (ACCOUNT_LOCKED, 'Cuenta bloqueada por intentos fallidos'),
+        (ACCOUNT_UNLOCKED, 'Cuenta desbloqueada con un enlace'),
         (ACCESS_DENIED, 'Acción rechazada'),
     ]
 

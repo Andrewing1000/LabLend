@@ -349,6 +349,7 @@ class PrivateUserAPITests(TestCase):
                 'is_active' : True,
                 'role_field' : LAB_ADMIN,
                 'activation_pending' : False,
+                'is_locked' : False,
             }
         )
 

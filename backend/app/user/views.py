@@ -17,8 +17,9 @@ from core.audit import record_event, safe_attempted_username
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
-from core.passwords import (create_password_link, find_valid_link,
-                            link_url,
+from core.passwords import (create_password_link, find_valid_link, is_locked,
+                            link_url, register_failed_login,
+                            register_successful_login,
                             use_link)
 from core.utils import CurrentPasswordThrottle, LogInThrottle
 
@@ -219,15 +220,24 @@ class CreateTokenView(ObtainAuthToken):
 
 
         user = serializer.validated_data.get('user')
+        username = serializer.validated_data['username']
 
-        if not user:
-            self.record_failed_login(SecurityEvent.LOGIN_FAILED,
-                                     serializer.validated_data['username'])
+        # Una cuenta bloqueada (D23) no entra ni con la contraseña correcta.
+        if not user or is_locked(user):
+            self.record_failed_login(SecurityEvent.LOGIN_FAILED, username)
+            if not user:
+                locked = register_failed_login(username)
+                if locked is not None:
+                    record_event(SecurityEvent.ACCOUNT_LOCKED, request,
+                                 target=locked,
+                                 intentos=locked.failed_login_attempts)
             # Mismo mensaje si el código no existe, la contraseña es
-            # incorrecta o la cuenta está desactivada (D12).
+            # incorrecta, la cuenta está desactivada o bloqueada (D12):
+            # un mensaje de "cuenta bloqueada" revelaría qué códigos existen.
             return Response({'message': LOGIN_FAILED_MESSAGE},
                             status=status.HTTP_401_UNAUTHORIZED)
 
+        register_successful_login(user)
         login(request, user)
         logIn(request.user)
         record_event(SecurityEvent.LOGIN, request, actor=user)
@@ -251,6 +261,8 @@ class CreateTokenView(ObtainAuthToken):
         if target is None:
             detail['codigo_ingresado'] = safe_attempted_username(
                 typed_username)
+        elif target.is_locked:
+            detail['cuenta_bloqueada'] = True
         record_event(event_type, self.request, target=target, **detail)
 
 
@@ -464,5 +476,8 @@ class PasswordLinkUseView(views.APIView):
 
         record_event(LINK_USED_EVENTS[link.purpose], request,
                      actor=link.user, target=link.user)
+        if link.unlocked_account:
+            record_event(SecurityEvent.ACCOUNT_UNLOCKED, request,
+                         actor=link.user, target=link.user)
         return Response({'detail': 'Contraseña guardada. Ya puede iniciar '
                                    'sesión con su código de usuario.'})

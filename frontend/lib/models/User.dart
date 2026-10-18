@@ -29,6 +29,8 @@ abstract class User extends ChangeNotifier{
   Role role;
   /// La cuenta aún no eligió su contraseña con el enlace de activación (D26).
   bool activationPending = false;
+  /// La cuenta se bloqueó por intentos fallidos (D23).
+  bool isLocked = false;
 
   User({
         int? id,
@@ -83,6 +85,7 @@ abstract class User extends ChangeNotifier{
     }
 
     user.activationPending = userData['activation_pending'] ?? false;
+    user.isLocked = userData['is_locked'] ?? false;
     return user;
   }
 
@@ -98,6 +101,7 @@ abstract class User extends ChangeNotifier{
       'role_field' : role.name,
       'is_active' : isActive,
       'activation_pending' : activationPending,
+      'is_locked' : isLocked,
     };
   }
 
@@ -136,6 +140,7 @@ abstract class User extends ChangeNotifier{
     isActive =  newUser.isActive;
     role = newUser.role;
     activationPending = newUser.activationPending;
+    isLocked = newUser.isLocked;
     notifyListeners();
   }
 }

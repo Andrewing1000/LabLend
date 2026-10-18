@@ -49,12 +49,14 @@ class UserSerializer(serializers.ModelSerializer):
     role_field = serializers.SerializerMethodField()
     name = serializers.ReadOnlyField()
     activation_pending = serializers.BooleanField(read_only=True)
+    is_locked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'password', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
-                  'is_active', 'role_field', 'activation_pending']
+                  'is_active', 'role_field', 'activation_pending',
+                  'is_locked']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
             'email': {'required':False},
@@ -159,7 +161,8 @@ class ManageUserSerializer(UserSerializer):
         model = get_user_model()
         fields = ['username', 'email', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
-                  'is_active', 'role_field', 'activation_pending']
+                  'is_active', 'role_field', 'activation_pending',
+                  'is_locked']
         extra_kwargs = {'role_field': {'read_only': False},}
 
     def to_internal_value(self, data):

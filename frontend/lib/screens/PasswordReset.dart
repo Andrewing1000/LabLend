@@ -25,7 +25,8 @@ class RecuperarContrasenaScreen extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'Si olvidó su contraseña, pida un '
+              'Si olvidó su contraseña o su cuenta se bloqueó tras tres '
+              'intentos fallidos, pida un '
               'enlace de restablecimiento al administrador de seguridad. '
               'Con el enlace podrá elegir una contraseña nueva. Vence en 24 '
               'horas y sirve una sola vez.',

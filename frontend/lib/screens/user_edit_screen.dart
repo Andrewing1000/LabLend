@@ -115,6 +115,22 @@ class EditUserScreenState extends State<EditUserScreen> {
                   onFormSubmit: _updateUser,
                 ),
               ),
+              // Cuenta bloqueada por intentos fallidos (D23): se desbloquea
+              // cuando su dueño elige una contraseña nueva.
+              if (widget.user.isLocked)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                  child: Text(
+                    widget.user.role == Role.securityAdminRole
+                        ? 'Cuenta bloqueada por intentos fallidos. Se '
+                            'desbloquea en el servidor con changepassword.'
+                        : 'Cuenta bloqueada por intentos fallidos. Se '
+                            'desbloquea cuando la persona elige una '
+                            'contraseña nueva con un enlace de '
+                            'restablecimiento.',
+                    style: const TextStyle(color: Colors.orangeAccent),
+                  ),
+                ),
               // El servidor no genera enlaces para cuentas de administrador
               // de seguridad (D27) ni para cuentas desactivadas.
               if (widget.user.role != Role.securityAdminRole &&
