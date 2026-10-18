@@ -3,6 +3,7 @@ import "dart:ui";
 
 import "package:flutter/material.dart";
 import "package:frontend/screens/PageBase.dart";
+import "package:frontend/screens/PasswordLinkPage.dart";
 import "package:frontend/screens/PasswordReset.dart";
 import "package:frontend/screens/category_brand_screen.dart";
 import "package:frontend/screens/create_item_screen.dart";
@@ -54,6 +55,10 @@ class MainFrameState extends State<MainFrame> {
 
   bool onLogin = false;
   bool onPasswordReset = false;
+
+  /// Token de un enlace de restablecimiento (D24): la aplicación web se abre
+  /// con ?enlace=<token> y muestra la página para elegir la contraseña.
+  String? linkToken = Uri.base.queryParameters['enlace'];
 
   late HomePage homePage;
   late SearchItemPage searchItemPage;
@@ -335,7 +340,7 @@ class MainFrameState extends State<MainFrame> {
                 ],
               ),
             ),
-            if (onLogin || onPasswordReset)
+            if (onLogin || onPasswordReset || linkToken != null)
               GestureDetector(
                 onTapDown: (e) {
                   setState(() {
@@ -346,7 +351,7 @@ class MainFrameState extends State<MainFrame> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                   child: Container(
-                    color: onLogin
+                    color: onLogin || linkToken != null
                         ? Colors.black.withOpacity(0.2)
                         : Colors.transparent,
                   ),
@@ -369,7 +374,16 @@ class MainFrameState extends State<MainFrame> {
                 });
               },
             ),
-            if(onPasswordReset) RecuperarContrasenaScreen(),
+            if(onPasswordReset) const RecuperarContrasenaScreen(),
+            if (linkToken != null) PasswordLinkScreen(
+              token: linkToken!,
+              onDone: () {
+                setState(() {
+                  linkToken = null;
+                  onLogin = true;
+                });
+              },
+            ),
 
 
             MultiProvider(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class PasswordCreationField extends StatefulWidget {
   final TextEditingController controller; // Controlador para el campo de texto
   final String hintText; // Texto de sugerencia para el campo de texto
+  final String labelText; // Etiqueta del campo
   final double width; // Ancho del campo de texto
 
   const PasswordCreationField({
@@ -11,6 +12,7 @@ class PasswordCreationField extends StatefulWidget {
     required this.controller,
     required this.hintText,
     required this.width,
+    this.labelText = 'contraseña',
   });
 
   // Método para verificar si la contraseña es válida
@@ -144,7 +146,7 @@ class _PasswordCreationFieldState extends State<PasswordCreationField>
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.grey[900], // Color de fondo del campo de texto
-              labelText: 'contraseña',
+              labelText: widget.labelText,
               labelStyle: Theme.of(context)
                   .textTheme
                   .labelMedium, // Estilo del texto de sugerencia

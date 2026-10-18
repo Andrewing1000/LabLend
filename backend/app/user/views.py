@@ -16,6 +16,8 @@ from core.audit import record_event, safe_attempted_username
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
+from core.passwords import (create_reset_link, find_valid_link, link_url,
+                            use_link)
 from core.utils import CurrentPasswordThrottle, LogInThrottle
 
 from django.contrib.auth import get_user_model
@@ -26,7 +28,10 @@ from user.serializers import (
     AssistanSerializer,
     AdminSerializer,
     ManageUserSerializer,
+    PasswordLinkSerializer,
+    PasswordLinkUseSerializer,
     ProfileSerializer,
+    ResetLinkRequestSerializer,
     SecurityEventSerializer,
     SessionSerializer,
     HealthCheckSerializer,
@@ -34,6 +39,7 @@ from user.serializers import (
 
 from user.filters import SecurityEventFilter, UserFilter
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema
@@ -317,14 +323,12 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         before = account_snapshot(serializer.instance)
-        password_changed = 'password' in serializer.validated_data
         super().perform_update(serializer)
 
         changes = account_changes(before, account_snapshot(serializer.instance))
-        if changes or password_changed:
+        if changes:
             record_event(SecurityEvent.ACCOUNT_UPDATED, self.request,
-                         target=serializer.instance, cambios=changes,
-                         contrasena_cambiada=password_changed)
+                         target=serializer.instance, cambios=changes)
 
 
 
@@ -341,3 +345,92 @@ class MissingQueryParameterException(exceptions.APIException):
     default_detail = 'Falta un parámetro query.'
     default_code = 'missing_query_parameter'
 
+
+
+LINK_INVALID_MESSAGE = ('El enlace no es válido o venció. Pida uno nuevo al '
+                        'administrador de seguridad.')
+
+
+class ResetLinkView(views.APIView):
+    """Generate a password reset link for an account (D24).
+
+    Only the security admin. The link is in the response only once: the
+    server keeps a hash of it, so it cannot be shown again.
+    """
+    serializer_class = ResetLinkRequestSerializer
+    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin,
+                          IsLogged]
+
+    @extend_schema(request=ResetLinkRequestSerializer)
+    def post(self, request):
+        serializer = ResetLinkRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(get_user_model(),
+                                 email=serializer.validated_data['email'])
+        # D27: las cuentas de administrador de seguridad no se gestionan
+        # aquí; un administrador de seguridad que olvidó su contraseña la
+        # recupera en el servidor con changepassword.
+        if isSecurityAdmin(user):
+            raise exceptions.PermissionDenied(
+                'No se generan enlaces para cuentas de administrador de '
+                'seguridad.')
+        if not user.is_active:
+            raise exceptions.ValidationError(
+                {'email': ['La cuenta está desactivada.']})
+
+        link, token = create_reset_link(user, created_by=request.user)
+        record_event(SecurityEvent.RESET_LINK_CREATED, request, target=user,
+                     vence=link.expires_at.isoformat())
+        response = Response({
+            'username': user.username,
+            'url': link_url(token),
+            'expires_at': link.expires_at,
+        }, status=status.HTTP_201_CREATED)
+        response['Cache-Control'] = 'no-store'
+        return response
+
+
+class PasswordLinkCheckView(views.APIView):
+    """Check a password link and show whose account it is (D24).
+
+    Public: whoever has the link is not logged in. The token goes in the
+    body, not in the address, so it does not stay in server logs.
+    """
+    serializer_class = PasswordLinkSerializer
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordLinkSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        link = find_valid_link(serializer.validated_data['token'])
+        if link is None:
+            return Response({'detail': LINK_INVALID_MESSAGE},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response({'username': link.user.username,
+                         'purpose': link.purpose})
+
+
+class PasswordLinkUseView(views.APIView):
+    """Choose a new password with a password link (D24)."""
+    serializer_class = PasswordLinkUseSerializer
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordLinkUseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = use_link(serializer.validated_data['token'],
+                            serializer.validated_data['password'])
+        except DjangoValidationError as error:
+            return Response({'password': list(error.messages)},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if user is None:
+            return Response({'detail': LINK_INVALID_MESSAGE},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        record_event(SecurityEvent.PASSWORD_RESET, request, actor=user,
+                     target=user)
+        return Response({'detail': 'Contraseña guardada. Ya puede iniciar '
+                                   'sesión con su código de usuario.'})

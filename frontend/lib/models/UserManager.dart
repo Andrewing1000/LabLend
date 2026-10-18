@@ -127,8 +127,9 @@ class UserManager {
     }
   }
 
-  Future<User?> updateUser(User user,
-      {required User newUser, String? password}) async {
+  /// El administrador ya no escribe contraseñas de otras cuentas (D14):
+  /// para eso genera un enlace de restablecimiento (createResetLink).
+  Future<User?> updateUser(User user, {required User newUser}) async {
     if (!await isReady()) {
       return null;
     }
@@ -140,9 +141,6 @@ class UserManager {
     }
 
     var data = newUser.toJson();
-    if(password!=null){
-      data['password'] = password;
-    }
 
     try {
       await requestHandler.patchRequest('/user/manage/',
@@ -154,6 +152,58 @@ class UserManager {
       manager.errorNotification(
           error: 'Actualización fallida', details: e.response?.data);
       return null;
+    }
+  }
+
+  /// Genera un enlace de restablecimiento de contraseña (D24). Devuelve la
+  /// dirección del enlace, que el servidor muestra una sola vez, o null.
+  Future<String?> createResetLink(User user) async {
+    if (!await isReady()) {
+      return null;
+    }
+    if (!isAdmin()) {
+      return null;
+    }
+    if (!await sessionCheck()) {
+      return null;
+    }
+
+    try {
+      var response = await requestHandler.postRequest(
+          '/user/manage/reset-link/', body: {'email': user.email});
+      return response.data['url'];
+    } on DioException catch (e) {
+      manager.errorNotification(
+          error: 'No se pudo generar el enlace', details: e.response?.data);
+      return null;
+    }
+  }
+
+  /// Revisa un enlace de restablecimiento. Devuelve el código de usuario
+  /// de la cuenta, o null si el enlace no es válido o venció.
+  Future<String?> checkPasswordLink(String token) async {
+    try {
+      var response = await requestHandler
+          .postRequest('/user/password-link/check/', body: {'token': token});
+      return response.data['username'];
+    } on DioException catch (e) {
+      manager.errorNotification(
+          error: 'Enlace no válido', details: e.response?.data);
+      return null;
+    }
+  }
+
+  /// Guarda la contraseña elegida con un enlace de restablecimiento.
+  Future<bool> usePasswordLink(String token, String password) async {
+    try {
+      await requestHandler.postRequest('/user/password-link/',
+          body: {'token': token, 'password': password});
+      return true;
+    } on DioException catch (e) {
+      manager.errorNotification(
+          error: 'No se pudo guardar la contraseña',
+          details: e.response?.data);
+      return false;
     }
   }
 

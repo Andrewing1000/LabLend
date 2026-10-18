@@ -128,7 +128,9 @@ class _UserFormState extends State<UserForm> {
           width: fieldWidth,
         ),
         const SizedBox(height: 20),
-        if (!lockedAccount) ...[
+        // Al editar no se escribe la contraseña (D14): se genera un enlace
+        // de restablecimiento desde la pantalla de edición (D24).
+        if (!updateMode) ...[
           PasswordCreationField(
             controller: passwordController,
             hintText: 'Contraseña',

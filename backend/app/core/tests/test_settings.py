@@ -11,6 +11,7 @@ from django.test import SimpleTestCase
 PRODUCTION_ENV = {
     'DJANGO_ALLOWED_HOSTS': 'lablend.example.edu',
     'CORS_ALLOWED_ORIGINS': 'https://lablend.example.edu',
+    'FRONTEND_URL': 'https://lablend.example.edu',
 }
 
 
@@ -21,7 +22,7 @@ def run_manage(*args, **env_overrides):
     """
     env = os.environ.copy()
     for name in ('DJANGO_DEBUG', 'DJANGO_ALLOWED_HOSTS',
-                 'CORS_ALLOWED_ORIGINS'):
+                 'CORS_ALLOWED_ORIGINS', 'FRONTEND_URL'):
         env.pop(name, None)
     for name, value in env_overrides.items():
         if value is None:
@@ -68,3 +69,12 @@ class ProductionSettingsTests(SimpleTestCase):
         res = run_manage('check', **PRODUCTION_ENV)
 
         self.assertEqual(res.returncode, 0, res.stderr)
+
+    def test_missing_frontend_url_error(self):
+        """Test the server refuses to start without FRONTEND_URL, needed
+        to build the password reset links."""
+        res = run_manage('check', **{**PRODUCTION_ENV,
+                                     'FRONTEND_URL': None})
+
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn('Falta FRONTEND_URL', res.stderr)

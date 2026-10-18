@@ -280,6 +280,20 @@ else:
         'origen de la aplicación web (ver README).')
 CORS_ALLOW_CREDENTIALS = True
 
+# Dirección de la aplicación web, para armar los enlaces de restablecimiento
+# de contraseña (D24). En desarrollo, si no se define, la del puerto local.
+if os.environ.get('FRONTEND_URL'):
+    FRONTEND_URL = os.environ['FRONTEND_URL'].rstrip('/')
+elif DEBUG:
+    FRONTEND_URL = 'http://localhost:58315'
+else:
+    raise ImproperlyConfigured(
+        'Falta FRONTEND_URL: con DEBUG desactivado, define la dirección de '
+        'la aplicación web (ver README).')
+
+# Vigencia de los enlaces de restablecimiento de contraseña (D24).
+PASSWORD_LINK_HOURS = 24
+
 CORS_ALLOW_HEADERS = [
     'authorization',
     'content-type',

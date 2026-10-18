@@ -45,14 +45,20 @@ class PasswordChangePolicyTests(TestCase):
                 self.admin.refresh_from_db()
                 self.assertTrue(self.admin.check_password(PASSWORD))
 
-    def test_managed_weak_password_rejected(self):
-        """Test an admin cannot set a weak password on another account."""
+    def test_managed_password_rejected(self):
+        """Test an admin cannot set any password on another account, weak
+        or strong: they generate a reset link instead (D14, D24)."""
         url = f'{MANAGE_URL}?email={self.assistant.email}'
-        res = self.client.patch(url, {'password': 'a'})
+        for password in ['a', 'Otrapass456$Otrapass456$']:
+            with self.subTest(password=password):
+                res = self.client.patch(url, {'password': password})
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assistant.refresh_from_db()
-        self.assertTrue(self.assistant.check_password(PASSWORD))
+                self.assertEqual(res.status_code,
+                                 status.HTTP_400_BAD_REQUEST)
+                self.assertIn('enlace de restablecimiento',
+                              res.data['password'][0])
+                self.assistant.refresh_from_db()
+                self.assertTrue(self.assistant.check_password(PASSWORD))
 
     def test_strong_password_accepted(self):
         """Test a password that satisfies the policy is saved."""

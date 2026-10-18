@@ -135,11 +135,10 @@ class EventRecordingTests(TestCase):
         self.assertEqual(event.detail['origen'], 'create_initial_admin')
 
     def test_account_update_recorded(self):
-        """Test admin changes record what changed, but not the password."""
+        """Test admin changes record what changed."""
         client_for(self.security_admin).patch(
             f'{MANAGE_URL}?email={self.assistant.email}',
-            {'is_active': False, 'role_field': LAB_ADMIN,
-             'password': NEW_PASSWORD})
+            {'is_active': False, 'role_field': LAB_ADMIN})
 
         event = last_event(SecurityEvent.ACCOUNT_UPDATED)
         self.assertEqual(event.actor, self.security_admin)
@@ -148,8 +147,6 @@ class EventRecordingTests(TestCase):
             'is_active': [True, False],
             'rol': [LAB_ASSIST, LAB_ADMIN],
         })
-        self.assertTrue(event.detail['contrasena_cambiada'])
-        self.assertNotIn(NEW_PASSWORD, str(event.detail))
 
     def test_own_profile_and_password_recorded(self):
         """Test changes through /user/me/ are recorded separately."""

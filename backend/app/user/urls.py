@@ -17,4 +17,10 @@ urlpatterns = [
     path('log/', views.ListUserLogsView.as_view(), name = 'log' ),
     path('events/', views.ListSecurityEventsView.as_view(), name='events'),
     path('logout/', views.LogoutView.as_view(), name = 'logout'),
+    path('manage/reset-link/', views.ResetLinkView.as_view(),
+         name='reset-link'),
+    path('password-link/check/', views.PasswordLinkCheckView.as_view(),
+         name='password-link-check'),
+    path('password-link/', views.PasswordLinkUseView.as_view(),
+         name='password-link'),
 ]

@@ -163,6 +163,13 @@ class ManageUserSerializer(UserSerializer):
                         'role_field': {'read_only': False},}
 
     def to_internal_value(self, data):
+        # El administrador ya no escribe contraseñas de cuentas existentes
+        # (D14): genera un enlace de restablecimiento y nunca la conoce
+        # (D24). Se revisa antes que el largo mínimo del campo.
+        if self.instance is not None and 'password' in data:
+            raise serializers.ValidationError({'password': [
+                'El administrador no puede escribir la contraseña de una '
+                'cuenta: genere un enlace de restablecimiento.']})
         # data puede ser un QueryDict inmutable (formularios): solo leerlo.
         external_field_value = data.get('role_field', None)
         internal_value = super().to_internal_value(data)
@@ -287,3 +294,19 @@ class  SessionSerializer(serializers.ModelSerializer):
 
 class HealthCheckSerializer(serializers.Serializer):
     status = serializers.CharField()
+
+
+class ResetLinkRequestSerializer(serializers.Serializer):
+    """Account the security admin generates a reset link for (D24)."""
+    email = serializers.EmailField()
+
+
+class PasswordLinkSerializer(serializers.Serializer):
+    """Token of a password link (D24)."""
+    token = serializers.CharField(trim_whitespace=False)
+
+
+class PasswordLinkUseSerializer(PasswordLinkSerializer):
+    """Token of a password link and the new password (D24)."""
+    password = serializers.CharField(
+        style={'input_type': 'password'}, trim_whitespace=False)

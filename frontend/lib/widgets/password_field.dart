@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
+  final String labelText;
   final double width;
 
   const PasswordField({
@@ -10,6 +11,7 @@ class PasswordField extends StatefulWidget {
     required this.controller,
     required this.hintText,
     required this.width,
+    this.labelText = 'contraseña',
   });
 
   @override
@@ -62,7 +64,7 @@ class _PasswordFieldState extends State<PasswordField> {
           filled: true,
           fillColor: Colors.grey[900], // Color de fondo del campo de texto
           labelStyle: Theme.of(context).textTheme.labelMedium,
-          labelText: 'contraseña',// Estilo del texto de sugerencia
+          labelText: widget.labelText,
           suffixIcon: IconButton(
             icon: Icon(
               _isObscured ? Icons.visibility_off : Icons.visibility,

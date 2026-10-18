@@ -105,9 +105,12 @@ abstract class User extends ChangeNotifier{
     return await SessionManager.userManager.createUser(this, password);
   }
 
-  Future<User?> update({required User newUser, String? password}) async {
+  Future<User?> update({required User newUser}) async {
+    return await SessionManager.userManager.updateUser(this, newUser: newUser);
+  }
 
-    return await SessionManager.userManager.updateUser(this, newUser: newUser, password: password);
+  Future<String?> createResetLink() async {
+    return await SessionManager.userManager.createResetLink(this);
   }
 
   void deactivate(){

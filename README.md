@@ -101,7 +101,7 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 - **Rol:** administrador de seguridad. Gestiona las cuentas y consulta la bitácora de sesiones, pero no el inventario ni los préstamos (D18).
 - **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador de seguridad. Las demás cuentas, administradores de laboratorio y asistentes, se crean desde la aplicación con esa cuenta. Para gestionar el inventario, crea primero un administrador de laboratorio.
 
-Si se pierde la contraseña del administrador de seguridad, cámbiala desde el servidor; el comando pide la nueva contraseña y aplica la misma política:
+Las demás cuentas recuperan su contraseña con un enlace de restablecimiento que el administrador de seguridad genera desde la aplicación (D24). Para las cuentas de administrador de seguridad no se generan enlaces, así que si se pierde su contraseña, cámbiala desde el servidor; el comando pide la nueva contraseña y aplica la misma política:
 
 ```bash
 docker compose -f backend/docker-compose.yml run --rm app_new python manage.py changepassword adm.jperez
@@ -136,6 +136,8 @@ flutter run -d chrome --web-port 58315
 Para usar Edge, cambia `-d chrome` por `-d edge`.
 
 **Usa el puerto 58315 (o 65420).** Django solo acepta peticiones desde los orígenes listados en `CORS_ALLOWED_ORIGINS` y `CSRF_TRUSTED_ORIGINS` (`backend/app/app/settings.py`). Con otro puerto el navegador bloquea las peticiones a la API (error CORS en la consola) y la aplicación no puede cargar datos.
+
+Los enlaces de restablecimiento de contraseña que genera el administrador de seguridad (D24) abren `http://localhost:58315/?enlace=…` en desarrollo, así que para probarlos la aplicación web debe estar corriendo en el puerto 58315. Para usar otra dirección, define `FRONTEND_URL` en `backend/.env`.
 
 Teclas útiles mientras corre: `r` recarga el código (hot reload), `R` reinicia la aplicación y `q` la cierra.
 
@@ -182,6 +184,7 @@ En producción no se usa `backend/.env` de desarrollo: define estas variables de
 | `DJANGO_DEBUG` | No se define (o `False`). Nunca `True`: mostraría el código y la configuración ante un error | — (desactivado, que es lo correcto) |
 | `DJANGO_ALLOWED_HOSTS` | El dominio del servidor, por ejemplo `lablend.example.edu`; varios separados por comas | El servidor no arranca |
 | `CORS_ALLOWED_ORIGINS` | El origen de la aplicación web, por ejemplo `https://lablend.example.edu`; varios separados por comas. Vacía (`CORS_ALLOWED_ORIGINS=`) si la aplicación y la API se sirven desde el mismo dominio | El servidor no arranca |
+| `FRONTEND_URL` | La dirección de la aplicación web, por ejemplo `https://lablend.example.edu`. Con ella se arman los enlaces de restablecimiento de contraseña (D24) | El servidor no arranca |
 
 Antes de abrir el sistema a los usuarios, revisa la configuración con la lista de verificación de Django y corrige lo que reporte:
 
@@ -199,7 +202,7 @@ Después del primer despliegue, crea la cuenta inicial en el servidor con `pytho
 | --- | --- | --- |
 | `docker compose` dice que no encuentra `backend/.env` | Falta el archivo de variables de entorno | Créalo desde la plantilla (paso 1) |
 | El backend termina con `ImproperlyConfigured: Falta DJANGO_SECRET_KEY` | `DJANGO_SECRET_KEY` no está definida o está vacía en `backend/.env` | Genera una clave y pégala (paso 1) |
-| El backend termina con `ImproperlyConfigured: Falta DJANGO_ALLOWED_HOSTS` o `Falta CORS_ALLOWED_ORIGINS` | DEBUG está desactivado (falta `DJANGO_DEBUG=True` en `backend/.env`) y no están las variables de producción | En desarrollo, agrega `DJANGO_DEBUG` y `DJANGO_ALLOWED_HOSTS` de la plantilla (paso 1); en producción, define las variables de la sección 5 |
+| El backend termina con `ImproperlyConfigured: Falta DJANGO_ALLOWED_HOSTS`, `Falta CORS_ALLOWED_ORIGINS` o `Falta FRONTEND_URL` | DEBUG está desactivado (falta `DJANGO_DEBUG=True` en `backend/.env`) y no están las variables de producción | En desarrollo, agrega `DJANGO_DEBUG` y `DJANGO_ALLOWED_HOSTS` de la plantilla (paso 1); en producción, define las variables de la sección 5 |
 | Una petición responde 400 (Bad Request) sin más detalle | La dirección por la que llega no está en `DJANGO_ALLOWED_HOSTS` | Agrégala a `DJANGO_ALLOWED_HOSTS` en `backend/.env` |
 | `docker compose` se detiene con `Falta DB_PASS en backend/.env` (o `DB_NAME`, `DB_USER`) | La variable no está en `backend/.env` o está vacía | Complétala (paso 1) |
 | El backend se detiene al aplicar las migraciones con `password authentication failed for user "devuser"` | La base local se creó con otra contraseña (por ejemplo, `changeme`) | Cambia la contraseña en la base o empieza de cero (nota del paso 1) |

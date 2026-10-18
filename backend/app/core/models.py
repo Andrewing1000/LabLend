@@ -309,6 +309,8 @@ class SecurityEvent(models.Model):
     PROFILE_UPDATED = 'perfil_modificado'
     OWN_PASSWORD_CHANGED = 'contrasena_propia_cambiada'
     CURRENT_PASSWORD_FAILED = 'contrasena_actual_incorrecta'
+    RESET_LINK_CREATED = 'enlace_restablecimiento_generado'
+    PASSWORD_RESET = 'contrasena_restablecida'
     ACCESS_DENIED = 'acceso_denegado'
 
     EVENT_TYPES = [
@@ -322,6 +324,8 @@ class SecurityEvent(models.Model):
         (OWN_PASSWORD_CHANGED, 'Contraseña propia cambiada'),
         (CURRENT_PASSWORD_FAILED,
          'Contraseña actual incorrecta al cambiar la contraseña'),
+        (RESET_LINK_CREATED, 'Enlace de restablecimiento generado'),
+        (PASSWORD_RESET, 'Contraseña restablecida con un enlace'),
         (ACCESS_DENIED, 'Acción rechazada'),
     ]
 
@@ -353,6 +357,32 @@ class SecurityEvent(models.Model):
     def delete(self, *args, **kwargs):
         raise PermissionDenied(
             'Los eventos de seguridad no se pueden eliminar.')
+
+
+class PasswordLink(models.Model):
+    """Single-use link to choose a new password (D24).
+
+    Only the SHA-256 hash of the token is stored: whoever reads the
+    database cannot use a pending link.
+    """
+
+    RESET = 'restablecimiento'
+    PURPOSES = [
+        (RESET, 'Restablecimiento de contraseña'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='password_links')
+    purpose = models.CharField(max_length=20, choices=PURPOSES)
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_by = models.ForeignKey(User, null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name='+')
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def is_valid(self):
+        return self.used_at is None and timezone.now() < self.expires_at
 
 
 class Session(models.Model):

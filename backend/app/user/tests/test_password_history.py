@@ -17,9 +17,10 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import logIn
+from core.passwords import create_reset_link
 
 ME_URL = reverse('user:me')
-MANAGE_URL = reverse('user:manage')
+PASSWORD_LINK_URL = reverse('user:password-link')
 PASSWORD = 'Testpass123#Testpass123#'
 REUSED_MESSAGE = ('La contraseña no puede ser igual a la actual ni a las '
                   '4 anteriores.')
@@ -92,11 +93,13 @@ class PasswordHistoryTests(TestCase):
         self.admin.refresh_from_db()
         self.assertTrue(self.admin.check_password(PASSWORD))
 
-    def test_managed_change_rejects_reuse(self):
-        """Test the history also applies when an admin changes the
-        password of another account."""
-        url = f'{MANAGE_URL}?email={self.assistant.email}'
-        res = self.client.patch(url, {'password': PASSWORD})
+    def test_reset_link_rejects_reuse(self):
+        """Test the history also applies when the password is chosen
+        with a reset link (D24)."""
+        _, token = create_reset_link(self.assistant, created_by=self.admin)
+
+        res = APIClient().post(PASSWORD_LINK_URL,
+                               {'token': token, 'password': PASSWORD})
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(res.data['password'], [REUSED_MESSAGE])
