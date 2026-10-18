@@ -7,12 +7,12 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import (LAB_ADMIN, LAB_ASSIST, SEC_ADMIN, Role, logIn)
+from core.models import (LAB_ADMIN, LAB_ASSIST, SEC_ADMIN, Role, logIn,
+                         roleName, roleNames)
 
 PASSWORD = 'Testpass123#Testpass123#'
 LIST_URL = reverse('user:list')
 CREATE_URL = reverse('user:create')
-CREATE_ADMIN_URL = reverse('user:create/admin')
 MANAGE_URL = reverse('user:manage')
 LOG_URL = reverse('user:log')
 ITEMS_URL = '/item/items/'
@@ -45,12 +45,12 @@ class SecurityAdminRoleTests(TestCase):
 
     def test_role_created_by_migrations(self):
         """Test migrating creates the security admin role."""
-        self.assertTrue(Role.objects.filter(role_name=SEC_ADMIN).exists())
+        self.assertTrue(Role.objects.filter(name=SEC_ADMIN, protected=True).exists())
 
     def test_security_admin_user_id_prefix(self):
         """Test security admins get the adm. prefix."""
         self.assertEqual(self.security_admin.username, 'adm.jperez')
-        self.assertEqual(self.security_admin.role.role_name, SEC_ADMIN)
+        self.assertEqual(roleNames(self.security_admin), [SEC_ADMIN])
 
     def test_security_admin_manages_accounts(self):
         """Test the security admin can use every account endpoint."""
@@ -75,7 +75,6 @@ class SecurityAdminRoleTests(TestCase):
         requests = {
             'list': lambda: client.get(LIST_URL),
             'create': lambda: client.post(CREATE_URL, payload),
-            'create_admin': lambda: client.post(CREATE_ADMIN_URL, payload),
             'manage': lambda: client.patch(
                 f'{MANAGE_URL}?email={self.assistant.email}',
                 {'nombres': 'Otro'}),
@@ -100,7 +99,7 @@ class SecurityAdminRoleTests(TestCase):
     def test_lab_staff_keep_loans(self):
         """Test lab admins and assistants still reach loans."""
         for user in [self.lab_admin, self.assistant]:
-            with self.subTest(role=user.role.role_name):
+            with self.subTest(role=roleName(user)):
                 res = client_for(user).get(LOANS_URL)
                 self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -118,16 +117,17 @@ class RoleSegregationTests(TestCase):
         self.client = client_for(self.security_admin)
 
     def patch(self, user, data):
-        return self.client.patch(f'{MANAGE_URL}?email={user.email}', data)
+        return self.client.patch(f'{MANAGE_URL}?email={user.email}', data,
+                                 format='json')
 
     def test_cannot_grant_security_admin_role(self):
         """Test a lab admin cannot be turned into a security admin."""
         res = self.patch(self.lab_admin,
-                         {'role_field': SEC_ADMIN, 'nombres': 'Otro'})
+                         {'roles': [SEC_ADMIN], 'nombres': 'Otro'})
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.lab_admin.refresh_from_db()
-        self.assertEqual(self.lab_admin.role.role_name, LAB_ADMIN)
+        self.assertEqual(roleNames(self.lab_admin), [LAB_ADMIN])
         self.assertEqual(self.lab_admin.nombres, 'María')
 
     def test_cannot_remove_security_admin_role(self):
@@ -135,19 +135,19 @@ class RoleSegregationTests(TestCase):
         account cannot be modified at all from /user/manage/ (D27)."""
         for role in [LAB_ADMIN, LAB_ASSIST]:
             with self.subTest(role=role):
-                res = self.patch(self.security_admin, {'role_field': role})
+                res = self.patch(self.security_admin, {'roles': [role]})
 
                 self.assertEqual(res.status_code,
                                  status.HTTP_403_FORBIDDEN)
                 self.security_admin.refresh_from_db()
-                self.assertEqual(self.security_admin.role.role_name,
-                                 SEC_ADMIN)
+                self.assertEqual(roleNames(self.security_admin),
+                                 [SEC_ADMIN])
 
     def test_same_role_is_not_a_change(self):
         """Test editing an account while sending its own role works,
         as the app sends the current role on every edit."""
         res = self.patch(self.lab_admin,
-                         {'role_field': LAB_ADMIN, 'nombres': 'María José'})
+                         {'roles': [LAB_ADMIN], 'nombres': 'María José'})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.lab_admin.refresh_from_db()
@@ -188,8 +188,8 @@ class RoleSegregationTests(TestCase):
 
     def test_lab_roles_can_still_change(self):
         """Test lab admin and assistant roles can still be swapped."""
-        res = self.patch(self.lab_admin, {'role_field': LAB_ASSIST})
+        res = self.patch(self.lab_admin, {'roles': [LAB_ASSIST]})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.lab_admin.refresh_from_db()
-        self.assertEqual(self.lab_admin.role.role_name, LAB_ASSIST)
+        self.assertEqual(roleNames(self.lab_admin), [LAB_ASSIST])

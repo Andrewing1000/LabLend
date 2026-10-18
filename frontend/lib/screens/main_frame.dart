@@ -20,6 +20,7 @@ import "package:frontend/services/ContextMessageService.dart";
 import "package:frontend/widgets/navbar.dart";
 import "package:frontend/widgets/resizable_panel.dart";
 
+import "../models/Permissions.dart";
 import "../models/User.dart";
 import "../services/PageManager.dart";
 
@@ -32,6 +33,7 @@ import "SearchItemPage.dart";
 import "SearchLoanPage.dart";
 import "SearchUserPage.dart";
 import "SecurityEventsPage.dart";
+import "RolesPage.dart";
 
 class MainFrame extends StatefulWidget {
   ContextMessageService messageService;
@@ -66,6 +68,7 @@ class MainFrameState extends State<MainFrame> {
   late SearchItemPage searchItemPage;
   late SearchUserPage searchUserPage;
   late SecurityEventsPage securityEventsPage;
+  late RolesPage rolesPage;
   late SearchLoanPage searchLoanPage;
   late CreateItemScreen createItemPage;
   late CategoryBrandScreen categoryBrandPage;
@@ -86,6 +89,7 @@ class MainFrameState extends State<MainFrame> {
     searchItemPage = SearchItemPage(selectedItem: selectedItem);
     searchUserPage = SearchUserPage();
     securityEventsPage = SecurityEventsPage();
+    rolesPage = RolesPage();
     searchLoanPage = SearchLoanPage();
     createItemPage = CreateItemScreen();
     categoryBrandPage = CategoryBrandScreen();
@@ -127,8 +131,6 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(homePage);
           },
           title: "Home",
-          permissions: [Role.adminRole, Role.assistantRole,
-            Role.securityAdminRole, Role.visitorRole],
       ),
       NavItem(
           iconNormal: Icons.biotech_outlined,
@@ -137,8 +139,6 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(searchItemPage);
           },
           title: "Search",
-          permissions: [Role.adminRole, Role.assistantRole,
-            Role.securityAdminRole, Role.visitorRole],
       ),
 
       NavItem(
@@ -147,8 +147,9 @@ class MainFrameState extends State<MainFrame> {
         onPressed: () {
           pageManager.setPage(categoryBrandPage as PageBase);
         },
-        title: "Search",
-        permissions: [Role.adminRole, Role.assistantRole],
+        title: "Marcas y categorías",
+        // El asistente ya no ve esta opción, que el servidor le rechazaba.
+        permission: AppPermission.gestionarInventario,
       ),
       NavItem(
           iconNormal: Icons.people_outline,
@@ -157,8 +158,7 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(searchUserPage);
           },
           title: "Search",
-          // Cuentas de usuario: solo el administrador de seguridad (D18).
-          permissions: [Role.securityAdminRole],
+          permission: AppPermission.verUsuarios,
       ),
       NavItem(
           iconNormal: Icons.shield_outlined,
@@ -167,8 +167,17 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(securityEventsPage);
           },
           title: "Bitácora de seguridad",
-          // Bitácora de seguridad (D28): solo el administrador de seguridad.
-          permissions: [Role.securityAdminRole],
+          permission: AppPermission.verBitacoras,
+      ),
+      NavItem(
+          iconNormal: Icons.badge_outlined,
+          iconSelected: Icons.badge,
+          onPressed: () {
+            pageManager.setPage(rolesPage);
+          },
+          title: "Roles",
+          // Gestión de roles y sus permisos (D15).
+          permission: AppPermission.verRoles,
       ),
       NavItem(
           iconNormal: Icons.swap_horiz_outlined,
@@ -177,7 +186,7 @@ class MainFrameState extends State<MainFrame> {
             pageManager.setPage(searchLoanPage);
           },
           title: "Search",
-          permissions: [Role.adminRole, Role.assistantRole],
+          permission: AppPermission.registrarPrestamos,
       ),
 
     ];

@@ -1,7 +1,7 @@
 """
 Views for the user API.
 """
-from rest_framework import generics, views, permissions, exceptions
+from rest_framework import generics, views, viewsets, permissions, exceptions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -9,10 +9,9 @@ from rest_framework.settings import api_settings
 from rest_framework import pagination
 from rest_framework import status
 
-from core.models import (IsSecurityAdmin, IsLogged, PasswordLink,
-                         SecurityEvent,
-                         getAdminRole, getAssistantRole, isSecurityAdmin,
-                         roleName)
+from core.models import (PasswordLink, Permission,
+                         Role, SecurityEvent, isSecurityAccount, roleNames)
+from core.permissions import AUTHENTICATED, has_permission
 from core.audit import record_event, safe_attempted_username
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.models import AnonymousUser
@@ -28,13 +27,13 @@ from django.contrib.auth import get_user_model
 from user.serializers import (
     AuthTokenSerializer,
     UserSerializer,
-    AssistanSerializer,
-    AdminSerializer,
     ManageUserSerializer,
     PasswordLinkSerializer,
     PasswordLinkUseSerializer,
+    PermissionSerializer,
     ProfileSerializer,
     ResetLinkRequestSerializer,
+    RoleSerializer,
     SecurityEventSerializer,
     SessionSerializer,
     HealthCheckSerializer,
@@ -75,43 +74,16 @@ class LogListPagination(pagination.CursorPagination):
 class ListUsersView(generics.ListAPIView):
     """List shows users in the api"""
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
+    required_permission = 'ver_usuarios'
     #pagination_class = UserListPagination
     queryset = get_user_model().objects.all().order_by('email')
     filterset_class = UserFilter
-
-    def get_queryset(self):
-
-        admin_param = self.request.query_params.get('is_admin', None)
-        queryset = self.queryset
-        # Filter queryset based on the 'admin' parameter
-        if admin_param is not None:
-            if admin_param.lower() in ['true', '1', 'yes']:
-                admin = getAdminRole()
-                queryset = queryset.filter(role = admin)
-
-            elif admin_param.lower() in ['false', '0', 'no']:
-                assistant = getAssistantRole()
-                queryset = queryset.filter(role = assistant)
-
-        return queryset
-
-    @extend_schema(parameters=[
-        OpenApiParameter(
-            name='is_admin',
-            description="Filter users by their admin status.",
-            required=False,
-            type=bool
-        )
-    ])
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
 
 
 class ListUserLogsView(generics.ListAPIView):
     """List shows user logs in the api"""
     serializer_class = SessionSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
+    required_permission = 'ver_bitacoras'
     #pagination_class = LogListPagination
     queryset = Session.objects.all()
 
@@ -151,7 +123,7 @@ ACCOUNT_FIELDS = ['email', 'nombres', 'apellido_paterno', 'apellido_materno',
 
 def account_snapshot(user):
     data = {field: getattr(user, field) for field in ACCOUNT_FIELDS}
-    data['rol'] = roleName(user)
+    data['roles'] = roleNames(user)
     return data
 
 
@@ -161,15 +133,25 @@ def account_changes(before, after):
             for field in before if before[field] != after[field]}
 
 
-class CreateAccountMixin:
+class CreateUserView(generics.CreateAPIView):
     """Create an account without a password and return its activation
-    link once (D26). Every creation is in the security event log."""
+    link once (D26). Every creation is in the security event log.
+
+    The account gets the roles in the request, possibly none. Giving
+    roles also requires asignar_roles.
+    """
+    serializer_class = ManageUserSerializer
+    required_permission = 'crear_usuarios'
 
     def perform_create(self, serializer):
-        super().perform_create(serializer)
+        roles = serializer.validated_data.get('roles') or []
+        if roles and not has_permission(self.request, 'asignar_roles'):
+            raise exceptions.PermissionDenied(
+                'No tiene permiso para asignar roles.')
+        serializer.save(roles=roles)
         record_event(SecurityEvent.ACCOUNT_CREATED, self.request,
                      target=serializer.instance,
-                     rol=roleName(serializer.instance))
+                     roles=roleNames(serializer.instance))
         self.activation_link = issue_password_link(self.request,
                                                    serializer.instance)
 
@@ -191,24 +173,15 @@ class ListSecurityEventsView(generics.ListAPIView):
     There is no endpoint to edit or delete events.
     """
     serializer_class = SecurityEventSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
+    required_permission = 'ver_bitacoras'
     pagination_class = SecurityEventPagination
     queryset = SecurityEvent.objects.all()
     filterset_class = SecurityEventFilter
 
 
-class CreateLabAssistantView(CreateAccountMixin, generics.CreateAPIView):
-    serializer_class = AssistanSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
-
-
-class CreateLabAdminView(CreateAccountMixin, generics.CreateAPIView):
-    serializer_class = AdminSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
-
-
 class CreateTokenView(ObtainAuthToken):
     """Create a new auth toker for user."""
+    permission_classes = [permissions.AllowAny]
     serializer_class = AuthTokenSerializer
     throttle_classes = [LogInThrottle]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
@@ -277,7 +250,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 class LogoutView(generics.CreateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLogged]
+    required_permission = AUTHENTICATED
     def post(self, request, *args, **kwargs):
         # Perform logout logic here
         if(isinstance(request.user, AnonymousUser)):
@@ -297,7 +270,7 @@ class LogoutView(generics.CreateAPIView):
 class UserProfileView(generics.RetrieveUpdateAPIView):
     """Manage the authenticated user."""
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated, IsLogged]
+    required_permission = AUTHENTICATED
     throttle_classes = (api_settings.DEFAULT_THROTTLE_CLASSES
                         + [CurrentPasswordThrottle])
 
@@ -326,7 +299,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Edit user profiles"""
     serializer_class = ManageUserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin, IsLogged]
+    required_permission = {'read': 'ver_usuarios',
+                           'write': 'modificar_usuarios'}
 
     @extend_schema(parameters=[
         OpenApiParameter(
@@ -343,11 +317,11 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
             raise MissingQueryParameterException(detail="Ingrese el parámetro de email")
         user = get_object_or_404(get_user_model(), email = email_param)
 
-        # D27: las cuentas de administrador de seguridad no se modifican
-        # desde la gestión de cuentas, ni la propia ni la de otro; cada uno
-        # cambia sus datos desde su perfil (/user/me/).
+        # D27: las cuentas con roles de seguridad no se modifican desde la
+        # gestión de cuentas, ni la propia ni la de otro; cada uno cambia
+        # sus datos desde su perfil (/user/me/).
         if self.request.method not in permissions.SAFE_METHODS \
-                and isSecurityAdmin(user):
+                and isSecurityAccount(user):
             raise exceptions.PermissionDenied(
                 'Las cuentas de administrador de seguridad no se pueden '
                 'modificar desde la gestión de cuentas.')
@@ -366,6 +340,7 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
 class HealthCheck(views.APIView):
     serializer_class = HealthCheckSerializer
+    permission_classes = [permissions.AllowAny]
     def get(self, request, *args, **kargs):
         return Response({'status':'OK'}, status=status.HTTP_200_OK)
 
@@ -415,8 +390,7 @@ class ResetLinkView(views.APIView):
     shown again.
     """
     serializer_class = ResetLinkRequestSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin,
-                          IsLogged]
+    required_permission = 'generar_enlaces'
 
     @extend_schema(request=ResetLinkRequestSerializer)
     def post(self, request):
@@ -424,10 +398,10 @@ class ResetLinkView(views.APIView):
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(get_user_model(),
                                  email=serializer.validated_data['email'])
-        # D27: las cuentas de administrador de seguridad no se gestionan
-        # aquí; un administrador de seguridad que olvidó su contraseña la
-        # recupera en el servidor con changepassword.
-        if isSecurityAdmin(user):
+        # D27: las cuentas con roles de seguridad no se gestionan aquí;
+        # quien olvidó su contraseña la recupera en el servidor con
+        # changepassword.
+        if isSecurityAccount(user):
             raise exceptions.PermissionDenied(
                 'No se generan enlaces para cuentas de administrador de '
                 'seguridad.')
@@ -490,3 +464,63 @@ class PasswordLinkUseView(views.APIView):
                          actor=link.user, target=link.user)
         return Response({'detail': 'Contraseña guardada. Ya puede iniciar '
                                    'sesión con su código de usuario.'})
+
+
+def role_snapshot(role):
+    return {'nombre': role.name, 'descripcion': role.description,
+            'permisos': sorted(role.permissions.values_list('codename',
+                                                            flat=True))}
+
+
+class RoleViewSet(viewsets.ModelViewSet):
+    """Role management (D15): list, create, modify and delete roles and
+    their permissions. Every change is in the security event log.
+
+    The security admin role is protected (D27): it can be read, but not
+    modified or deleted. A role with users cannot be deleted.
+    """
+    serializer_class = RoleSerializer
+    required_permission = {'read': 'ver_roles', 'write': 'gestionar_roles'}
+    queryset = Role.objects.prefetch_related('permissions')
+
+    def get_object(self):
+        role = super().get_object()
+        if self.request.method not in permissions.SAFE_METHODS \
+                and role.protected:
+            raise exceptions.PermissionDenied(
+                'El rol de administrador de seguridad no se puede modificar '
+                'ni eliminar.')
+        return role
+
+    def perform_create(self, serializer):
+        serializer.save()
+        record_event(SecurityEvent.ROLE_CREATED, self.request,
+                     **role_snapshot(serializer.instance))
+
+    def perform_update(self, serializer):
+        before = role_snapshot(serializer.instance)
+        serializer.save()
+        after = role_snapshot(serializer.instance)
+        changes = account_changes(before, after)
+        if changes:
+            record_event(SecurityEvent.ROLE_UPDATED, self.request,
+                         rol=after['nombre'], cambios=changes)
+
+    def perform_destroy(self, instance):
+        # Se verifica antes de borrar: la señal pre_delete también lo
+        # impide, pero desde dentro de la transacción del borrado.
+        if instance.users.exists():
+            raise exceptions.ValidationError({'detail': [
+                'El rol tiene usuarios asignados: quíteselo antes de '
+                'eliminarlo.']})
+        before = role_snapshot(instance)
+        instance.delete()
+        record_event(SecurityEvent.ROLE_DELETED, self.request, **before)
+
+
+class ListPermissionsView(generics.ListAPIView):
+    """Catalog of permissions a role can have (D15), with their area:
+    a role cannot mix security and lab permissions (D18)."""
+    serializer_class = PermissionSerializer
+    required_permission = 'ver_roles'
+    queryset = Permission.objects.all()

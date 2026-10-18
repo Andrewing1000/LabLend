@@ -1,3 +1,4 @@
+import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/password_link_dialog.dart';
 import 'package:frontend/screens/PageBase.dart';
@@ -33,7 +34,7 @@ class EditUserScreenState extends State<EditUserScreen> {
 
   Future<void> _updateUser(String email, String nombres,
       String apellidoPaterno, String apellidoMaterno,
-      Role role, bool isActive) async {
+      List<String> roles, bool isActive) async {
     User newUser = widget.user.clone();
     nombres = nombres.trim();
     apellidoPaterno = apellidoPaterno.trim();
@@ -56,9 +57,9 @@ class EditUserScreenState extends State<EditUserScreen> {
       noEdits = false;
       newUser.apellidoMaterno = apellidoMaterno;
     }
-    if(role != newUser.role){
+    if(!_sameRoles(roles, newUser.roles)){
       noEdits = false;
-      newUser.role = role;
+      newUser.roles = roles;
     }
     if(isActive != newUser.isActive){
       noEdits = false;
@@ -78,6 +79,9 @@ class EditUserScreenState extends State<EditUserScreen> {
       }
     }
   }
+
+  bool _sameRoles(List<String> a, List<String> b) =>
+      a.length == b.length && a.toSet().containsAll(b);
 
   /// Genera un enlace nuevo: de activación si la cuenta aún no eligió su
   /// contraseña (D26), de restablecimiento si ya la tiene (D24).
@@ -121,7 +125,7 @@ class EditUserScreenState extends State<EditUserScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                   child: Text(
-                    widget.user.role == Role.securityAdminRole
+                    widget.user.securityAccount
                         ? 'Cuenta bloqueada por intentos fallidos. Se '
                             'desbloquea en el servidor con changepassword.'
                         : 'Cuenta bloqueada por intentos fallidos. Se '
@@ -132,8 +136,11 @@ class EditUserScreenState extends State<EditUserScreen> {
                   ),
                 ),
               // El servidor no genera enlaces para cuentas de administrador
-              // de seguridad (D27) ni para cuentas desactivadas.
-              if (widget.user.role != Role.securityAdminRole &&
+              // de seguridad (D27) ni para cuentas desactivadas, y solo a
+              // quien tiene el permiso de generarlos (D17).
+              if (SessionManager().session.user
+                      .can(AppPermission.generarEnlaces) &&
+                  !widget.user.securityAccount &&
                   widget.user.isActive)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),

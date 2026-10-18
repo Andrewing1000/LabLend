@@ -7,6 +7,7 @@ import 'package:frontend/screens/main_frame.dart';
 import 'package:frontend/services/ContextMessageService.dart';
 import 'Inventory.dart';
 import 'LoanService.dart';
+import 'Role.dart';
 import 'User.dart';
 import 'package:flutter/material.dart';
 
@@ -38,16 +39,10 @@ class Session {
     return await manager.connectionCheck();
   }
 
-  bool isAdmin(){
-    if(user is AdminUser){
-      return true;
-    }
-    manager.errorNotification(error: "Acción denegada");
-    return false ;
-  }
-
-  bool isSecurityAdmin(){
-    if(user is SecurityAdminUser){
+  /// La cuenta tiene el permiso (D17). Si no, avisa y no envía la petición,
+  /// que el servidor rechazaría de todos modos.
+  bool allowed(String permission){
+    if(user.can(permission)){
       return true;
     }
     manager.errorNotification(error: "Acción denegada");
@@ -72,6 +67,7 @@ class SessionManager with ChangeNotifier {
 
   static RequestHandler httpHandler = RequestHandler();
   static UserManager userManager = UserManager();
+  static RoleService roleService = RoleService();
   static Inventory inventory = Inventory();
   static LoanService loanService = LoanService();
   static ContextMessageService messageService = ContextMessageService();
@@ -142,6 +138,7 @@ class SessionManager with ChangeNotifier {
     try{
       var response = await httpHandler.getRequest('/user/me/');
       if(response.statusCode == 200){
+        _refreshPermissions(response.data);
         return true;
       }
     }on DioException catch (e){
@@ -152,6 +149,24 @@ class SessionManager with ChangeNotifier {
     errorNotification(error: 'Inicie sesión');
     notifyListeners();
     return false;
+  }
+
+
+  /// Si cambiaron los roles o los permisos de la cuenta mientras tenía la
+  /// sesión abierta, el menú se actualiza sin volver a iniciar sesión.
+  void _refreshPermissions(dynamic data){
+    if(data is! Map || _session is AnonymousSession) return;
+    final user = _session.user;
+    final permissions = Set<String>.from(data['permissions'] ?? const []);
+    final roles = List<String>.from(data['roles'] ?? const []);
+    if(permissions.length == user.permissions.length
+        && permissions.containsAll(user.permissions)
+        && roles.join(',') == user.roles.join(',')){
+      return;
+    }
+    user.permissions = permissions;
+    user.roles = roles;
+    notifyListeners();
   }
 
 
@@ -299,6 +314,8 @@ class SessionManager with ChangeNotifier {
   }
 
   String _beautifyMessage(String field, String error) {
+    // Mensajes generales del servidor (403, reglas del modelo): sin campo.
+    if (field == 'detail' || field == 'non_field_errors') return error;
     String beautifiedField = _prettifyFieldName(field);
     return "$beautifiedField: $error";
   }

@@ -1,10 +1,10 @@
+import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/LoanCard.dart';
 import 'package:frontend/widgets/ReviewLoan.dart';
 import '../models/Loan.dart';
-import '../models/User.dart';
 
 class SearchLoanPage extends BrowsablePage {
 
@@ -21,8 +21,10 @@ class SearchLoanPage extends BrowsablePage {
 
   @override
   void onSet(){
-    Role role = SessionManager().session.user.role; ///Acceder usuario actual
-    searchEnabled = role == Role.adminRole;
+    // Buscar entre los préstamos de todos solo tiene sentido si puede
+    // verlos (D17).
+    searchEnabled = SessionManager().session.user
+        .can(AppPermission.verTodosPrestamos);
   }
 
   @override

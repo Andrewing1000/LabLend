@@ -115,12 +115,13 @@ class EventRecordingTests(TestCase):
         """Test creating an account records who created it and the role."""
         client_for(self.security_admin).post(CREATE_URL, {
             'email': 'nuevo@example.com',
-            'nombres': 'Luis', 'apellido_paterno': 'Peña'})
+            'nombres': 'Luis', 'apellido_paterno': 'Peña',
+            'roles': [LAB_ASSIST]}, format='json')
 
         event = last_event(SecurityEvent.ACCOUNT_CREATED)
         self.assertEqual(event.actor, self.security_admin)
         self.assertEqual(event.target_username, 'usr.lpena')
-        self.assertEqual(event.detail, {'rol': LAB_ASSIST})
+        self.assertEqual(event.detail, {'roles': [LAB_ASSIST]})
 
     def test_initial_admin_creation_recorded(self):
         """Test create_initial_admin leaves an event without an actor."""
@@ -138,14 +139,14 @@ class EventRecordingTests(TestCase):
         """Test admin changes record what changed."""
         client_for(self.security_admin).patch(
             f'{MANAGE_URL}?email={self.assistant.email}',
-            {'is_active': False, 'role_field': LAB_ADMIN})
+            {'is_active': False, 'roles': [LAB_ADMIN]}, format='json')
 
         event = last_event(SecurityEvent.ACCOUNT_UPDATED)
         self.assertEqual(event.actor, self.security_admin)
         self.assertEqual(event.target, self.assistant)
         self.assertEqual(event.detail['cambios'], {
             'is_active': [True, False],
-            'rol': [LAB_ASSIST, LAB_ADMIN],
+            'roles': [[LAB_ASSIST], [LAB_ADMIN]],
         })
 
     def test_own_profile_and_password_recorded(self):

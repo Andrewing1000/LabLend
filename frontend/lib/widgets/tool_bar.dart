@@ -1,3 +1,4 @@
+import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/User.dart';
 import 'package:frontend/screens/PageBase.dart';
@@ -120,7 +121,7 @@ class ToolBarState extends State<ToolBar>{
                               Container(width: 10,),
                               const Spacer(),
 
-                              if(sessionManager.session.user is! VisitorUser) CircularButton.animated(
+                              if(sessionManager.session.user.can(AppPermission.registrarPrestamos)) CircularButton.animated(
                                 normalIcon: Icons.shopping_cart_outlined,
                                 selectedIcon: Icons.shopping_cart,
                                 size: 25,

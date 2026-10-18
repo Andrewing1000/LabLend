@@ -11,7 +11,19 @@ class SecurityEvent {
     'cuenta_modificada': 'Cuenta modificada por el administrador',
     'perfil_modificado': 'Perfil propio modificado',
     'contrasena_propia_cambiada': 'Contraseña propia cambiada',
+    'contrasena_actual_incorrecta':
+        'Contraseña actual incorrecta al cambiar la contraseña',
+    'enlace_restablecimiento_generado': 'Enlace de restablecimiento generado',
+    'contrasena_restablecida': 'Contraseña restablecida con un enlace',
+    'contrasena_vencida': 'Inicio de sesión con la contraseña vencida',
+    'enlace_activacion_generado': 'Enlace de activación generado',
+    'cuenta_activada': 'Cuenta activada con un enlace',
+    'cuenta_bloqueada': 'Cuenta bloqueada por intentos fallidos',
+    'cuenta_desbloqueada': 'Cuenta desbloqueada con un enlace',
     'acceso_denegado': 'Acción rechazada',
+    'rol_creado': 'Rol creado',
+    'rol_modificado': 'Rol modificado',
+    'rol_eliminado': 'Rol eliminado',
   };
 
   final int id;

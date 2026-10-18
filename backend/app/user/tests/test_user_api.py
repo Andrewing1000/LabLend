@@ -17,7 +17,6 @@ from unittest.mock import patch
 from core.models import LAB_ADMIN, LAB_ASSIST
 
 CREATE_USER_URL = reverse("user:create")
-CREATE_ADMIN_URL = reverse("user:create/admin")
 TOKEN_URL = reverse("user:token")
 ME_URL = reverse("user:me")
 
@@ -84,13 +83,14 @@ class PublicAdminAPITests(TestCase):
             'email' : 'maria@example.com',
             'nombres' : 'María',
             'apellido_paterno' : 'Quispe',
+            'roles' : [LAB_ADMIN],
         }
 
-        res = self.client.post(CREATE_ADMIN_URL, payload)
+        res = self.client.post(CREATE_USER_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data['username'], 'usr.mquispe')
-        self.assertEqual(res.data['role_field'], LAB_ADMIN)
+        self.assertEqual(res.data['roles'], [LAB_ADMIN])
 
     def test_username_is_read_only(self):
         """Test the User ID cannot be chosen by the client."""
@@ -347,7 +347,11 @@ class PrivateUserAPITests(TestCase):
                 'apellido_materno' : '',
                 'name' : 'Test Name',
                 'is_active' : True,
-                'role_field' : LAB_ADMIN,
+                'roles' : [LAB_ADMIN],
+                'permissions' : ['gestionar_inventario',
+                                 'registrar_prestamos',
+                                 'ver_todos_prestamos'],
+                'security_account' : False,
                 'activation_pending' : False,
                 'is_locked' : False,
                 'password_expired' : False,

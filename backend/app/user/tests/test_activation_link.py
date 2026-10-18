@@ -15,7 +15,6 @@ from rest_framework.test import APIClient
 from core.models import PasswordLink, SecurityEvent, logIn
 
 CREATE_URL = reverse('user:create')
-CREATE_ADMIN_URL = reverse('user:create/admin')
 LINK_URL = reverse('user:reset-link')
 CHECK_URL = reverse('user:password-link-check')
 USE_URL = reverse('user:password-link')
@@ -62,7 +61,7 @@ class ActivationLinkTests(TestCase):
     def test_activation_link_returned_once(self):
         """Test the creation response carries the activation link, which
         is not cached and is stored only as a hash."""
-        for url in (CREATE_URL, CREATE_ADMIN_URL):
+        for url in (CREATE_URL,):
             with self.subTest(url=url):
                 Users.filter(email='nuevo@example.com').delete()
                 res = self.create_account(url)

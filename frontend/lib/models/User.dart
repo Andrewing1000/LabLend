@@ -5,18 +5,6 @@ import 'package:frontend/models/PasswordLink.dart';
 
 
 
-class Role{
-  static const Role adminRole = Role(name : "AdministradorLaboratorio");
-  static const Role assistantRole = Role(name : "AsistenteLaboratorio");
-  static const Role securityAdminRole = Role(name : "AdministradorSeguridad");
-  static const Role visitorRole = Role(name : "VisitorRole");
-
-  final String name;
-  const Role({required this.name});
-}
-
-
-
 abstract class User extends ChangeNotifier{
   int? id;
   /// Código de usuario (User ID) generado por el servidor, p. ej. usr.jperez.
@@ -26,66 +14,55 @@ abstract class User extends ChangeNotifier{
   String apellidoPaterno;
   String apellidoMaterno;
   bool isActive;
-  Role role;
   /// La cuenta aún no eligió su contraseña con el enlace de activación (D26).
   bool activationPending = false;
   /// La cuenta se bloqueó por intentos fallidos (D23).
   bool isLocked = false;
   /// La contraseña venció (D21): debe cambiarla antes de seguir.
   bool passwordExpired = false;
+  /// Nombres de todos los roles de la cuenta (D15).
+  List<String> roles;
+  /// Permisos de todos sus roles, según el servidor. Deciden qué opciones
+  /// muestra la aplicación (D17).
+  Set<String> permissions = {};
+  /// Tiene un rol de seguridad: la gestión de cuentas no la modifica, ni le
+  /// genera enlaces (D18, D27).
+  bool securityAccount = false;
+
+  /// La cuenta puede usar la función: alguno de sus roles la permite.
+  bool can(String permission) => permissions.contains(permission);
 
   User({
-        int? id,
+        this.id,
         this.username = '',
         required this.email,
         required this.nombres,
         required this.apellidoPaterno,
         this.apellidoMaterno = '',
         this.isActive = true,
-        this.role = Role.assistantRole});
+        List<String>? roles}) : roles = roles ?? [];
 
   String get name => [nombres, apellidoPaterno, apellidoMaterno]
       .where((part) => part.isNotEmpty)
       .join(' ');
 
 
+  /// Cuenta tal como la devuelve el servidor. Lo que puede hacer sale de
+  /// sus permisos (D17), no del nombre de sus roles.
   factory User.fromJson(Map<String, dynamic> userData){
-    String? roleField = userData['role_field'];
-    User user = VisitorUser.anonymousUser;
-    if(roleField == Role.adminRole.name){
-      user = AdminUser(
-        id: userData['id'],
-        username: userData['username'] ?? '',
-        email: userData['email'],
-        nombres: userData['nombres'] ?? '',
-        apellidoPaterno: userData['apellido_paterno'] ?? '',
-        apellidoMaterno: userData['apellido_materno'] ?? '',
-        isActive : userData['is_active'],
-      );
-    }
-    else if(roleField == Role.assistantRole.name){
-      user = AssistUser(
-        id: userData['id'],
-        username: userData['username'] ?? '',
-        email: userData['email'],
-        nombres: userData['nombres'] ?? '',
-        apellidoPaterno: userData['apellido_paterno'] ?? '',
-        apellidoMaterno: userData['apellido_materno'] ?? '',
-        isActive : userData['is_active'],
-      );
-    }
-    else if(roleField == Role.securityAdminRole.name){
-      user = SecurityAdminUser(
-        id: userData['id'],
-        username: userData['username'] ?? '',
-        email: userData['email'],
-        nombres: userData['nombres'] ?? '',
-        apellidoPaterno: userData['apellido_paterno'] ?? '',
-        apellidoMaterno: userData['apellido_materno'] ?? '',
-        isActive : userData['is_active'],
-      );
-    }
+    final User user = AccountUser(
+      id: userData['id'],
+      username: userData['username'] ?? '',
+      email: userData['email'] ?? '',
+      nombres: userData['nombres'] ?? '',
+      apellidoPaterno: userData['apellido_paterno'] ?? '',
+      apellidoMaterno: userData['apellido_materno'] ?? '',
+      isActive : userData['is_active'] ?? true,
+      roles: List<String>.from(userData['roles'] ?? const []),
+    );
 
+    user.permissions = Set<String>.from(userData['permissions'] ?? const []);
+    user.securityAccount = userData['security_account'] ?? false;
     user.activationPending = userData['activation_pending'] ?? false;
     user.isLocked = userData['is_locked'] ?? false;
     user.passwordExpired = userData['password_expired'] ?? false;
@@ -93,6 +70,8 @@ abstract class User extends ChangeNotifier{
   }
 
 
+  /// Datos que se envían al servidor al crear o modificar la cuenta. Los
+  /// permisos no van: salen de los roles.
   Map<String, dynamic> toJson(){
     return {
       'id' : id,
@@ -101,16 +80,19 @@ abstract class User extends ChangeNotifier{
       'nombres' : nombres,
       'apellido_paterno' : apellidoPaterno,
       'apellido_materno' : apellidoMaterno,
-      'role_field' : role.name,
+      'roles' : roles,
       'is_active' : isActive,
       'activation_pending' : activationPending,
       'is_locked' : isLocked,
       'password_expired' : passwordExpired,
+      'security_account' : securityAccount,
     };
   }
 
   User clone(){
-    return User.fromJson(toJson());
+    final copy = User.fromJson(toJson());
+    copy.permissions = Set.of(permissions);
+    return copy;
   }
 
 
@@ -135,6 +117,7 @@ abstract class User extends ChangeNotifier{
     SessionManager.userManager.enableUser(this);
   }
 
+
   void updateData({required User newUser}) {
     username = newUser.username;
     email = newUser.email;
@@ -142,7 +125,9 @@ abstract class User extends ChangeNotifier{
     apellidoPaterno = newUser.apellidoPaterno;
     apellidoMaterno = newUser.apellidoMaterno;
     isActive =  newUser.isActive;
-    role = newUser.role;
+    roles = List.of(newUser.roles);
+    permissions = Set.of(newUser.permissions);
+    securityAccount = newUser.securityAccount;
     activationPending = newUser.activationPending;
     isLocked = newUser.isLocked;
     passwordExpired = newUser.passwordExpired;
@@ -150,38 +135,19 @@ abstract class User extends ChangeNotifier{
   }
 }
 
+/// Sin sesión: solo consulta el catálogo.
 class VisitorUser extends User{
   static
 
   User anonymousUser = VisitorUser(email: "", nombres: "", apellidoPaterno: "");
 
   VisitorUser({required super.email, required super.nombres,
-    required super.apellidoPaterno, super.id}):
-        super(role: Role.visitorRole);
+    required super.apellidoPaterno, super.id});
 }
 
-class AdminUser extends User{
-  AdminUser({super.username, required super.email, required super.nombres,
+/// Cuenta del sistema, con cualquier combinación de roles.
+class AccountUser extends User{
+  AccountUser({super.username, required super.email, required super.nombres,
     required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
-    super.id}):
-        super(role: Role.adminRole);
-}
-
-
-/// Administrador de seguridad: gestiona cuentas de usuario, no el
-/// inventario ni los préstamos (D18).
-class SecurityAdminUser extends User{
-  SecurityAdminUser({super.username, required super.email, required super.nombres,
-    required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
-    super.id}):
-        super(role: Role.securityAdminRole);
-}
-
-
-class AssistUser extends User{
-  AssistUser({super.username, required super.email, required super.nombres,
-    required super.apellidoPaterno, super.apellidoMaterno, super.isActive,
-    super.id}):
-        super(role: Role.assistantRole);
-
+    super.id, super.roles});
 }

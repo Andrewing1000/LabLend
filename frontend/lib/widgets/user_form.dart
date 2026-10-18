@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/Permissions.dart';
+import 'package:frontend/models/Role.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/boton_agregar.dart';
+import 'package:frontend/widgets/role_selector.dart';
 import 'package:frontend/widgets/string_field.dart';
 import '../models/User.dart';
 
 class UserForm extends StatefulWidget {
   final User? user;
-  /// email, nombres, apellido paterno, apellido materno, rol, activo
-  final Function(String, String, String, String, Role, bool)
+  /// email, nombres, apellido paterno, apellido materno, roles, activo
+  final Function(String, String, String, String, List<String>, bool)
       onFormSubmit;
 
   const UserForm({
@@ -26,20 +29,20 @@ class _UserFormState extends State<UserForm> {
   final TextEditingController nombresController = TextEditingController();
   final TextEditingController apellidoPaternoController = TextEditingController();
   final TextEditingController apellidoMaternoController = TextEditingController();
-  List<Role> roles = [Role.adminRole, Role.assistantRole];
-  Role selectedRole = Role.assistantRole;
+  /// Roles que existen en el servidor (D15), para elegir los de la cuenta.
+  List<Role> availableRoles = [];
+  Set<String> selectedRoles = {};
   bool isActive = true;
 
   bool get updateMode => widget.user != null;
 
-  /// El rol de administrador de seguridad no se asigna ni se quita (D18):
-  /// en su cuenta el rol se muestra, pero no se puede cambiar.
-  bool get roleLocked => selectedRole == Role.securityAdminRole;
+  /// Asignar y quitar roles requiere su propio permiso (D15).
+  bool get canAssignRoles =>
+      SessionManager().session.user.can(AppPermission.asignarRoles);
 
-  /// Cuenta de administrador de seguridad abierta para editar: el servidor
-  /// rechaza cualquier cambio (D27), así que el formulario es de solo lectura.
-  bool get lockedAccount =>
-      updateMode && widget.user!.role == Role.securityAdminRole;
+  /// Cuenta con roles de seguridad abierta para editar: el servidor rechaza
+  /// cualquier cambio (D27), así que el formulario es de solo lectura.
+  bool get lockedAccount => updateMode && widget.user!.securityAccount;
 
   @override
   void initState() {
@@ -51,11 +54,15 @@ class _UserFormState extends State<UserForm> {
       apellidoPaternoController.text = widget.user?.apellidoPaterno ?? '';
       apellidoMaternoController.text = widget.user?.apellidoMaterno ?? '';
       isActive = widget.user?.isActive ?? true;
-      selectedRole = widget.user?.role ?? Role.assistantRole;
-      if (!roles.contains(selectedRole)) {
-        roles = [selectedRole];
-      }
+      selectedRoles = Set.of(widget.user!.roles);
     }
+    _loadRoles();
+  }
+
+  Future<void> _loadRoles() async {
+    if (!SessionManager().session.user.can(AppPermission.verRoles)) return;
+    final roles = await SessionManager.roleService.getRoles();
+    if (mounted) setState(() => availableRoles = roles);
   }
 
   @override
@@ -128,25 +135,24 @@ class _UserFormState extends State<UserForm> {
         // El administrador nunca escribe contraseñas: la cuenta nueva recibe
         // un enlace de activación (D26) y una existente, uno de
         // restablecimiento desde la pantalla de edición (D14, D24).
-        DropdownButton<Role>(
-          value: selectedRole,
-          dropdownColor: Colors.grey[900],
-          style: const TextStyle(color: Colors.white),
-          items: roles.map((Role role) {
-            return DropdownMenuItem<Role>(
-              value: role,
-              child: Text(
-                role.name,
-                style: const TextStyle(color: Colors.white),
-              ),
-            );
-          }).toList(),
-          onChanged: roleLocked ? null : (Role? newRole) {
-            setState(() {
-              selectedRole = newRole!;
-            });
-          },
-        ),
+        if (availableRoles.isNotEmpty)
+          SizedBox(
+            width: fieldWidth,
+            child: RoleSelector(
+              roles: availableRoles,
+              selected: selectedRoles,
+              existingAccount: updateMode,
+              enabled: canAssignRoles && !lockedAccount,
+              onChanged: (roles) => setState(() => selectedRoles = roles),
+            ),
+          )
+        else if (updateMode)
+          Text(
+            widget.user!.roles.isEmpty
+                ? 'Sin roles'
+                : 'Roles: ${widget.user!.roles.join(', ')}',
+            style: const TextStyle(color: Colors.white70),
+          ),
         const SizedBox(height: 20),
         if(activeSwitch)
           Row(
@@ -170,7 +176,7 @@ class _UserFormState extends State<UserForm> {
         const SizedBox(height: 20),
         if (lockedAccount)
           const Text(
-            'Las cuentas de administrador de seguridad no se modifican desde '
+            'Las cuentas con roles de seguridad no se modifican desde '
             'aquí: cada uno cambia sus datos desde su perfil.',
             style: TextStyle(color: Colors.white70),
           )
@@ -183,7 +189,7 @@ class _UserFormState extends State<UserForm> {
               nombresController.text,
               apellidoPaternoController.text,
               apellidoMaternoController.text,
-              selectedRole,
+              selectedRoles.toList(),
               isActive,
             );
           },

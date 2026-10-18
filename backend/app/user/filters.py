@@ -2,25 +2,17 @@ import django_filters
 from django_filters import rest_framework as filters
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
-from core.models import SecurityEvent, User, getAdminRole, getAssistantRole
+from core.models import SecurityEvent, User
 
 
 class UserFilter(filters.FilterSet):
-    is_admin = filters.BooleanFilter(method='filter_by_admin_status', label='Is Admin')
+    role = filters.CharFilter(field_name='roles__name', label='Nombre del rol')
     is_active = filters.BooleanFilter(field_name='is_active')
     email = filters.CharFilter(method='filter_by_email_similarity')
 
     class Meta:
         model = User
-        fields = ['is_admin', 'is_active', 'email']
-
-    def filter_by_admin_status(self, queryset, name, value):
-        if value:
-            admin_role = getAdminRole()
-            return queryset.filter(role=admin_role)
-        else:
-            assistant_role = getAssistantRole()
-            return queryset.filter(role=assistant_role)
+        fields = ['role', 'is_active', 'email']
 
     def filter_by_email_similarity(self, queryset, name, value):
         return queryset.annotate(

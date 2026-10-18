@@ -7,7 +7,7 @@ import '../../models/User.dart';
 Future<void> main() async {
   runApp(MaterialApp(
     home: EditUserScreen(
-    user : AdminUser(
+    user : AccountUser(
       email: "",
       nombres: "",
       apellidoPaterno: "",

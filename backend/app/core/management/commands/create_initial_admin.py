@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         User = get_user_model()
-        if User.objects.filter(role__role_name=SEC_ADMIN).exists():
+        if User.objects.filter(roles__protected=True).exists():
             raise CommandError(
                 'A security administrator account already exists.')
         if User.objects.filter(email=options['email']).exists():
@@ -63,7 +63,7 @@ class Command(BaseCommand):
             raise CommandError(
                 '--nombres and --apellido-paterno must contain letters.')
         record_event(SecurityEvent.ACCOUNT_CREATED, target=user,
-                     rol=SEC_ADMIN, origen='create_initial_admin')
+                     roles=[SEC_ADMIN], origen='create_initial_admin')
 
         self.stdout.write(self.style.SUCCESS(
             f'Security administrator {user.username} created.'))

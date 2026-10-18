@@ -4,9 +4,14 @@ from .models import Prestamo, PrestamoItem
 from item.serializers import ItemSerializer
 from django.contrib.auth import get_user_model
 from item.models import Item
-from core.models import IsLabAdmin, isAdmin
+from core.permissions import has_permission
 
 User = get_user_model()
+
+# Quien tiene este permiso ve y cierra los préstamos de todos; los demás,
+# solo los propios.
+SEE_ALL_LOANS = 'ver_todos_prestamos'
+
 
 class PrestamoItemSerializer(serializers.ModelSerializer):
     item_id = serializers.PrimaryKeyRelatedField(queryset = Item.objects.all(), many = False, source = 'item')
@@ -40,7 +45,8 @@ class PrestamoSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         request = self.context['request']
 
-        if instance.usuario != request.user and not isAdmin(request.user):
+        if instance.usuario != request.user \
+                and not has_permission(request, SEE_ALL_LOANS):
             raise serializers.ValidationError("No tiene permiso para editar este préstamo.")
 
         items_data = validated_data.pop('items', None)

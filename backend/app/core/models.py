@@ -12,155 +12,108 @@ from django.contrib.auth.models import (
     BaseUserManager,
 )
 
-from core.permissions import Role, RolePermissionsMixin
+from core.rbac import (AREAS, LAB_ADMIN, LAB_ASSIST, SEC_ADMIN,
+                       SECURITY_AREA, create_default_role)
 
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
 
 from django.utils import timezone
 
-from rest_framework.permissions import BasePermission
 
-LAB_ADMIN = 'AdministradorLaboratorio'
-LAB_ASSIST = 'AsistenteLaboratorio'
-SEC_ADMIN = 'AdministradorSeguridad'
+class Permission(models.Model):
+    """One function of the system that a role can allow (D15). The
+    catalog is in core.rbac and every view declares the one it requires
+    (D16)."""
+
+    codename = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=255)
+    area = models.CharField(max_length=20, choices=AREAS)
+
+    class Meta:
+        ordering = ['area', 'codename']
+
+    def __str__(self):
+        return self.codename
+
+
+def area_of(permissions):
+    """Area of a set of permissions, None if it is empty. A role cannot
+    mix security and lab permissions (D18)."""
+    areas = {permission.area for permission in permissions}
+    if len(areas) > 1:
+        raise ValidationError({'permissions': [
+            'Un rol no puede combinar permisos de seguridad y de '
+            'laboratorio (segregación de roles).']})
+    return areas.pop() if areas else None
+
+
+class Role(models.Model):
+    """Role stored in the database, with permissions per function (D15).
+    A user can have several roles."""
+
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=255, blank=True)
+    permissions = models.ManyToManyField(Permission, blank=True,
+                                         related_name='roles')
+    # El rol de administrador de seguridad (D27): no se modifica ni se
+    # elimina, y siempre tiene todos los permisos de seguridad.
+    protected = models.BooleanField(default=False, editable=False)
+
+    class Meta:
+        ordering = ['name']
+
+    @property
+    def area(self):
+        return area_of(self.permissions.all())
+
+    def __str__(self):
+        return self.name
+
+
+def roles_area(roles, extra_areas=()):
+    """Area of the roles a user holds, None if none has permissions.
+    Nobody can hold security and lab roles at the same time (D18)."""
+    areas = {role.area for role in roles} | set(extra_areas)
+    areas.discard(None)
+    if len(areas) > 1:
+        raise ValidationError({'roles': [
+            'Un usuario no puede tener a la vez roles de seguridad y de '
+            'laboratorio (segregación de roles).']})
+    return areas.pop() if areas else None
+
+
+def default_role(name):
+    """A default role (core.rbac.DEFAULT_ROLES), created if missing."""
+    return create_default_role(Role, Permission, name)
+
+
+def roleNames(user):
+    """Names of the roles of the user, sorted."""
+    if not getattr(user, 'pk', None):
+        return []
+    return sorted(user.roles.values_list('name', flat=True))
 
 
 def roleName(user):
-    """Role name of the user, or None if it has no role."""
-    role = getattr(user, 'role', None)
-    return role.role_name if role else None
-
-
-# Sin excepciones para superusuarios (D27): todo permiso sale del rol.
-
-def isAdmin(user):
-    """Lab admin: manages inventory and sees every loan."""
-    return roleName(user) == LAB_ADMIN
+    """One role name of the user, or None if it has no role. Kept for the
+    app until its menu uses the permissions (D17)."""
+    names = roleNames(user)
+    return names[0] if names else None
 
 
 def isSecurityAdmin(user):
-    """Security admin: manages user accounts only (D18)."""
-    return roleName(user) == SEC_ADMIN
+    """Holds the protected security admin role (D27)."""
+    return bool(getattr(user, 'pk', None)) and user.roles.filter(
+        protected=True).exists()
 
 
-def isLabStaff(user):
-    """Lab admin or assistant: the roles that work with loans."""
-    return roleName(user) in (LAB_ADMIN, LAB_ASSIST)
-
-
-
-class IsLabAdmin(BasePermission):
-
-    def has_permission(self, request, view):
-        return isAdmin(request.user)
-
-
-class IsSecurityAdmin(BasePermission):
-
-    def has_permission(self, request, view):
-        return isSecurityAdmin(request.user)
-
-
-class IsLabStaff(BasePermission):
-
-    def has_permission(self, request, view):
-        return isLabStaff(request.user)
-
-class LabAdmin(Role):
-    """Lab Administrator role"""
-
-    class Meta:
-        permissions = [ ("lab_admin_creation", "Creation of lab admin users"),
-                        ("lab_admin_modification", "Modification of lab admin users"),
-                        ("assistant_inactivation", "Deletion of assistant users"),
-                        ("assistant_modification", "Modification of assistant users"),
-                        ("assistant_creation", "Creation of assistan users"),
-                        ]
-        proxy = True
-
-    def save(self, *args, **kwargs):
-        self.role_name = LAB_ADMIN
-        super().save(*args, **kwargs)
-
-
-class LabAssistant(Role):
-    """Lab Assistant role"""
-
-    class Meta:
-        permissions = []
-        proxy = True
-
-    def save(self, *args, **kwargs):
-        self.role_name = LAB_ASSIST
-        super().save(*args, **kwargs)
-
-
-class SecurityAdmin(Role):
-    """Security Administrator role: manages user accounts, separated
-    from the lab administrator (D18)"""
-
-    class Meta:
-        permissions = []
-        proxy = True
-
-    def save(self, *args, **kwargs):
-        self.role_name = SEC_ADMIN
-        super().save(*args, **kwargs)
-
-
-def createAdminRole():
-    try:
-        Role.objects.get(role_name = LAB_ADMIN)
-        print(LAB_ADMIN + "LabAdmin Already Added")
-    except:
-        LabAdmin.objects.create()
-        print(LAB_ADMIN + "LabAdmin Added")
-
-def createAssistantRole():
-    try:
-        Role.objects.get(role_name = LAB_ASSIST)
-        print(LAB_ASSIST + "LabAssistant Already Added")
-    except:
-        LabAssistant.objects.create()
-        print(LAB_ASSIST + "LabAssistant Added")
-
-def createSecurityAdminRole():
-    try:
-        Role.objects.get(role_name = SEC_ADMIN)
-        print(SEC_ADMIN + "SecurityAdmin Already Added")
-    except:
-        SecurityAdmin.objects.create()
-        print(SEC_ADMIN + "SecurityAdmin Added")
-
-def createRoles():
-    createAdminRole()
-    createAssistantRole()
-    createSecurityAdminRole()
-
-
-def getAdminRole():
-    try:
-        return LabAdmin.objects.get(role_name = LAB_ADMIN)
-    except:
-        createAdminRole()
-        return LabAdmin.objects.get(role_name = LAB_ADMIN)
-
-
-def getAssistantRole():
-    try:
-        return LabAssistant.objects.get(role_name = LAB_ASSIST)
-    except:
-        createAssistantRole()
-        return LabAssistant.objects.get(role_name = LAB_ASSIST)
-
-
-def getSecurityAdminRole():
-    try:
-        return SecurityAdmin.objects.get(role_name = SEC_ADMIN)
-    except:
-        createSecurityAdminRole()
-        return SecurityAdmin.objects.get(role_name = SEC_ADMIN)
+def isSecurityAccount(user):
+    """Holds a role with security permissions. These accounts get that
+    role when they are created, and are not modified from the account
+    management (D18, D27)."""
+    return bool(getattr(user, 'pk', None)) and user.roles.filter(
+        permissions__area=SECURITY_AREA).exists()
 
 
 ADMIN_USERNAME_PREFIX = 'adm'
@@ -210,38 +163,39 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_lab_admin(self, email, password=None, **extra_fields):
+    def create_with_roles(self, email, password=None, roles=(),
+                          **extra_fields):
+        """Create a user with its roles. Accounts with a security role
+        get the adm. prefix in their User ID."""
+        roles = list(roles)
+        if roles_area(roles) == SECURITY_AREA:
+            extra_fields['username_prefix'] = ADMIN_USERNAME_PREFIX
         user = self.create_user(email, password, **extra_fields)
-        user.role = getAdminRole()
-        user.save(using=self._db)
+        user.roles.set(roles)
         return user
 
+    def create_lab_admin(self, email, password=None, **extra_fields):
+        return self.create_with_roles(
+            email, password, [default_role(LAB_ADMIN)], **extra_fields)
+
     def create_lab_assistant(self, email, password=None, **extra_fields):
-        user = self.create_user(email, password, **extra_fields)
-        user.role = getAssistantRole()
-        user.save(using=self._db)
-        return user
+        return self.create_with_roles(
+            email, password, [default_role(LAB_ASSIST)], **extra_fields)
 
     def create_security_admin(self, email, password=None, **extra_fields):
         """Security admins always get the adm. prefix in their User ID."""
         extra_fields.pop('username_prefix', None)
-        user = self.create_user(email, password,
-                                username_prefix=ADMIN_USERNAME_PREFIX,
-                                **extra_fields)
-        user.role = getSecurityAdminRole()
-        user.save(using=self._db)
-        return user
+        return self.create_with_roles(
+            email, password, [default_role(SEC_ADMIN)], **extra_fields)
 
     # Sin create_superuser (D27): ninguna cuenta queda fuera de los roles.
     # La cuenta inicial se crea con create_initial_admin.
 
 
-class User(AbstractBaseUser, RolePermissionsMixin):
-    """User in the system."""
-
-    class Meta:
-        permissions = [("own_password_modification", "Modification of self's account password"),
-                       ("own_phone_modification", "Modification of self's account phone number"),]
+class User(AbstractBaseUser):
+    """User in the system. Its permissions come only from its roles
+    (D15): there are no permissions or groups assigned to the user
+    directly."""
 
     username = models.CharField(max_length=150, unique=True, editable=False)
     email = models.EmailField(max_length=255, unique=True)
@@ -257,24 +211,36 @@ class User(AbstractBaseUser, RolePermissionsMixin):
     # seguidos, y cuándo se bloqueó la cuenta (vacío si no lo está).
     failed_login_attempts = models.PositiveSmallIntegerField(default=0)
     locked_at = models.DateTimeField(null=True, blank=True)
+    roles = models.ManyToManyField(Role, blank=True, related_name='users')
 
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'nombres', 'apellido_paterno']
 
-    # D27: sin superusuarios. Reemplaza el campo is_superuser de
-    # PermissionsMixin; Django lo sigue consultando, así que siempre es False.
+    # D27: sin superusuarios. Siempre es False, por si algún código de
+    # Django lo consulta.
     @property
     def is_superuser(self):
         return False
 
+    def get_permissions(self):
+        """Codenames of the permissions of all the user's roles."""
+        if not self.pk or not self.is_active:
+            return set()
+        return set(Permission.objects.filter(roles__users=self)
+                   .values_list('codename', flat=True))
+
+    def has_perm(self, perm, obj=None):
+        """The user may use the function: one of its roles allows it."""
+        return perm in self.get_permissions()
+
     def save(self, *args, **kwargs):
         """Never leave the system without an active security admin (D27),
         not even from the server shell."""
-        if (self.pk and not self.is_active and roleName(self) == SEC_ADMIN
+        if (self.pk and not self.is_active and isSecurityAdmin(self)
                 and not User.objects.filter(
-                    role__role_name=SEC_ADMIN, is_active=True,
+                    roles__protected=True, is_active=True,
                 ).exclude(pk=self.pk).exists()):
             raise ValidationError(
                 'No se puede desactivar al último administrador de '
@@ -360,6 +326,9 @@ class SecurityEvent(models.Model):
     ACCOUNT_LOCKED = 'cuenta_bloqueada'
     ACCOUNT_UNLOCKED = 'cuenta_desbloqueada'
     ACCESS_DENIED = 'acceso_denegado'
+    ROLE_CREATED = 'rol_creado'
+    ROLE_UPDATED = 'rol_modificado'
+    ROLE_DELETED = 'rol_eliminado'
 
     EVENT_TYPES = [
         (LOGIN, 'Inicio de sesión'),
@@ -380,6 +349,9 @@ class SecurityEvent(models.Model):
         (ACCOUNT_LOCKED, 'Cuenta bloqueada por intentos fallidos'),
         (ACCOUNT_UNLOCKED, 'Cuenta desbloqueada con un enlace'),
         (ACCESS_DENIED, 'Acción rechazada'),
+        (ROLE_CREATED, 'Rol creado'),
+        (ROLE_UPDATED, 'Rol modificado'),
+        (ROLE_DELETED, 'Rol eliminado'),
     ]
 
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -491,11 +463,5 @@ def logIn(user):
     Session.objects.create(user=user)
 
 
-
-class IsLogged(BasePermission):
-
-    def has_permission(self, request, view):
-
-        return isLogged(request.user)
 
 

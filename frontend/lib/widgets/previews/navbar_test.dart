@@ -1,13 +1,11 @@
 
 import 'package:flutter/material.dart';
-import '../../models/User.dart';
 import '../navbar.dart';
 
 
 void main(){
 
 
-  final List<Role> permissions = [Role.adminRole, Role.assistantRole, Role.visitorRole];
 
   final List<NavItem> items = [
 
@@ -18,7 +16,7 @@ void main(){
           print("Opcion1");
         },
         title: "Home",
-        permissions : permissions,),
+        ),
 
     NavItem(
       iconNormal : Icons.search_sharp,
@@ -27,7 +25,6 @@ void main(){
           print("Opcion2");
         },
       title: "Search",
-      permissions : permissions,
     ),
 
     NavItem(
@@ -37,7 +34,6 @@ void main(){
           print("Opcion3");
         },
       title: "Notifications",
-      permissions : permissions,
     ),
 
     NavItem(
@@ -47,7 +43,6 @@ void main(){
           print("Opcion4");
         },
       title: "Profile",
-      permissions : permissions,
     ),
     
     NavItem(
@@ -57,7 +52,6 @@ void main(){
           print("hola");
         },
       title: "Profile",
-      permissions : permissions,
     ),
   ];
 

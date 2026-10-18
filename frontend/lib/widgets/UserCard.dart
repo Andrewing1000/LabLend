@@ -83,7 +83,7 @@ class _UserCardState extends State<UserCard> {
                         flex: 3,
                         fit: FlexFit.tight,
                         child: Text(
-                          user.role.name,
+                          user.roles.isEmpty ? 'Sin roles' : user.roles.join(', '),
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,

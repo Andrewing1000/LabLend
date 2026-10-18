@@ -216,6 +216,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 
+    # Un único mecanismo de permisos (D16): toda vista exige sesión abierta
+    # y el permiso de su función, salvo las públicas, que lo declaran.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'core.permissions.RolePermission',
+    ],
+
     'EXCEPTION_HANDLER': 'core.exceptions.api_exception_handler',
 
     'DEFAULT_THROTTLE_CLASSES': [

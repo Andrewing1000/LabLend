@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/icon_button.dart';
 import 'package:provider/provider.dart';
-import '../models/User.dart';
 
 class VerticalNavbar extends StatefulWidget {
   final List<NavItem> items;
@@ -42,10 +41,12 @@ class VerticalNavbarState extends State<VerticalNavbar> {
       ],
       child:Consumer<SessionManager>(
         builder: (context, sessionManager, child) {
-          Role role = SessionManager().session.user.role;
+          final user = SessionManager().session.user;
           List<CustomIconButton> iconList = [];
           for(NavItem item in widget.items){
-            if(!item.permissions.contains(role)) continue;
+            // Menú armado con los permisos del servidor (D17).
+            final permission = item.permission;
+            if(permission != null && !user.can(permission)) continue;
             iconList.add(CustomIconButton(
               iconNormal: item.iconNormal,
               iconSelected: item.iconSelected,
@@ -99,13 +100,15 @@ class NavItem{
   final IconData? iconSelected;
   final Function? onPressed;
   final String title;
-  final List<Role> permissions;
+  /// Permiso que debe tener la cuenta para ver la opción; sin permiso, la
+  /// ven todos, también los visitantes.
+  final String? permission;
   NavItem({
     required this.iconNormal,
     this.iconSelected,
     required this.onPressed,
     required this.title,
-    required this.permissions,
+    this.permission,
   });
 }
 

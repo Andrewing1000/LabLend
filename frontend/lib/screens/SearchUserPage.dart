@@ -1,3 +1,4 @@
+import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
@@ -21,15 +22,15 @@ class SearchUserPage extends BrowsablePage {
       isActive = activeFilter.getSelected().first == "Activo";
     }
 
-    bool? isAdmin;
+    String? role;
     if (roleFilter.getSelected().isNotEmpty) {
-      isAdmin = roleFilter.getSelected().first == Role.adminRole;
+      role = roleFilter.getSelected().first;
     }
 
     return await SessionManager.userManager.getUserList(
       email: pattern,
       isActive: isActive,
-      isAdmin: isAdmin,
+      role: role,
     );
   }
 
@@ -149,7 +150,7 @@ class SearchUserPage extends BrowsablePage {
                   ),
                 ],
               ),
-              if (SessionManager().session.user.role == Role.securityAdminRole)
+              if (SessionManager().session.user.can(AppPermission.crearUsuarios))
                 Align(
                   alignment: const Alignment(1, 1),
                   child: Container(
@@ -203,16 +204,18 @@ class ActiveFilter extends SingleFilter<String> {
   }
 }
 
-class RoleFilter extends SingleFilter<Role> {
+/// Filtra por nombre de rol, con los roles que existen en el servidor (D15).
+class RoleFilter extends SingleFilter<String> {
   RoleFilter() : super(attributeName: "Rol");
 
   @override
-  String getRepresentation(Role item) {
-    return item.name;
+  String getRepresentation(String item) {
+    return item;
   }
 
   @override
-  Future<List<Role>> retrieveItems() async {
-    return [Role.adminRole, Role.assistantRole];
+  Future<List<String>> retrieveItems() async {
+    final roles = await SessionManager.roleService.getRoles();
+    return [for (final role in roles) role.name];
   }
 }

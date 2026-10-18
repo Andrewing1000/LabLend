@@ -13,7 +13,7 @@ from django.core.management import CommandError, call_command
 from django.db.utils import OperationalError
 from django.test import SimpleTestCase, TestCase
 
-from core.models import SEC_ADMIN
+from core.models import SEC_ADMIN, roleNames
 
 
 @patch("core.management.commands.wait_for_db.Command.check")
@@ -57,7 +57,7 @@ class CreateInitialAdminTests(TestCase):
         password = self.create_admin()
 
         user = get_user_model().objects.get(email='admin@lablend.test')
-        self.assertEqual(user.role.role_name, SEC_ADMIN)
+        self.assertEqual(roleNames(user), [SEC_ADMIN])
         self.assertFalse(user.is_superuser)
         self.assertTrue(user.check_password(password))
 

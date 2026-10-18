@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import PasswordLink, SecurityEvent, logIn
+from core.models import PasswordLink, SecurityEvent, logIn, roleName
 from core.passwords import create_password_link, hash_token
 
 RESET_LINK_URL = reverse('user:reset-link')
@@ -120,7 +120,7 @@ class ResetLinkCreationTests(TestCase):
             email='lab@example.com', password=PASSWORD,
             nombres='Luis', apellido_paterno='Mamani')
         for user in [lab_admin, self.assistant]:
-            with self.subTest(role=user.role.role_name):
+            with self.subTest(role=roleName(user)):
                 res = client_for(user).post(RESET_LINK_URL,
                                             {'email': self.assistant.email})
 

@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model #Helper function to get (Default)
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import CommandError, call_command
 from django.db import transaction
-from django.db.models import ProtectedError
 
 from core import models
 from item import models as item_models
@@ -110,27 +109,29 @@ class SecurityAdminProtectionTests(TestCase):
 
     def test_security_admin_role_cannot_be_deleted(self):
         """Test the role cannot be deleted, even without users."""
-        role = models.getSecurityAdminRole()
+        role = models.default_role(models.SEC_ADMIN)
 
         # Django borra sin savepoint: cada intento va en su propio atomic
         # para que el rechazo no anule la transacción de la prueba.
         with self.assertRaises(PermissionDenied), transaction.atomic():
             role.delete()
         with self.assertRaises(PermissionDenied), transaction.atomic():
-            models.Role.objects.filter(role_name=models.SEC_ADMIN).delete()
+            models.Role.objects.filter(name=models.SEC_ADMIN).delete()
         self.assertTrue(models.Role.objects.filter(
-            role_name=models.SEC_ADMIN).exists())
+            name=models.SEC_ADMIN).exists())
 
     def test_role_with_users_cannot_be_deleted(self):
-        """Test deleting a role with users fails instead of deleting
-        the users with it."""
+        """Test deleting a role with users fails instead of leaving them
+        without access."""
         get_user_model().objects.create_lab_admin(
             'lab@example.com', PASSWORD, **NAMES)
 
-        with self.assertRaises(ProtectedError), transaction.atomic():
-            models.getAdminRole().delete()
-        self.assertTrue(get_user_model().objects.filter(
-            email='lab@example.com').exists())
+        with self.assertRaises(ValidationError), transaction.atomic():
+            models.default_role(models.LAB_ADMIN).delete()
+        with self.assertRaises(ValidationError), transaction.atomic():
+            models.Role.objects.filter(name=models.LAB_ADMIN).delete()
+        user = get_user_model().objects.get(email='lab@example.com')
+        self.assertEqual(models.roleNames(user), [models.LAB_ADMIN])
 
 
 class UserIdTests(TestCase):

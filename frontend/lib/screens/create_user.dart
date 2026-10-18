@@ -33,7 +33,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   /// activación, con el que su dueño elige la contraseña (D26).
   Future<void> _createUser(String email, String nombres,
       String apellidoPaterno, String apellidoMaterno,
-      Role role, bool isActive) async {
+      List<String> roles, bool isActive) async {
     if (email.isEmpty){
       SessionManager().errorNotification(error: "Se requiere el email de usuario");
       return;
@@ -44,18 +44,15 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       return;
     }
 
-    User user;
-    if (role == Role.adminRole) {
-      user = AdminUser(email: email, nombres: nombres.trim(),
-          apellidoPaterno: apellidoPaterno.trim(),
-          apellidoMaterno: apellidoMaterno.trim(), isActive: isActive);
-    } else {
-      user = AssistUser(email: email, nombres: nombres.trim(),
-          apellidoPaterno: apellidoPaterno.trim(),
-          apellidoMaterno: apellidoMaterno.trim(), isActive: isActive);
-    }
+    final User user = AccountUser(email: email, nombres: nombres.trim(),
+        apellidoPaterno: apellidoPaterno.trim(),
+        apellidoMaterno: apellidoMaterno.trim(), isActive: isActive,
+        roles: roles);
 
-    final pass = await SessionManager().confirmNotification(message: "Se creará el usuario ${user.name} con email \"$email\"");
+    final rolesText = roles.isEmpty
+        ? 'sin roles (solo podrá ver su perfil hasta recibir uno)'
+        : 'con los roles ${roles.join(', ')}';
+    final pass = await SessionManager().confirmNotification(message: "Se creará el usuario ${user.name} con email \"$email\", $rolesText");
 
     if(pass){
       final link = await user.create();

@@ -11,9 +11,11 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 
-from core.models import (Session, SecurityEvent, getAdminRole, getAssistantRole,
-                         LAB_ADMIN, LAB_ASSIST, SEC_ADMIN, roleName,
-                         username_part)
+from core.models import (Permission, Role, Session, SecurityEvent, area_of,
+                         isSecurityAccount,
+                         roleNames, roles_area, username_part)
+from core.permissions import has_permission
+from core.rbac import SECURITY_AREA
 
 from rest_framework.exceptions import APIException, PermissionDenied
 
@@ -21,18 +23,19 @@ from core.audit import record_event
 from core.middleware import PASSWORD_EXPIRED_MESSAGE
 
 
+def django_errors(error, field):
+    """Messages of a Django ValidationError, for a DRF ValidationError."""
+    if hasattr(error, 'message_dict'):
+        return error.message_dict.get(field, error.messages)
+    return error.messages
 
-class NotValidRole(APIException):
-    status_code = 400
-    default_detail = 'Ingrese un rol válido'
-    default_code = 'role_field'
 
 
 class SecurityRoleSegregation(APIException):
     status_code = 400
-    default_detail = ('El rol de administrador de seguridad no se puede '
-                      'asignar ni quitar a una cuenta existente.')
-    default_code = 'role_field'
+    default_detail = ('Los roles de seguridad no se pueden asignar ni quitar '
+                      'a una cuenta existente: se dan solo al crearla.')
+    default_code = 'roles'
     # Se registra en la bitácora de seguridad como acción rechazada (D28).
     security_event = True
 
@@ -40,14 +43,16 @@ class SecurityRoleSegregation(APIException):
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from typing import Optional
 from rest_framework import serializers
+from typing import Optional
 from django.contrib.auth import get_user_model
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the user object."""
 
-    role_field = serializers.SerializerMethodField()
+    roles = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
+    security_account = serializers.SerializerMethodField()
     name = serializers.ReadOnlyField()
     activation_pending = serializers.BooleanField(read_only=True)
     is_locked = serializers.BooleanField(read_only=True)
@@ -57,18 +62,26 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ['username', 'email', 'password', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
-                  'is_active', 'role_field', 'activation_pending',
-                  'is_locked', 'password_expired']
+                  'is_active', 'roles', 'permissions', 'security_account',
+                  'activation_pending', 'is_locked', 'password_expired']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
             'email': {'required':False},
-            'role_field': {'read_only': True},
             'is_active': {'read_only': True},
         }
 
-    def get_role_field(self, obj) -> Optional[str]:
-        """Get the role name of the user."""
-        return roleName(obj)
+    def get_roles(self, obj) -> list[str]:
+        """Names of the user's roles (D15)."""
+        return roleNames(obj)
+
+    def get_permissions(self, obj) -> list[str]:
+        """Permissions of all the user's roles: what the app may show."""
+        return sorted(obj.get_permissions())
+
+    def get_security_account(self, obj) -> bool:
+        """The account has a security role: the account management does
+        not modify it (D18, D27)."""
+        return isSecurityAccount(obj)
 
     def validate_nombres(self, value):
         """The User ID needs a letter from the first name."""
@@ -161,16 +174,19 @@ class ProfileSerializer(UserSerializer):
 
 
 class ManageUserSerializer(UserSerializer):
+    """Account as the security admin creates, sees and edits it."""
 
-    role_field = serializers.SerializerMethodField()
+    roles = serializers.SlugRelatedField(
+        many=True, slug_field='name', queryset=Role.objects.all(),
+        required=False,
+        error_messages={'does_not_exist': 'El rol {value} no existe.'})
 
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
-                  'is_active', 'role_field', 'activation_pending',
-                  'is_locked', 'password_expired']
-        extra_kwargs = {'role_field': {'read_only': False},}
+                  'is_active', 'roles', 'permissions', 'security_account',
+                  'activation_pending', 'is_locked', 'password_expired']
 
     def to_internal_value(self, data):
         # El administrador nunca escribe contraseñas: una cuenta nueva
@@ -183,75 +199,46 @@ class ManageUserSerializer(UserSerializer):
                 if self.instance is not None else
                 'Las cuentas nuevas no reciben una contraseña: su dueño la '
                 'elige con el enlace de activación.']})
-        # data puede ser un QueryDict inmutable (formularios): solo leerlo.
-        external_field_value = data.get('role_field', None)
         internal_value = super().to_internal_value(data)
-        internal_value['role_field'] = external_field_value
+        # En un formulario, una lista ausente llega vacía: sin el campo
+        # roles, la petición no indica roles (no "ningún rol").
+        if 'roles' not in data:
+            internal_value.pop('roles', None)
         return internal_value
 
+    def validate_roles(self, roles):
+        try:
+            roles_area(roles)
+        except DjangoValidationError as error:
+            raise serializers.ValidationError(django_errors(error, 'roles'))
+        return roles
 
     def create(self, validated_data):
-        """Create and return a user with encrypted password"""
-        role_name = validated_data.pop('role_field', None)
-        user = get_user_model().objects.create_user(**validated_data)
-
-        if role_name:
-            if(role_name == LAB_ASSIST):
-                user.role = getAssistantRole()
-            elif(role_name == LAB_ADMIN):
-                user.role = getAdminRole()
-            else:
-                raise NotValidRole()
-
-        user.save()
-
-        return user
-
+        """Create the account with its roles, without a password (D26)."""
+        return get_user_model().objects.create_with_roles(**validated_data)
 
     def update(self, instance, validated_data):
         """Update and return user.
 
-        The role is checked before saving anything, so a rejected role
+        The roles are checked before saving anything, so a rejected role
         change leaves the account untouched.
         """
-        role_name = validated_data.pop('role_field', None)
-        new_role = None
-        if role_name and role_name != roleName(instance):
-            # Segregación de roles (D18): el rol de administrador de
-            # seguridad no se asigna ni se quita a una cuenta existente.
-            if SEC_ADMIN in (role_name, roleName(instance)):
+        roles = validated_data.pop('roles', None)
+        if roles is not None and set(roles) != set(instance.roles.all()):
+            if not has_permission(self.context['request'], 'asignar_roles'):
+                raise PermissionDenied('No tiene permiso para asignar roles.')
+            # Segregación de roles (D18): los roles de seguridad solo se dan
+            # al crear la cuenta, y las cuentas que los tienen no se editan
+            # aquí (D27), así que tampoco se quitan.
+            if roles_area(roles) == SECURITY_AREA:
                 raise SecurityRoleSegregation()
-            if(role_name == LAB_ASSIST):
-                new_role = getAssistantRole()
-            elif(role_name == LAB_ADMIN):
-                new_role = getAdminRole()
-            else:
-                raise NotValidRole()
 
         user = super().update(instance, validated_data)
 
-        if new_role:
-            user.role = new_role
-            user.save()
+        if roles is not None:
+            user.roles.set(roles)
 
         return user
-
-class AssistanSerializer(ManageUserSerializer):
-
-    def create(self, validated_data):
-        """Create and return a user with encrypted password"""
-        validated_data.pop('role_field')
-        return get_user_model().objects.create_lab_assistant(**validated_data)
-
-
-class AdminSerializer(ManageUserSerializer):
-
-    def create(self, validated_data):
-        """Create and return a user with encrypted password"""
-        validated_data.pop('role_field')
-        return get_user_model().objects.create_lab_admin(**validated_data)
-
-
 
 
 class AuthTokenSerializer(serializers.Serializer):
@@ -323,3 +310,82 @@ class PasswordLinkUseSerializer(PasswordLinkSerializer):
     """Token of a password link and the new password (D24)."""
     password = serializers.CharField(
         style={'input_type': 'password'}, trim_whitespace=False)
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    """A permission of the catalog (D15)."""
+
+    class Meta:
+        model = Permission
+        fields = ['codename', 'name', 'area']
+        read_only_fields = fields
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    """A role and its permissions (D15)."""
+
+    permissions = serializers.SlugRelatedField(
+        many=True, slug_field='codename', queryset=Permission.objects.all(),
+        error_messages={'does_not_exist': 'El permiso {value} no existe.'})
+    area = serializers.SerializerMethodField()
+    user_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'description', 'permissions', 'area',
+                  'protected', 'user_count']
+        read_only_fields = ['protected']
+        # El nombre único se valida en validate_name, con mensaje en español.
+        extra_kwargs = {'name': {'validators': []}}
+
+    def get_area(self, obj) -> Optional[str]:
+        """Area of the role's permissions: seguridad, laboratorio or
+        null if it has none."""
+        return obj.area
+
+    def get_user_count(self, obj) -> int:
+        return obj.users.count()
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Ingrese el nombre del rol.')
+        others = Role.objects.filter(name__iexact=value)
+        if self.instance is not None:
+            others = others.exclude(pk=self.instance.pk)
+        if others.exists():
+            raise serializers.ValidationError(
+                'Ya existe un rol con ese nombre.')
+        return value
+
+    def validate_permissions(self, permissions):
+        try:
+            area_of(permissions)
+        except DjangoValidationError as error:
+            raise serializers.ValidationError(
+                django_errors(error, 'permissions'))
+        return permissions
+
+    def validate(self, attrs):
+        """A role with users cannot change area in a way that would give
+        security permissions to existing accounts, take them away, or mix
+        both areas in one account (D18)."""
+        role = self.instance
+        if role is None or 'permissions' not in attrs:
+            return attrs
+        old_area, new_area = role.area, area_of(attrs['permissions'])
+        if old_area == new_area or not role.users.exists():
+            return attrs
+        if SECURITY_AREA in (old_area, new_area):
+            raise serializers.ValidationError({'permissions': [
+                'El rol tiene usuarios: no puede ganar ni perder permisos de '
+                'seguridad, porque los roles de seguridad solo se dan al '
+                'crear una cuenta (segregación de roles).']})
+        for user in role.users.all():
+            try:
+                roles_area(user.roles.exclude(pk=role.pk), [new_area])
+            except DjangoValidationError:
+                raise serializers.ValidationError({'permissions': [
+                    f'El usuario {user.username} quedaría con roles de '
+                    'seguridad y de laboratorio (segregación de roles).']})
+        return attrs

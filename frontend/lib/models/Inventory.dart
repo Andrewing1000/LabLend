@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'Permissions.dart';
 import 'Item.dart';
 import 'Session.dart';
 import 'package:dio/dio.dart';
@@ -101,7 +102,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -122,7 +123,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -143,7 +144,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -212,7 +213,7 @@ class Inventory {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -236,7 +237,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -257,7 +258,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -278,7 +279,7 @@ class Inventory {
     if (!await isReady()) {
       return false;
     }
-    if (!isAdmin()) {
+    if (!canManageInventory()) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -343,9 +344,11 @@ class Inventory {
     }
   }
 
-  bool isAdmin() {
-    final session = SessionManager().session;
-    return session.isAdmin();
+  /// Alta, edición y baja del inventario: permiso gestionar_inventario
+  /// (D17).
+  bool canManageInventory() {
+    return SessionManager().session.allowed(
+        AppPermission.gestionarInventario);
   }
 
   Future<bool> isReady() async {

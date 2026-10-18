@@ -1,6 +1,6 @@
+import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Loan.dart';
-import 'package:frontend/models/User.dart';
 import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/services/Cart.dart';
@@ -187,7 +187,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                       _buildInfoRow('Categorías', item!.categories.map((c) => c.nombre).join(', ')),
                       const SizedBox(height: 20),
                       // Selector de cantidad y botón para agregar a la lista de compras
-                      if(sessionManager.session.user is! VisitorUser)
+                      if(sessionManager.session.user.can(AppPermission.registrarPrestamos))
                         Row(
                         children: [
                           ElevatedButton(
@@ -236,7 +236,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                       ),
                       const SizedBox(height: 20),
 
-                      if(sessionManager.session.user is! VisitorUser)
+                      if(sessionManager.session.user.can(AppPermission.registrarPrestamos))
                         ElevatedButton(
                         onPressed: () {
                           if(isInCart){

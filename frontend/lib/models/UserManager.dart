@@ -1,3 +1,4 @@
+import 'Permissions.dart';
 import 'PasswordLink.dart';
 import 'SecurityEvent.dart';
 import 'Session.dart';
@@ -10,11 +11,11 @@ class UserManager {
 
 
   Future<List<User>> getUserList(
-      {bool? isAdmin, bool? isActive, String? email}) async {
+      {String? role, bool? isActive, String? email}) async {
     if (!await isReady()) {
       return [];
     }
-    if (!this.isAdmin()) {
+    if (!allowed(AppPermission.verUsuarios)) {
       return [];
     }
     if (!await sessionCheck()) {
@@ -24,8 +25,8 @@ class UserManager {
     var response;
     try {
       Map<String, dynamic> queryParams = {};
-      if (isAdmin != null) {
-        queryParams['is_admin'] = isAdmin.toString();
+      if (role != null) {
+        queryParams['role'] = role;
       }
       if (isActive != null) {
         queryParams['is_active'] = isActive.toString();
@@ -64,7 +65,7 @@ class UserManager {
       return User.fromJson(response.data);
     }
 
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.verUsuarios)) {
       return null;
     }
 
@@ -89,26 +90,17 @@ class UserManager {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.crearUsuarios)) {
       return null;
     }
     if (!await sessionCheck()) {
       return null;
     }
 
-    String path;
-    if (user.role == Role.adminRole) {
-      path = '/user/create/admin/';
-    } else if (user.role == Role.assistantRole) {
-      path = '/user/create/';
-    } else {
-      manager.errorNotification(error: 'Ingrese un rol válido');
-      return null;
-    }
-
     try {
       var response =
-          await requestHandler.postRequest(path, body: user.toJson());
+          await requestHandler.postRequest('/user/create/',
+              body: user.toJson());
       user.updateData(newUser: User.fromJson(response.data));
       return PasswordLink.fromJson(
           response.data['username'], response.data['activation_link']);
@@ -125,7 +117,7 @@ class UserManager {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.modificarUsuarios)) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -135,11 +127,13 @@ class UserManager {
     var data = newUser.toJson();
 
     try {
-      await requestHandler.patchRequest('/user/manage/',
+      final response = await requestHandler.patchRequest('/user/manage/',
           body: data, query: {'email': user.email});
-      user.updateData(newUser: newUser);
+      // La cuenta tal como quedó en el servidor, con sus permisos nuevos.
+      final updated = User.fromJson(response.data);
+      user.updateData(newUser: updated);
       manager.notification(notification: 'Información de usuario actualizada');
-      return User.fromJson(newUser.toJson());
+      return updated;
     } on DioException catch (e) {
       manager.errorNotification(
           error: 'Actualización fallida', details: e.response?.data);
@@ -154,7 +148,7 @@ class UserManager {
     if (!await isReady()) {
       return null;
     }
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.generarEnlaces)) {
       return null;
     }
     if (!await sessionCheck()) {
@@ -208,7 +202,7 @@ class UserManager {
     if (!await isReady()) {
       return false;
     }
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.modificarUsuarios)) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -225,7 +219,7 @@ class UserManager {
     if (!await isReady()) {
       return false;
     }
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.modificarUsuarios)) {
       return false;
     }
     if (!await sessionCheck()) {
@@ -238,34 +232,13 @@ class UserManager {
     return result != null;
   }
 
-  Future<User?> makeAdmin(User user) async {
-    if (!await isReady()) {
-      return null;
-    }
-    if (!isAdmin()) {
-      return null;
-    }
-    if (!await sessionCheck()) {
-      return null;
-    }
-
-    if (user.role == Role.adminRole) {
-      manager.notification(notification: 'Ya es administrador');
-      return user;
-    }
-
-    User newUser = user.clone();
-    newUser.role = Role.adminRole;
-    return await updateUser(user, newUser: newUser);
-  }
-
   /// Bitácora de seguridad (D28): los eventos más recientes primero.
   Future<List<SecurityEvent>> getSecurityEvents(
       {String? username, String? eventType}) async {
     if (!await isReady()) {
       return [];
     }
-    if (!isAdmin()) {
+    if (!allowed(AppPermission.verBitacoras)) {
       return [];
     }
     if (!await sessionCheck()) {
@@ -292,10 +265,9 @@ class UserManager {
     }
   }
 
-  /// La gestión de cuentas corresponde al administrador de seguridad (D18).
-  bool isAdmin() {
-    final session = SessionManager().session;
-    return session.isSecurityAdmin();
+  /// Cada operación pide el permiso de su función (D17).
+  bool allowed(String permission) {
+    return SessionManager().session.allowed(permission);
   }
 
   Future<bool> isReady() async {

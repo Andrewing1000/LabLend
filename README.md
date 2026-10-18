@@ -98,8 +98,8 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 - **Correo y nombre:** los que pases al comando. `--apellido-materno` es opcional.
 - **Código de usuario:** es la credencial para iniciar sesión (el correo ya no sirve para entrar). El comando lo genera y lo muestra: `adm.` + inicial del primer nombre + apellido paterno, en minúsculas y sin tildes ni ñ (en el ejemplo, `adm.jperez`). Las cuentas creadas desde la aplicación reciben el prefijo `usr.` (por ejemplo `usr.mquispe`), y si el código ya existe se le agrega un número (`usr.mquispe2`). El código no cambia aunque después se edite el nombre.
 - **Contraseña:** el comando la genera al azar, cumpliendo la política de contraseñas, y la muestra **una sola vez** en la terminal. Guárdala de inmediato en el gestor de contraseñas: la base de datos solo guarda su hash, así que no hay forma de volver a verla. Nadie la conoce de antemano y no está en el código ni en git.
-- **Rol:** administrador de seguridad. Gestiona las cuentas y consulta la bitácora de sesiones, pero no el inventario ni los préstamos (D18).
-- **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador de seguridad. Las demás cuentas, administradores de laboratorio y asistentes, se crean desde la aplicación con esa cuenta, sin contraseña: la aplicación muestra un enlace de activación, que se entrega a la persona para que elija la suya (D26). Para gestionar el inventario, crea primero un administrador de laboratorio.
+- **Rol:** administrador de seguridad. Gestiona las cuentas, los roles y sus permisos, y consulta las bitácoras, pero no el inventario ni los préstamos (D18). Es el único rol protegido: no se puede modificar ni eliminar.
+- **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador de seguridad. Las demás cuentas, con los roles que se elijan (también otros administradores de seguridad), se crean desde la aplicación con esa cuenta, sin contraseña: la aplicación muestra un enlace de activación, que se entrega a la persona para que elija la suya (D26). Para gestionar el inventario, crea primero un administrador de laboratorio.
 
 Las demás cuentas recuperan su contraseña con un enlace de restablecimiento que el administrador de seguridad genera desde la aplicación (D24). Para las cuentas de administrador de seguridad no se generan enlaces, así que si se pierde su contraseña o su cuenta se bloquea tras tres intentos fallidos (D23), cámbiala desde el servidor; el comando pide la nueva contraseña, aplica la misma política y desbloquea la cuenta:
 
@@ -114,6 +114,8 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 > **No hay superusuarios:** `python manage.py createsuperuser` está deshabilitado y responde con un error; toda cuenta tiene un rol. Si tu base de datos tenía un superusuario creado con ese comando, después de las migraciones queda sin rol y sin permisos: crea la cuenta inicial con `create_initial_admin`.
 
 > **Si tu cuenta inicial se creó antes del rol de administrador de seguridad:** sigue siendo administrador de laboratorio y ya no puede gestionar cuentas. Con el backend levantado (las migraciones crean el rol nuevo), vuelve a ejecutar `create_initial_admin` con otro correo: crea el administrador de seguridad, y la cuenta anterior queda como administrador de laboratorio.
+
+> **Roles en la base de datos (D15):** las migraciones `0016` a `0018` reemplazan los roles fijos por roles con permisos por función, y cada usuario existente conserva su rol. No hace falta hacer nada: se aplican al levantar el backend. Después, los roles y sus permisos se gestionan desde la opción "Roles" de la aplicación, con la cuenta de administrador de seguridad.
 
 > Si ya tenías el backend con la versión anterior (PostgreSQL 13), la base de datos empieza vacía después de actualizar: Django 5.2 requiere PostgreSQL 14 o superior y los datos anteriores no se migran.
 

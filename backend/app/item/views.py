@@ -8,20 +8,19 @@ from .filters import ItemFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import permissions
-from core.models import IsLogged, IsLabAdmin
 
 class BrandViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsLogged, IsLabAdmin]
+    required_permission = 'gestionar_inventario'
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsLogged, IsLabAdmin]
+    required_permission = 'gestionar_inventario'
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 class ItemViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsLogged, IsLabAdmin]
+    required_permission = 'gestionar_inventario'
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     filterset_class = ItemFilter
@@ -44,25 +43,22 @@ class ItemViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Catálogo público: lo consulta cualquiera, incluso sin sesión.
+
 class ListBrandsView(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [permissions.AllowAny]
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
 
 
 class ListCategoriesView(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [permissions.AllowAny]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class ListItemsView(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [permissions.AllowAny]
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     filterset_class = ItemFilter
-
-
-
-
-
-
-
-

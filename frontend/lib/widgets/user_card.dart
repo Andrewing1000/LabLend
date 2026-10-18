@@ -52,7 +52,7 @@ class UserCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  user.role.name,
+                  user.roles.isEmpty ? 'Sin roles' : user.roles.join(', '),
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,

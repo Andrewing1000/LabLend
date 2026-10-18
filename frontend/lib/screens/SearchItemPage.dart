@@ -1,10 +1,10 @@
+import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/screens/create_item_screen.dart';
 import 'package:frontend/screens/edit_item_screen.dart';
 import 'package:frontend/widgets/card.dart';
-import '../models/User.dart';
 import '../models/Item.dart';
 import '../services/SelectedItemContext.dart';
 
@@ -101,7 +101,7 @@ class SearchItemPage extends BrowsablePage {
                         ),
                       ],
                     ),
-                    if(sessionManager.session.user.role == Role.adminRole)
+                    if(sessionManager.session.user.can(AppPermission.gestionarInventario))
                       Align(
                         alignment: const Alignment(1, 1),
                         child: Container(

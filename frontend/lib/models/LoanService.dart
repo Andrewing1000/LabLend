@@ -143,11 +143,6 @@ class LoanService {
     }
   }
 
-  bool isAdmin() {
-    final session = SessionManager().session;
-    return session.isAdmin();
-  }
-
   Future<bool> isReady() async {
     var session = SessionManager().session;
     return await session.isReady();

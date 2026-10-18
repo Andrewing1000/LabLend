@@ -1,7 +1,7 @@
+import 'package:frontend/models/Permissions.dart';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
-import 'package:frontend/models/User.dart';
 import 'package:frontend/widgets/icon_button.dart';
 import 'package:provider/provider.dart';
 import '../models/Item.dart';
@@ -137,7 +137,7 @@ class CustomCardState extends State<CustomCard> {
 
 
                                 if(widget.onEdit != null
-                                    && SessionManager().session.user is AdminUser)
+                                    && SessionManager().session.user.can(AppPermission.gestionarInventario))
                                   Flexible(
                                     flex: 2,
                                     fit: FlexFit.tight,
@@ -155,7 +155,7 @@ class CustomCardState extends State<CustomCard> {
                                 ),
 
                                 if(widget.onDelete != null
-                                    && SessionManager().session.user is AdminUser)
+                                    && SessionManager().session.user.can(AppPermission.gestionarInventario))
                                   Flexible(
                                       flex: 2,
                                       fit: FlexFit.tight,
