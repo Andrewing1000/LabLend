@@ -38,14 +38,15 @@ Una contraseña es válida solo si cumple **todas** estas reglas:
 | Situación | Endpoint o comando | Resultado si la contraseña no cumple |
 | --- | --- | --- |
 | Activar una cuenta nueva con su enlace de activación (D26) | `/user/password-link/` | 400 con las reglas incumplidas; el enlace sigue sirviendo hasta que se use o venza |
-| Cambiar la contraseña propia | `/user/me/`, con la contraseña actual en `current_password` (D14) | 400 con las reglas incumplidas; se mantiene la contraseña anterior. Si falta la contraseña actual o es incorrecta, 400 en `current_password`, antes de revisar la política |
+| Cambiar la contraseña propia, con el botón de llave de la barra superior | `/user/me/`, con la contraseña actual en `current_password` (D14) | 400 con las reglas incumplidas; se mantiene la contraseña anterior. Si falta la contraseña actual o es incorrecta, 400 en `current_password`, antes de revisar la política |
+| Renovar una contraseña vencida (D21) | `/user/me/`, igual que el cambio propio: pide la actual y una nueva | Igual que el cambio propio; mientras no la cambie, el servidor rechaza cualquier otra acción |
 | Elegir una contraseña nueva con un enlace de restablecimiento (D24) | `/user/password-link/` | 400 con las reglas incumplidas; el enlace sigue sirviendo hasta que se use o venza |
 | Crear la cuenta inicial | `python manage.py create_initial_admin` | La contraseña la genera el sistema al azar (24 caracteres) y siempre cumple la política |
 | Recuperar la contraseña del administrador desde el servidor | `python manage.py changepassword` | El comando rechaza la contraseña y la vuelve a pedir |
 
 El administrador de seguridad no escribe la contraseña de ninguna cuenta: al crear una cuenta (`/user/create/`, `/user/create/admin/`) y al editarla (`/user/manage/`) el servidor responde 400 si la petición trae una contraseña. Una cuenta nueva recibe un enlace de activación y una existente, uno de restablecimiento (sección 5).
 
-El historial se aplica en todos los cambios de esta tabla, también con un enlace. Los cambios que se agreguen con el módulo 5 (vencimiento) deben validar la contraseña con la cuenta (`validate_password(contraseña, user=cuenta)`) para que el historial los cubra.
+El historial se aplica en todos los cambios de esta tabla, también con un enlace. Un camino nuevo para elegir contraseñas debe validarla con la cuenta (`validate_password(contraseña, user=cuenta)`) para que el historial lo cubra.
 
 La respuesta 400 indica las reglas incumplidas en el campo `password`. Si la contraseña tiene menos de 12 caracteres, solo se informa la longitud. Con 12 o más, se informan todas las demás reglas incumplidas a la vez, para que el usuario pueda corregirlas en un solo intento.
 
@@ -77,6 +78,7 @@ Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por e
 | La sesión expira a los 15 minutos | Implementado |
 | Mensaje genérico que no revela si la cuenta existe (D12) | Implementado |
 | La cuenta se bloquea al tercer inicio de sesión fallido seguido; un inicio exitoso reinicia el conteo. Bloqueada, no entra ni con la contraseña correcta y recibe la misma respuesta genérica, que no revela el bloqueo. Se desbloquea al elegir una contraseña nueva con un enlace de restablecimiento (sección 5) o, si es de administrador de seguridad, con `changepassword` en el servidor (D23) | Implementado |
+| La contraseña vence a los 90 días de elegida (`PASSWORD_MAX_AGE_DAYS`), también si se eligió con un enlace. Con la contraseña vencida se puede iniciar sesión, pero el servidor responde 403 (`password_expired`) a todo salvo el cambio de contraseña en `/user/me/`, el cierre de sesión y la verificación de estado, hasta que el usuario la cambie. La aplicación muestra "Su contraseña venció" y no deja hacer otra cosa (D21) | Implementado |
 | Cambiar la contraseña propia exige la contraseña actual, con un límite de 3 intentos por minuto por usuario (respuesta 429); un intento con la contraseña actual incorrecta queda en la bitácora de seguridad. El correo de una cuenta no se puede cambiar. Así una sesión robada no basta para tomar la cuenta, ni para adivinar la contraseña fuera del límite del login (D14) | Implementado |
 
 ## 5. Cuentas nuevas y contraseñas olvidadas: enlaces de activación y de restablecimiento (D26, D24)
@@ -101,15 +103,7 @@ La cuenta guarda cuándo eligió su contraseña (`password_changed_at`): vacío 
 
 La creación de la cuenta, cada enlace generado, la activación y la contraseña restablecida quedan en la bitácora de seguridad, sin el enlace. El enlace usa la dirección de la aplicación web definida en `FRONTEND_URL` (ver README). El botón "Recuperar contraseña" de la pantalla de inicio de sesión explica que se debe pedir el enlace al administrador de seguridad.
 
-## 6. Pendiente (módulo 5, gestión de contraseñas)
-
-Cada situación que falta tiene su propio camino:
-
-| Situación | Quién la resuelve | Cómo |
-| --- | --- | --- |
-| Contraseña vencida, a los 90 días (D21) | El propio usuario | Inicia sesión con la contraseña vencida y debe cambiarla, ingresando la actual y una nueva, antes de cualquier otra acción |
-
-Además:
+## 6. Pendiente
 
 - Ampliar la lista de caracteres especiales.
 
@@ -128,3 +122,5 @@ Las pruebas de `backend/app/user/tests/test_reset_link.py` comprueban que solo e
 Las pruebas de `backend/app/user/tests/test_activation_link.py` comprueban que una cuenta nueva nace sin contraseña y no puede iniciar sesión, que la respuesta de creación trae el enlace de activación una sola vez (sin caché) y la base de datos guarda solo su hash, que la creación y el enlace quedan en la bitácora, que con el enlace la persona elige su contraseña e inicia sesión, que si el enlace vence el administrador genera otro de activación, y que una cuenta ya activada recibe uno de restablecimiento. `test_password_policy.py` comprueba que la creación rechaza cualquier contraseña.
 
 Las pruebas de `backend/app/user/tests/test_lockout.py` comprueban que dos fallos no bloquean y el tercero sí, que bloqueada la cuenta rechaza la contraseña correcta con la misma respuesta que un código inexistente, que un inicio exitoso reinicia el conteo, que el bloqueo queda una sola vez en la bitácora, que un enlace de restablecimiento la desbloquea, que `changepassword` desbloquea a un administrador de seguridad y que el administrador ve el bloqueo.
+
+Las pruebas de `backend/app/user/tests/test_password_expiry.py` comprueban que la contraseña vence después de 90 días y no antes, que una cuenta pendiente de activación no vence, que con la contraseña vencida el inicio de sesión lo informa y queda en la bitácora, que el servidor rechaza las demás peticiones pero permite ver el perfil, verificar la conexión y cerrar la sesión, que el perfil solo acepta el cambio de contraseña, que el cambio pide la actual y respeta el historial, que después del cambio la misma sesión vuelve a usar la API, y que una contraseña elegida con un enlace reinicia los 90 días.

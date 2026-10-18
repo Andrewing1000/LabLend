@@ -15,9 +15,10 @@ from core.models import (Session, SecurityEvent, getAdminRole, getAssistantRole,
                          LAB_ADMIN, LAB_ASSIST, SEC_ADMIN, roleName,
                          username_part)
 
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, PermissionDenied
 
 from core.audit import record_event
+from core.middleware import PASSWORD_EXPIRED_MESSAGE
 
 
 
@@ -50,13 +51,14 @@ class UserSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField()
     activation_pending = serializers.BooleanField(read_only=True)
     is_locked = serializers.BooleanField(read_only=True)
+    password_expired = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'password', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
                   'is_active', 'role_field', 'activation_pending',
-                  'is_locked']
+                  'is_locked', 'password_expired']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
             'email': {'required':False},
@@ -133,6 +135,11 @@ class ProfileSerializer(UserSerializer):
         # La contraseña actual se verifica antes que la política: si no,
         # el historial (D22) respondería si una contraseña probada es la
         # actual, sin conocerla.
+        # Contraseña vencida (D21): el perfil solo acepta cambiarla.
+        if self.instance.password_expired and (
+                'password' not in data
+                or set(data) - {'password', 'current_password'}):
+            raise PermissionDenied(PASSWORD_EXPIRED_MESSAGE)
         if 'password' in data:
             self.check_current_password(data.get('current_password'))
         return super().to_internal_value(data)
@@ -162,7 +169,7 @@ class ManageUserSerializer(UserSerializer):
         fields = ['username', 'email', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
                   'is_active', 'role_field', 'activation_pending',
-                  'is_locked']
+                  'is_locked', 'password_expired']
         extra_kwargs = {'role_field': {'read_only': False},}
 
     def to_internal_value(self, data):

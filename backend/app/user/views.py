@@ -14,7 +14,7 @@ from core.models import (IsSecurityAdmin, IsLogged, PasswordLink,
                          getAdminRole, getAssistantRole, isSecurityAdmin,
                          roleName)
 from core.audit import record_event, safe_attempted_username
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
 from core.passwords import (create_password_link, find_valid_link, is_locked,
@@ -241,6 +241,11 @@ class CreateTokenView(ObtainAuthToken):
         login(request, user)
         logIn(request.user)
         record_event(SecurityEvent.LOGIN, request, actor=user)
+        # Con la contraseña vencida (D21) la sesión se abre, pero el
+        # servidor solo acepta cambiarla o cerrar la sesión.
+        if user.password_expired:
+            record_event(SecurityEvent.PASSWORD_EXPIRED, request, actor=user,
+                         target=user)
         response_serializer  = UserSerializer(instance = user)
         #response_serializer.is_valid(raise_exception=True)
         return Response(data = response_serializer.data, status=status.HTTP_200_OK)
@@ -310,6 +315,10 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             record_event(SecurityEvent.PROFILE_UPDATED, self.request,
                          target=serializer.instance, cambios=changes)
         if password_changed:
+            # Mantiene abierta esta sesión: Django guarda en la sesión un
+            # hash de la contraseña y cerraría también la actual. Las demás
+            # sesiones de la cuenta sí se cierran.
+            update_session_auth_hash(self.request, serializer.instance)
             record_event(SecurityEvent.OWN_PASSWORD_CHANGED, self.request,
                          target=serializer.instance)
 

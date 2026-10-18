@@ -3,6 +3,7 @@ import "dart:ui";
 
 import "package:flutter/material.dart";
 import "package:frontend/screens/PageBase.dart";
+import "package:frontend/screens/ChangePasswordPage.dart";
 import "package:frontend/screens/PasswordLinkPage.dart";
 import "package:frontend/screens/PasswordReset.dart";
 import "package:frontend/screens/category_brand_screen.dart";
@@ -55,6 +56,7 @@ class MainFrameState extends State<MainFrame> {
 
   bool onLogin = false;
   bool onPasswordReset = false;
+  bool onChangePassword = false;
 
   /// Token de un enlace de restablecimiento (D24): la aplicación web se abre
   /// con ?enlace=<token> y muestra la página para elegir la contraseña.
@@ -99,6 +101,9 @@ class MainFrameState extends State<MainFrame> {
       onLogout: () async {
         await SessionManager().logOut();
         pageManager.clear();
+      },
+      onChangePassword: (){
+        setState(() {onChangePassword = true;});
       },
       onCartLookup: (){
         showModalBottomSheet(
@@ -382,6 +387,36 @@ class MainFrameState extends State<MainFrame> {
                   linkToken = null;
                   onLogin = true;
                 });
+              },
+            ),
+            // Cambio de la contraseña propia: obligatorio si venció (D21),
+            // voluntario desde la barra superior.
+            Consumer<SessionManager>(
+              builder: (context, sessionManager, child) {
+                final user = sessionManager.session.user;
+                final forced = user is! VisitorUser && user.passwordExpired;
+                if (!forced && !onChangePassword) return const SizedBox.shrink();
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                        child: Container(color: Colors.black.withOpacity(0.2)),
+                      ),
+                    ),
+                    ChangePasswordScreen(
+                      forced: forced,
+                      onDone: () {
+                        setState(() {onChangePassword = false;});
+                      },
+                      onLogout: () async {
+                        setState(() {onChangePassword = false;});
+                        await SessionManager().logOut();
+                        pageManager.clear();
+                      },
+                    ),
+                  ],
+                );
               },
             ),
 

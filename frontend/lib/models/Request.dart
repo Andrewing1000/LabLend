@@ -42,13 +42,12 @@ class RequestHandler {
             options.headers['X-CSRFToken'] = csrfToken;
           }
         } else {
-          _loadCsrfToken();
-          if (_csrfToken.isNotEmpty) {
-            options.headers['X-CSRFToken'] = _csrfToken;
-          } else {
-            String? csrfToken = _cookieCsrfHandler.readCookie('csrftoken');
-            options.headers['X-CSRFToken'] = csrfToken;
-          }
+          // Se lee la cookie en cada petición: Django renueva el token CSRF
+          // al iniciar sesión, y una copia guardada antes quedaría vieja
+          // para la primera escritura (por ejemplo, el cambio obligatorio
+          // de una contraseña vencida, D21).
+          options.headers['X-CSRFToken'] =
+              _cookieCsrfHandler.readCookie('csrftoken') ?? '';
         }
         handler.next(options);
       },

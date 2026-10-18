@@ -2,6 +2,7 @@
 Database models
 """
 import unicodedata
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
@@ -290,6 +291,15 @@ class User(AbstractBaseUser, RolePermissionsMixin):
         self.locked_at = None
 
     @property
+    def password_expired(self):
+        """The password was chosen more than PASSWORD_MAX_AGE_DAYS ago
+        (D21). An account pending activation has no password to expire."""
+        if self.password_changed_at is None:
+            return False
+        max_age = timedelta(days=settings.PASSWORD_MAX_AGE_DAYS)
+        return timezone.now() - self.password_changed_at > max_age
+
+    @property
     def is_locked(self):
         """Locked after too many failed logins in a row (D23)."""
         return self.locked_at is not None
@@ -344,6 +354,7 @@ class SecurityEvent(models.Model):
     CURRENT_PASSWORD_FAILED = 'contrasena_actual_incorrecta'
     RESET_LINK_CREATED = 'enlace_restablecimiento_generado'
     PASSWORD_RESET = 'contrasena_restablecida'
+    PASSWORD_EXPIRED = 'contrasena_vencida'
     ACTIVATION_LINK_CREATED = 'enlace_activacion_generado'
     ACCOUNT_ACTIVATED = 'cuenta_activada'
     ACCOUNT_LOCKED = 'cuenta_bloqueada'
@@ -363,6 +374,7 @@ class SecurityEvent(models.Model):
          'Contraseña actual incorrecta al cambiar la contraseña'),
         (RESET_LINK_CREATED, 'Enlace de restablecimiento generado'),
         (PASSWORD_RESET, 'Contraseña restablecida con un enlace'),
+        (PASSWORD_EXPIRED, 'Inicio de sesión con la contraseña vencida'),
         (ACTIVATION_LINK_CREATED, 'Enlace de activación generado'),
         (ACCOUNT_ACTIVATED, 'Cuenta activada con un enlace'),
         (ACCOUNT_LOCKED, 'Cuenta bloqueada por intentos fallidos'),

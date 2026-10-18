@@ -31,6 +31,8 @@ abstract class User extends ChangeNotifier{
   bool activationPending = false;
   /// La cuenta se bloqueó por intentos fallidos (D23).
   bool isLocked = false;
+  /// La contraseña venció (D21): debe cambiarla antes de seguir.
+  bool passwordExpired = false;
 
   User({
         int? id,
@@ -86,6 +88,7 @@ abstract class User extends ChangeNotifier{
 
     user.activationPending = userData['activation_pending'] ?? false;
     user.isLocked = userData['is_locked'] ?? false;
+    user.passwordExpired = userData['password_expired'] ?? false;
     return user;
   }
 
@@ -102,6 +105,7 @@ abstract class User extends ChangeNotifier{
       'is_active' : isActive,
       'activation_pending' : activationPending,
       'is_locked' : isLocked,
+      'password_expired' : passwordExpired,
     };
   }
 
@@ -141,6 +145,7 @@ abstract class User extends ChangeNotifier{
     role = newUser.role;
     activationPending = newUser.activationPending;
     isLocked = newUser.isLocked;
+    passwordExpired = newUser.passwordExpired;
     notifyListeners();
   }
 }

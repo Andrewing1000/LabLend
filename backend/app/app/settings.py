@@ -80,6 +80,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Contraseña vencida (D21): después de identificar al usuario.
+    'core.middleware.PasswordExpiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -296,6 +298,9 @@ PASSWORD_LINK_HOURS = 24
 
 # La cuenta se bloquea al tercer inicio de sesión fallido seguido (D23).
 LOGIN_MAX_FAILED_ATTEMPTS = 3
+
+# Las contraseñas vencen a los 90 días de elegidas (D21).
+PASSWORD_MAX_AGE_DAYS = 90
 
 CORS_ALLOW_HEADERS = [
     'authorization',

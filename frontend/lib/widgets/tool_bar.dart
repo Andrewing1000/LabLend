@@ -16,12 +16,15 @@ class ToolBar extends StatefulWidget{
   Function onLogin;
   Function onLogout;
   Function onCartLookup;
+  /// Abre el cambio de la contraseña propia (D14, D21).
+  Function? onChangePassword;
   ToolBar({
     super.key,
     required this.manager,
     required this.onLogin,
     required this.onLogout,
     required this.onCartLookup,
+    this.onChangePassword,
   });
 
   @override
@@ -142,6 +145,19 @@ class ToolBarState extends State<ToolBar>{
                               // ),
 
                               Container(width: 10,),
+                              if(sessionManager.session.user is! VisitorUser &&
+                                  widget.onChangePassword != null) ...[
+                                CircularButton.animated(
+                                  normalIcon: Icons.key_outlined,
+                                  selectedIcon: Icons.key,
+                                  size: 25,
+                                  isSelected: true,
+                                  onPressed: () {
+                                    widget.onChangePassword!();
+                                  },
+                                ),
+                                Container(width: 10,),
+                              ],
                               CircularButton.animated(
                                 normalIcon: sessionManager.session.user is VisitorUser?
                                   Icons.person:

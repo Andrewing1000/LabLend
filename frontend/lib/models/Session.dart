@@ -221,6 +221,28 @@ class SessionManager with ChangeNotifier {
   }
 
 
+  /// Cambia la contraseña propia, confirmando la actual (D14). Si estaba
+  /// vencida (D21), la aplicación vuelve a quedar disponible. El servidor
+  /// mantiene abierta esta sesión.
+  Future<bool> changeOwnPassword(
+      String currentPassword, String newPassword) async {
+    try {
+      await httpHandler.patchRequest('/user/me/', body: {
+        'current_password': currentPassword,
+        'password': newPassword,
+      });
+    } on DioException catch (e) {
+      errorNotification(
+          error: 'No se pudo cambiar la contraseña',
+          details: e.response?.data);
+      return false;
+    }
+    _session.user.passwordExpired = false;
+    notification(notification: 'Contraseña cambiada');
+    notifyListeners();
+    return true;
+  }
+
   Future<Session> logOut() async{
     if(!(await connectionCheck())){
       return AnonymousSession();

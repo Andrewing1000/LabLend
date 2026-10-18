@@ -8,6 +8,8 @@ class PageContainer extends StatefulWidget{
   Function onLogin;
   Function onLogout;
   Function onCartLookup;
+  /// Abre el cambio de la contraseña propia (D14, D21).
+  Function? onChangePassword;
 
   PageContainer({
     super.key,
@@ -15,6 +17,7 @@ class PageContainer extends StatefulWidget{
     required this.onLogin,
     required this.onLogout,
     required this.onCartLookup,
+    this.onChangePassword,
   });
 
 
@@ -41,6 +44,7 @@ class PageContainerState extends State<PageContainer>{
                   onLogin: widget.onLogin,
                   onLogout: widget.onLogout,
                   onCartLookup: widget.onCartLookup,
+                  onChangePassword: widget.onChangePassword,
               ),
 
                   Expanded(child: manager.currentPage),
