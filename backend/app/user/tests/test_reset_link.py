@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import PasswordLink, SecurityEvent, logIn
-from core.passwords import create_reset_link, hash_token
+from core.passwords import create_password_link, hash_token
 
 RESET_LINK_URL = reverse('user:reset-link')
 CHECK_URL = reverse('user:password-link-check')
@@ -164,7 +164,7 @@ class PasswordLinkUseTests(TestCase):
         self.user = Users.create_lab_assistant(
             email='ast@example.com', password=PASSWORD,
             nombres='Ana', apellido_paterno='Quispe')
-        self.link, self.token = create_reset_link(
+        self.link, self.token = create_password_link(
             self.user, created_by=self.security_admin)
         self.client = APIClient()
 

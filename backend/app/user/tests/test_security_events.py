@@ -114,7 +114,7 @@ class EventRecordingTests(TestCase):
     def test_account_creation_recorded(self):
         """Test creating an account records who created it and the role."""
         client_for(self.security_admin).post(CREATE_URL, {
-            'email': 'nuevo@example.com', 'password': PASSWORD,
+            'email': 'nuevo@example.com',
             'nombres': 'Luis', 'apellido_paterno': 'Peña'})
 
         event = last_event(SecurityEvent.ACCOUNT_CREATED)

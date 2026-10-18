@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/widgets/boton_agregar.dart';
 import 'package:frontend/widgets/string_field.dart';
-import 'package:frontend/widgets/password_creation_field.dart';
 import '../models/User.dart';
 
 class UserForm extends StatefulWidget {
   final User? user;
-  /// email, nombres, apellido paterno, apellido materno, contraseña, rol, activo
-  final Function(String, String, String, String, String, Role, bool)
+  /// email, nombres, apellido paterno, apellido materno, rol, activo
+  final Function(String, String, String, String, Role, bool)
       onFormSubmit;
 
   const UserForm({
@@ -27,7 +26,6 @@ class _UserFormState extends State<UserForm> {
   final TextEditingController nombresController = TextEditingController();
   final TextEditingController apellidoPaternoController = TextEditingController();
   final TextEditingController apellidoMaternoController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
   List<Role> roles = [Role.adminRole, Role.assistantRole];
   Role selectedRole = Role.assistantRole;
   bool isActive = true;
@@ -67,7 +65,6 @@ class _UserFormState extends State<UserForm> {
     nombresController.dispose();
     apellidoPaternoController.dispose();
     apellidoMaternoController.dispose();
-    passwordController.dispose();
     super.dispose();
   }
 
@@ -128,16 +125,9 @@ class _UserFormState extends State<UserForm> {
           width: fieldWidth,
         ),
         const SizedBox(height: 20),
-        // Al editar no se escribe la contraseña (D14): se genera un enlace
-        // de restablecimiento desde la pantalla de edición (D24).
-        if (!updateMode) ...[
-          PasswordCreationField(
-            controller: passwordController,
-            hintText: 'Contraseña',
-            width: MediaQuery.of(context).size.width * 0.8,
-          ),
-          const SizedBox(height: 20),
-        ],
+        // El administrador nunca escribe contraseñas: la cuenta nueva recibe
+        // un enlace de activación (D26) y una existente, uno de
+        // restablecimiento desde la pantalla de edición (D14, D24).
         DropdownButton<Role>(
           value: selectedRole,
           dropdownColor: Colors.grey[900],
@@ -193,7 +183,6 @@ class _UserFormState extends State<UserForm> {
               nombresController.text,
               apellidoPaternoController.text,
               apellidoMaternoController.text,
-              passwordController.text,
               selectedRole,
               isActive,
             );

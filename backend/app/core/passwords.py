@@ -67,24 +67,30 @@ def link_url(token):
 
 
 @transaction.atomic
-def create_reset_link(user, created_by):
-    """Create a reset link for user and return (link, token).
+def create_password_link(user, created_by):
+    """Create a password link for user and return (link, token).
 
-    The current password stops working at once, in case the account was
-    compromised; that also closes its open sessions, because Django
-    checks a hash of the password on every request. Earlier links that
-    were not used stop working too. The token is returned only here: the
-    database keeps its hash.
+    An account that has never had a password gets an activation link
+    (D26). Any other account gets a reset link (D24): its current
+    password stops working at once, in case the account was compromised;
+    that also closes its open sessions, because Django checks a hash of
+    the password on every request. Earlier links that were not used stop
+    working too. The token is returned only here: the database keeps its
+    hash.
     """
-    user.set_unusable_password()
-    user.save(update_fields=['password'])
-    logOut(user)
+    if user.activation_pending:
+        purpose = PasswordLink.ACTIVATION
+    else:
+        purpose = PasswordLink.RESET
+        user.set_unusable_password()
+        user.save(update_fields=['password'])
+        logOut(user)
 
     PasswordLink.objects.filter(user=user, used_at__isnull=True).delete()
     token = secrets.token_urlsafe(32)
     link = PasswordLink.objects.create(
         user=user,
-        purpose=PasswordLink.RESET,
+        purpose=purpose,
         token_hash=hash_token(token),
         created_by=created_by,
         expires_at=timezone.now() + timedelta(
@@ -108,7 +114,7 @@ def find_valid_link(token):
 def use_link(token, password):
     """Set password with the link of token and close the link.
 
-    Returns the user, or None if the link is not valid. Raises
+    Returns the used link, or None if it is not valid. Raises
     ValidationError if the password does not satisfy the policy,
     history included; the link then stays usable.
     """
@@ -126,4 +132,4 @@ def use_link(token, password):
     user.save()
     link.used_at = timezone.now()
     link.save(update_fields=['used_at'])
-    return user
+    return link

@@ -55,7 +55,7 @@ class SecurityAdminRoleTests(TestCase):
     def test_security_admin_manages_accounts(self):
         """Test the security admin can use every account endpoint."""
         client = client_for(self.security_admin)
-        payload = {'email': 'nuevo@example.com', 'password': PASSWORD,
+        payload = {'email': 'nuevo@example.com',
                    'nombres': 'Luis', 'apellido_paterno': 'Peña'}
 
         self.assertEqual(client.get(LIST_URL).status_code, status.HTTP_200_OK)
@@ -69,7 +69,7 @@ class SecurityAdminRoleTests(TestCase):
     def test_lab_admin_cannot_manage_accounts(self):
         """Test the lab admin no longer reaches the account endpoints."""
         client = client_for(self.lab_admin)
-        payload = {'email': 'nuevo@example.com', 'password': PASSWORD,
+        payload = {'email': 'nuevo@example.com',
                    'nombres': 'Luis', 'apellido_paterno': 'Peña'}
 
         requests = {

@@ -60,7 +60,6 @@ class PublicAdminAPITests(TestCase):
         """Test creating user is succesful"""
         payload = {
             'email' : 'test@example.com',
-            'password' : 'Testpass123#Testpass123#',
             'nombres' : 'Juan Carlos',
             'apellido_paterno' : 'Pérez',
             'apellido_materno' : 'Gutiérrez',
@@ -72,7 +71,9 @@ class PublicAdminAPITests(TestCase):
 
         user = get_user_model().objects.get(email = payload['email'])
 
-        self.assertTrue(user.check_password(payload['password']))
+        # La cuenta nace sin contraseña, esperando su activación (D26).
+        self.assertFalse(user.has_usable_password())
+        self.assertTrue(res.data['activation_pending'])
         self.assertNotIn('password', res.data)
         self.assertEqual(res.data['username'], 'usr.jperez')
         self.assertEqual(res.data['name'], 'Juan Carlos Pérez Gutiérrez')
@@ -81,7 +82,6 @@ class PublicAdminAPITests(TestCase):
         """Test lab admins created from the app use the usr. prefix."""
         payload = {
             'email' : 'maria@example.com',
-            'password' : 'Testpass123#Testpass123#',
             'nombres' : 'María',
             'apellido_paterno' : 'Quispe',
         }
@@ -96,7 +96,6 @@ class PublicAdminAPITests(TestCase):
         """Test the User ID cannot be chosen by the client."""
         payload = {
             'email' : 'test@example.com',
-            'password' : 'Testpass123#Testpass123#',
             'nombres' : 'Ana',
             'apellido_paterno' : 'López',
             'username' : 'adm.root',
@@ -111,7 +110,6 @@ class PublicAdminAPITests(TestCase):
         """Test the User ID needs letters in nombres and apellido paterno."""
         payload = {
             'email' : 'test@example.com',
-            'password' : 'Testpass123#Testpass123#',
             'nombres' : 'Ana',
             'apellido_paterno' : '123',
         }
@@ -131,6 +129,7 @@ class PublicAdminAPITests(TestCase):
         }
 
         create_user(**payload)
+        del payload['password']
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -349,6 +348,7 @@ class PrivateUserAPITests(TestCase):
                 'name' : 'Test Name',
                 'is_active' : True,
                 'role_field' : LAB_ADMIN,
+                'activation_pending' : False,
             }
         )
 

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/PasswordLink.dart';
 import 'package:frontend/models/Session.dart';
 
 import '../widgets/password_creation_field.dart';
 import '../widgets/password_field.dart';
 
-/// Página que abre un enlace de restablecimiento (D24): muestra el código
-/// de usuario de la cuenta y deja elegir una contraseña nueva. No requiere
-/// sesión: quien tiene el enlace todavía no puede iniciar sesión.
+/// Página que abre un enlace de activación (D26) o de restablecimiento
+/// (D24): muestra el código de usuario de la cuenta y deja elegir la
+/// contraseña. No requiere sesión: quien tiene el enlace todavía no puede
+/// iniciar sesión.
 class PasswordLinkScreen extends StatefulWidget {
   final String token;
   final Function() onDone;
@@ -23,7 +25,7 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
   final TextEditingController confirmController = TextEditingController();
   bool loading = true;
   bool saving = false;
-  String? username;
+  PasswordLink? link;
 
   @override
   void initState() {
@@ -43,7 +45,7 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
         await SessionManager.userManager.checkPasswordLink(widget.token);
     if (!mounted) return;
     setState(() {
-      username = result;
+      link = result;
       loading = false;
     });
   }
@@ -64,10 +66,14 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
     setState(() => saving = false);
     if (saved) {
       SessionManager().notification(
-          notification: 'Contraseña guardada. Ya puede iniciar sesión.');
+          notification: isActivation
+              ? 'Cuenta activada. Ya puede iniciar sesión.'
+              : 'Contraseña guardada. Ya puede iniciar sesión.');
       widget.onDone();
     }
   }
+
+  bool get isActivation => link?.isActivation ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -82,14 +88,14 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Elegir una contraseña nueva',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              isActivation ? 'Activar su cuenta' : 'Elegir una contraseña nueva',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             if (loading)
               const CircularProgressIndicator()
-            else if (username == null) ...[
+            else if (link == null) ...[
               const Text(
                 'El enlace no es válido o venció. Pida uno nuevo al '
                 'administrador de seguridad.',
@@ -101,7 +107,7 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
                 child: const Text('Ir al inicio de sesión'),
               ),
             ] else ...[
-              Text('Código de usuario: $username'),
+              Text('Código de usuario: ${link!.username}'),
               const SizedBox(height: 20),
               PasswordCreationField(
                 controller: passwordController,

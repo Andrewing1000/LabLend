@@ -1,3 +1,4 @@
+import 'PasswordLink.dart';
 import 'SecurityEvent.dart';
 import 'Session.dart';
 import 'User.dart';
@@ -82,7 +83,9 @@ class UserManager {
     }
   }
 
-  Future<User?> createUser(User user, String password) async {
+  /// Crea la cuenta sin contraseña (D26) y devuelve su enlace de
+  /// activación, que el servidor muestra una sola vez, o null.
+  Future<PasswordLink?> createUser(User user) async {
     if (!await isReady()) {
       return null;
     }
@@ -93,33 +96,22 @@ class UserManager {
       return null;
     }
 
-    if (password.isEmpty) {
-      manager.errorNotification(error: 'La contraseña no puede estar vacía');
+    String path;
+    if (user.role == Role.adminRole) {
+      path = '/user/create/admin/';
+    } else if (user.role == Role.assistantRole) {
+      path = '/user/create/';
+    } else {
+      manager.errorNotification(error: 'Ingrese un rol válido');
       return null;
     }
 
-    Map<String, dynamic> userData = user.toJson();
-    userData['password'] = password;
-
     try {
-      if (user.role == Role.adminRole) {
-        var response = await requestHandler.postRequest('/user/create/admin/',
-            body: userData);
-        manager.notification(notification:
-            'Administrador creado. Código de usuario: ${response.data['username']}');
-        user.updateData(newUser: User.fromJson(response.data));
-        return User.fromJson(response.data);
-      } else if (user.role == Role.assistantRole) {
-        var response =
-            await requestHandler.postRequest('/user/create/', body: userData);
-        manager.notification(notification:
-            'Asistente creado. Código de usuario: ${response.data['username']}');
-        user.updateData(newUser: User.fromJson(response.data));
-        return User.fromJson(response.data);
-      } else {
-        manager.errorNotification(error: 'Ingrese un rol válido');
-        return null;
-      }
+      var response =
+          await requestHandler.postRequest(path, body: user.toJson());
+      user.updateData(newUser: User.fromJson(response.data));
+      return PasswordLink.fromJson(
+          response.data['username'], response.data['activation_link']);
     } on DioException catch (e) {
       manager.errorNotification(
           error: 'Adición de usuario fallida', details: e.response?.data);
@@ -128,7 +120,7 @@ class UserManager {
   }
 
   /// El administrador ya no escribe contraseñas de otras cuentas (D14):
-  /// para eso genera un enlace de restablecimiento (createResetLink).
+  /// para eso genera un enlace de restablecimiento (createPasswordLink).
   Future<User?> updateUser(User user, {required User newUser}) async {
     if (!await isReady()) {
       return null;
@@ -155,9 +147,10 @@ class UserManager {
     }
   }
 
-  /// Genera un enlace de restablecimiento de contraseña (D24). Devuelve la
-  /// dirección del enlace, que el servidor muestra una sola vez, o null.
-  Future<String?> createResetLink(User user) async {
+  /// Genera un enlace para la cuenta: de activación si aún no eligió su
+  /// contraseña (D26), de restablecimiento si ya la tiene (D24). El
+  /// servidor lo muestra una sola vez. Devuelve null si falla.
+  Future<PasswordLink?> createPasswordLink(User user) async {
     if (!await isReady()) {
       return null;
     }
@@ -171,7 +164,7 @@ class UserManager {
     try {
       var response = await requestHandler.postRequest(
           '/user/manage/reset-link/', body: {'email': user.email});
-      return response.data['url'];
+      return PasswordLink.fromJson(response.data['username'], response.data);
     } on DioException catch (e) {
       manager.errorNotification(
           error: 'No se pudo generar el enlace', details: e.response?.data);
@@ -179,13 +172,17 @@ class UserManager {
     }
   }
 
-  /// Revisa un enlace de restablecimiento. Devuelve el código de usuario
-  /// de la cuenta, o null si el enlace no es válido o venció.
-  Future<String?> checkPasswordLink(String token) async {
+  /// Revisa un enlace de activación o restablecimiento. Devuelve el código
+  /// de usuario de la cuenta y el tipo de enlace (sin la dirección), o null
+  /// si el enlace no es válido o venció.
+  Future<PasswordLink?> checkPasswordLink(String token) async {
     try {
       var response = await requestHandler
           .postRequest('/user/password-link/check/', body: {'token': token});
-      return response.data['username'];
+      return PasswordLink(
+          username: response.data['username'],
+          url: '',
+          purpose: response.data['purpose']);
     } on DioException catch (e) {
       manager.errorNotification(
           error: 'Enlace no válido', details: e.response?.data);

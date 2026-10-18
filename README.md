@@ -99,7 +99,7 @@ docker compose -f backend/docker-compose.yml run --rm app_new python manage.py c
 - **Código de usuario:** es la credencial para iniciar sesión (el correo ya no sirve para entrar). El comando lo genera y lo muestra: `adm.` + inicial del primer nombre + apellido paterno, en minúsculas y sin tildes ni ñ (en el ejemplo, `adm.jperez`). Las cuentas creadas desde la aplicación reciben el prefijo `usr.` (por ejemplo `usr.mquispe`), y si el código ya existe se le agrega un número (`usr.mquispe2`). El código no cambia aunque después se edite el nombre.
 - **Contraseña:** el comando la genera al azar, cumpliendo la política de contraseñas, y la muestra **una sola vez** en la terminal. Guárdala de inmediato en el gestor de contraseñas: la base de datos solo guarda su hash, así que no hay forma de volver a verla. Nadie la conoce de antemano y no está en el código ni en git.
 - **Rol:** administrador de seguridad. Gestiona las cuentas y consulta la bitácora de sesiones, pero no el inventario ni los préstamos (D18).
-- **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador de seguridad. Las demás cuentas, administradores de laboratorio y asistentes, se crean desde la aplicación con esa cuenta. Para gestionar el inventario, crea primero un administrador de laboratorio.
+- **Solo una vez:** el comando se niega a ejecutarse si ya existe un administrador de seguridad. Las demás cuentas, administradores de laboratorio y asistentes, se crean desde la aplicación con esa cuenta, sin contraseña: la aplicación muestra un enlace de activación, que se entrega a la persona para que elija la suya (D26). Para gestionar el inventario, crea primero un administrador de laboratorio.
 
 Las demás cuentas recuperan su contraseña con un enlace de restablecimiento que el administrador de seguridad genera desde la aplicación (D24). Para las cuentas de administrador de seguridad no se generan enlaces, así que si se pierde su contraseña, cámbiala desde el servidor; el comando pide la nueva contraseña y aplica la misma política:
 
@@ -137,7 +137,7 @@ Para usar Edge, cambia `-d chrome` por `-d edge`.
 
 **Usa el puerto 58315 (o 65420).** Django solo acepta peticiones desde los orígenes listados en `CORS_ALLOWED_ORIGINS` y `CSRF_TRUSTED_ORIGINS` (`backend/app/app/settings.py`). Con otro puerto el navegador bloquea las peticiones a la API (error CORS en la consola) y la aplicación no puede cargar datos.
 
-Los enlaces de restablecimiento de contraseña que genera el administrador de seguridad (D24) abren `http://localhost:58315/?enlace=…` en desarrollo, así que para probarlos la aplicación web debe estar corriendo en el puerto 58315. Para usar otra dirección, define `FRONTEND_URL` en `backend/.env`.
+Los enlaces de activación y de restablecimiento de contraseña que genera el administrador de seguridad (D26, D24) abren `http://localhost:58315/?enlace=…` en desarrollo, así que para probarlos la aplicación web debe estar corriendo en el puerto 58315. Para usar otra dirección, define `FRONTEND_URL` en `backend/.env`.
 
 Teclas útiles mientras corre: `r` recarga el código (hot reload), `R` reinicia la aplicación y `q` la cierra.
 

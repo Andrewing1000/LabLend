@@ -4,6 +4,7 @@ import 'package:frontend/screens/PageBase.dart';
 // import 'package:frontend/models/Session.dart'; // Comentado para ver solo la vista
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/widgets/user_form.dart';
+import 'package:frontend/widgets/password_link_dialog.dart';
 
 import '../models/User.dart';
 // import 'package:frontend/models/user.dart'; // Comentado para ver solo la vista
@@ -28,8 +29,10 @@ class CreateUserScreen extends PageBase{
 class _CreateUserScreenState extends State<CreateUserScreen> {
 
 
+  /// Crea la cuenta sin contraseña y muestra una sola vez su enlace de
+  /// activación, con el que su dueño elige la contraseña (D26).
   Future<void> _createUser(String email, String nombres,
-      String apellidoPaterno, String apellidoMaterno, String password,
+      String apellidoPaterno, String apellidoMaterno,
       Role role, bool isActive) async {
     if (email.isEmpty){
       SessionManager().errorNotification(error: "Se requiere el email de usuario");
@@ -38,11 +41,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
     if (nombres.trim().isEmpty || apellidoPaterno.trim().isEmpty){
       SessionManager().errorNotification(error: "Se requieren los nombres y el apellido paterno");
-      return;
-    }
-
-    if(password.isEmpty) {
-      SessionManager().errorNotification(error: "La contraseña no puede estar vacía");
       return;
     }
 
@@ -60,8 +58,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     final pass = await SessionManager().confirmNotification(message: "Se creará el usuario ${user.name} con email \"$email\"");
 
     if(pass){
-      var res = await user.create(password: password);
-      if(res!=null){
+      final link = await user.create();
+      if(link != null && mounted){
+        await showPasswordLinkDialog(context, link);
         widget.manager?.removePage();
       }
     }

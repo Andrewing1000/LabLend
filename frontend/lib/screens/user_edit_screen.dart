@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:frontend/widgets/password_link_dialog.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/widgets/banner.dart';
 import 'package:frontend/models/User.dart';
@@ -32,7 +32,7 @@ class EditUserScreenState extends State<EditUserScreen> {
 
 
   Future<void> _updateUser(String email, String nombres,
-      String apellidoPaterno, String apellidoMaterno, String password,
+      String apellidoPaterno, String apellidoMaterno,
       Role role, bool isActive) async {
     User newUser = widget.user.clone();
     nombres = nombres.trim();
@@ -79,47 +79,21 @@ class EditUserScreenState extends State<EditUserScreen> {
     }
   }
 
-  /// Genera un enlace de restablecimiento (D24) y lo muestra una sola vez:
-  /// el servidor guarda solo su hash y no lo puede volver a mostrar.
-  Future<void> _createResetLink() async {
-    final confirmed = await SessionManager().confirmNotification(
-        message: "La contraseña actual de ${widget.user.username} dejará de "
-            "funcionar y se cerrarán sus sesiones. ¿Generar el enlace?");
+  /// Genera un enlace nuevo: de activación si la cuenta aún no eligió su
+  /// contraseña (D26), de restablecimiento si ya la tiene (D24).
+  Future<void> _createPasswordLink() async {
+    final message = widget.user.activationPending
+        ? "El enlace de activación anterior de ${widget.user.username} "
+            "dejará de funcionar. ¿Generar uno nuevo?"
+        : "La contraseña actual de ${widget.user.username} dejará de "
+            "funcionar y se cerrarán sus sesiones. ¿Generar el enlace?";
+    final confirmed =
+        await SessionManager().confirmNotification(message: message);
     if (!confirmed) return;
 
-    final url = await widget.user.createResetLink();
-    if (url == null || !mounted) return;
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Enlace de restablecimiento'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Entregue este enlace a ${widget.user.username}. Vence en '
-                '24 horas, sirve una sola vez y no se volverá a mostrar.'),
-            const SizedBox(height: 12),
-            SelectableText(url),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: url));
-              SessionManager().notification(notification: 'Enlace copiado');
-            },
-            child: const Text('Copiar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
+    final link = await widget.user.createPasswordLink();
+    if (link == null || !mounted) return;
+    await showPasswordLinkDialog(context, link);
   }
 
   @override
@@ -149,8 +123,10 @@ class EditUserScreenState extends State<EditUserScreen> {
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.link),
-                    label: const Text('Generar enlace de restablecimiento'),
-                    onPressed: _createResetLink,
+                    label: Text(widget.user.activationPending
+                        ? 'Generar enlace de activación'
+                        : 'Generar enlace de restablecimiento'),
+                    onPressed: _createPasswordLink,
                   ),
                 ),
             ],

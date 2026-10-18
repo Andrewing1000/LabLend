@@ -37,15 +37,15 @@ Una contraseña es válida solo si cumple **todas** estas reglas:
 
 | Situación | Endpoint o comando | Resultado si la contraseña no cumple |
 | --- | --- | --- |
-| Crear un asistente o un administrador | `/user/create/`, `/user/create/admin/` | 400 con las reglas incumplidas; la cuenta no se crea |
+| Activar una cuenta nueva con su enlace de activación (D26) | `/user/password-link/` | 400 con las reglas incumplidas; el enlace sigue sirviendo hasta que se use o venza |
 | Cambiar la contraseña propia | `/user/me/`, con la contraseña actual en `current_password` (D14) | 400 con las reglas incumplidas; se mantiene la contraseña anterior. Si falta la contraseña actual o es incorrecta, 400 en `current_password`, antes de revisar la política |
 | Elegir una contraseña nueva con un enlace de restablecimiento (D24) | `/user/password-link/` | 400 con las reglas incumplidas; el enlace sigue sirviendo hasta que se use o venza |
 | Crear la cuenta inicial | `python manage.py create_initial_admin` | La contraseña la genera el sistema al azar (24 caracteres) y siempre cumple la política |
 | Recuperar la contraseña del administrador desde el servidor | `python manage.py changepassword` | El comando rechaza la contraseña y la vuelve a pedir |
 
-El administrador de seguridad no escribe la contraseña de ninguna cuenta existente: `/user/manage/` responde 400 si la petición trae una contraseña, y en su lugar se genera un enlace de restablecimiento (sección 5).
+El administrador de seguridad no escribe la contraseña de ninguna cuenta: al crear una cuenta (`/user/create/`, `/user/create/admin/`) y al editarla (`/user/manage/`) el servidor responde 400 si la petición trae una contraseña. Una cuenta nueva recibe un enlace de activación y una existente, uno de restablecimiento (sección 5).
 
-El historial se aplica en todos los cambios de esta tabla, también con un enlace de restablecimiento. Los cambios que se agreguen con el módulo 5 (vencimiento y enlaces de activación) deben validar la contraseña con la cuenta (`validate_password(contraseña, user=cuenta)`) para que el historial los cubra.
+El historial se aplica en todos los cambios de esta tabla, también con un enlace. Los cambios que se agreguen con el módulo 5 (vencimiento) deben validar la contraseña con la cuenta (`validate_password(contraseña, user=cuenta)`) para que el historial los cubra.
 
 La respuesta 400 indica las reglas incumplidas en el campo `password`. Si la contraseña tiene menos de 12 caracteres, solo se informa la longitud. Con 12 o más, se informan todas las demás reglas incumplidas a la vez, para que el usuario pueda corregirlas en un solo intento.
 
@@ -78,18 +78,27 @@ Nadie puede ver la contraseña de una cuenta, tampoco los administradores. Por e
 | Mensaje genérico que no revela si la cuenta existe (D12) | Implementado |
 | Cambiar la contraseña propia exige la contraseña actual, con un límite de 3 intentos por minuto por usuario (respuesta 429); un intento con la contraseña actual incorrecta queda en la bitácora de seguridad. El correo de una cuenta no se puede cambiar. Así una sesión robada no basta para tomar la cuenta, ni para adivinar la contraseña fuera del límite del login (D14) | Implementado |
 
-## 5. Contraseña olvidada: enlaces de restablecimiento (D24)
+## 5. Cuentas nuevas y contraseñas olvidadas: enlaces de activación y de restablecimiento (D26, D24)
 
-Ninguna contraseña viaja por correo ni por otro medio, y el administrador nunca la conoce. Si una persona olvidó su contraseña, se la pide al administrador de seguridad, que genera un enlace de restablecimiento:
+Ninguna contraseña viaja por correo ni por otro medio, y el administrador nunca la conoce. La persona elige su contraseña con un enlace que genera el administrador de seguridad:
 
-1. En la aplicación, el administrador de seguridad abre la cuenta en la gestión de usuarios y pulsa **Generar enlace de restablecimiento** (`/user/manage/reset-link/`). En ese momento la contraseña actual deja de funcionar y se cierran las sesiones abiertas de la cuenta, por si estaba comprometida; un enlace anterior sin usar también deja de funcionar.
+- **Cuenta nueva (D26):** al crear la cuenta, el sistema genera automáticamente un **enlace de activación**. La cuenta queda sin contraseña, "pendiente de activación", y no puede iniciar sesión hasta que su dueño elija la contraseña con el enlace. Si el enlace vence antes, el administrador abre la cuenta y pulsa **Generar enlace de activación** para obtener otro.
+- **Contraseña olvidada (D24):** la persona se lo pide al administrador de seguridad, que abre la cuenta y pulsa **Generar enlace de restablecimiento** (`/user/manage/reset-link/`). En ese momento la contraseña actual deja de funcionar y se cierran las sesiones abiertas de la cuenta, por si estaba comprometida.
+
+El mismo botón genera uno u otro según el estado de la cuenta. Los dos enlaces funcionan igual:
+
+1. Generar un enlace anula el anterior que no se haya usado.
 2. La aplicación muestra el enlace **una sola vez**: el servidor guarda solo un hash SHA-256 del enlace, así que no puede volver a mostrarlo, y quien lea la base de datos no puede usar los enlaces pendientes. El administrador lo entrega a la persona.
-3. La persona abre el enlace en el navegador. La aplicación web muestra su código de usuario y le pide la contraseña nueva dos veces (`/user/password-link/check/` y `/user/password-link/`). La contraseña debe cumplir la política, historial incluido.
+3. La persona abre el enlace en el navegador. La aplicación web muestra "Activar su cuenta" o "Elegir una contraseña nueva", con su código de usuario, y le pide la contraseña dos veces (`/user/password-link/check/` y `/user/password-link/`). La contraseña debe cumplir la política, historial incluido.
 4. El enlace deja de funcionar al usarse, a las 24 horas o si la cuenta se desactiva. En esos casos la página dice "El enlace no es válido o venció. Pida uno nuevo al administrador de seguridad.", sin distinguir el motivo.
 
 No se generan enlaces para cuentas de administrador de seguridad (D27) ni para cuentas desactivadas. Un administrador de seguridad que olvidó su contraseña la recupera en el servidor con `python manage.py changepassword` (ver README).
 
-La generación del enlace y la contraseña restablecida quedan en la bitácora de seguridad, sin el enlace. El enlace usa la dirección de la aplicación web definida en `FRONTEND_URL` (ver README). El botón "Recuperar contraseña" de la pantalla de inicio de sesión explica que se debe pedir el enlace al administrador de seguridad.
+La cuenta inicial es la excepción: se crea antes de que exista la aplicación, así que `create_initial_admin` genera su contraseña al azar y la muestra una sola vez, para guardarla en un gestor de contraseñas (por ejemplo Bitwarden o KeePassXC).
+
+La cuenta guarda cuándo eligió su contraseña (`password_changed_at`): vacío significa "pendiente de activación", y de esa fecha se contarán los 90 días del vencimiento (D21).
+
+La creación de la cuenta, cada enlace generado, la activación y la contraseña restablecida quedan en la bitácora de seguridad, sin el enlace. El enlace usa la dirección de la aplicación web definida en `FRONTEND_URL` (ver README). El botón "Recuperar contraseña" de la pantalla de inicio de sesión explica que se debe pedir el enlace al administrador de seguridad.
 
 ## 6. Pendiente (módulo 5, gestión de contraseñas)
 
@@ -97,7 +106,6 @@ Cada situación que falta tiene su propio camino:
 
 | Situación | Quién la resuelve | Cómo |
 | --- | --- | --- |
-| Cuenta nueva (D26) | Automático | Al crear la cuenta, el sistema genera un enlace de activación de un solo uso (24 horas) y lo muestra una vez al administrador de seguridad, que lo entrega a la persona; ella elige su contraseña. La cuenta inicial es la excepción: `create_initial_admin` genera su contraseña y la muestra una vez |
 | Contraseña vencida, a los 90 días (D21) | El propio usuario | Inicia sesión con la contraseña vencida y debe cambiarla, ingresando la actual y una nueva, antes de cualquier otra acción |
 | Cuenta bloqueada al tercer intento fallido (D23) | El administrador de seguridad, a pedido | El mismo enlace de restablecimiento (sección 5) la desbloquea |
 
@@ -116,3 +124,5 @@ Las pruebas de `backend/app/user/tests/test_password_history.py` comprueban que 
 Las pruebas de `backend/app/user/tests/test_current_password.py` comprueban que la contraseña propia no cambia sin la contraseña actual o con una incorrecta, que el intento incorrecto queda registrado, que la contraseña actual se verifica antes que la política, que el nombre se cambia sin ella, que el cuarto intento en un minuto recibe 429 y que ni el usuario ni el administrador de seguridad pueden cambiar el correo.
 
 Las pruebas de `backend/app/user/tests/test_reset_link.py` comprueban que solo el administrador de seguridad genera enlaces, que no se generan para administradores de seguridad ni cuentas desactivadas, que al generarlo la contraseña anterior deja de funcionar y se cierran las sesiones, que la base de datos y la bitácora no guardan el enlace, que un enlace nuevo anula el anterior, y que el enlace muestra el código de usuario, exige la política, sirve una sola vez y deja de funcionar al vencer o si la cuenta se desactiva. `test_password_policy.py` comprueba que `/user/manage/` rechaza cualquier contraseña.
+
+Las pruebas de `backend/app/user/tests/test_activation_link.py` comprueban que una cuenta nueva nace sin contraseña y no puede iniciar sesión, que la respuesta de creación trae el enlace de activación una sola vez (sin caché) y la base de datos guarda solo su hash, que la creación y el enlace quedan en la bitácora, que con el enlace la persona elige su contraseña e inicia sesión, que si el enlace vence el administrador genera otro de activación, y que una cuenta ya activada recibe uno de restablecimiento. `test_password_policy.py` comprueba que la creación rechaza cualquier contraseña.

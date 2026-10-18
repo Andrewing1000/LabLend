@@ -48,12 +48,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     role_field = serializers.SerializerMethodField()
     name = serializers.ReadOnlyField()
+    activation_pending = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'password', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
-                  'is_active', 'role_field']
+                  'is_active', 'role_field', 'activation_pending']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
             'email': {'required':False},
@@ -156,20 +157,22 @@ class ManageUserSerializer(UserSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'password', 'nombres',
+        fields = ['username', 'email', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
-                  'is_active', 'role_field']
-        extra_kwargs = {'password':{'write_only': True, 'min_length': 12},
-                        'role_field': {'read_only': False},}
+                  'is_active', 'role_field', 'activation_pending']
+        extra_kwargs = {'role_field': {'read_only': False},}
 
     def to_internal_value(self, data):
-        # El administrador ya no escribe contraseñas de cuentas existentes
-        # (D14): genera un enlace de restablecimiento y nunca la conoce
-        # (D24). Se revisa antes que el largo mínimo del campo.
-        if self.instance is not None and 'password' in data:
+        # El administrador nunca escribe contraseñas: una cuenta nueva
+        # recibe un enlace de activación (D26) y una existente, uno de
+        # restablecimiento (D14, D24). Así nunca las conoce.
+        if 'password' in data:
             raise serializers.ValidationError({'password': [
                 'El administrador no puede escribir la contraseña de una '
-                'cuenta: genere un enlace de restablecimiento.']})
+                'cuenta: genere un enlace de restablecimiento.'
+                if self.instance is not None else
+                'Las cuentas nuevas no reciben una contraseña: su dueño la '
+                'elige con el enlace de activación.']})
         # data puede ser un QueryDict inmutable (formularios): solo leerlo.
         external_field_value = data.get('role_field', None)
         internal_value = super().to_internal_value(data)

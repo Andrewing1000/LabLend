@@ -140,17 +140,21 @@ class PasswordRulesTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('al menos 1 caracter especial', res.data['password'][0])
 
-    def test_create_user_weak_password_rejected(self):
-        """Test a long but weak password is rejected when creating a user."""
-        payload = {
-            'email': 'nuevo@example.com',
-            'password': 'laboratorio2026ucb',
-            'nombres': 'Nuevo',
-            'apellido_paterno': 'Prueba',
-        }
-        res = self.client.post(reverse('user:create'), payload)
+    def test_create_user_password_rejected(self):
+        """Test no password is accepted when creating an account, weak or
+        strong: its owner chooses it with the activation link (D26)."""
+        for password in ['laboratorio2026ucb', 'Otrapass456$Otrapass456$']:
+            with self.subTest(password=password):
+                payload = {
+                    'email': 'nuevo@example.com',
+                    'password': password,
+                    'nombres': 'Nuevo',
+                    'apellido_paterno': 'Prueba',
+                }
+                res = self.client.post(reverse('user:create'), payload)
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('password', res.data)
-        self.assertFalse(get_user_model().objects.filter(
-            email=payload['email']).exists())
+                self.assertEqual(res.status_code,
+                                 status.HTTP_400_BAD_REQUEST)
+                self.assertIn('enlace de activación', res.data['password'][0])
+                self.assertFalse(get_user_model().objects.filter(
+                    email=payload['email']).exists())

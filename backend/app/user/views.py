@@ -9,14 +9,16 @@ from rest_framework.settings import api_settings
 from rest_framework import pagination
 from rest_framework import status
 
-from core.models import (IsSecurityAdmin, IsLogged, SecurityEvent,
+from core.models import (IsSecurityAdmin, IsLogged, PasswordLink,
+                         SecurityEvent,
                          getAdminRole, getAssistantRole, isSecurityAdmin,
                          roleName)
 from core.audit import record_event, safe_attempted_username
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import AnonymousUser
 from core.models import Session, logIn, logOut
-from core.passwords import (create_reset_link, find_valid_link, link_url,
+from core.passwords import (create_password_link, find_valid_link,
+                            link_url,
                             use_link)
 from core.utils import CurrentPasswordThrottle, LogInThrottle
 
@@ -159,13 +161,22 @@ def account_changes(before, after):
 
 
 class CreateAccountMixin:
-    """Record every account creation in the security event log."""
+    """Create an account without a password and return its activation
+    link once (D26). Every creation is in the security event log."""
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
         record_event(SecurityEvent.ACCOUNT_CREATED, self.request,
                      target=serializer.instance,
                      rol=roleName(serializer.instance))
+        self.activation_link = issue_password_link(self.request,
+                                                   serializer.instance)
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.data['activation_link'] = self.activation_link
+        response['Cache-Control'] = 'no-store'
+        return response
 
 
 class SecurityEventPagination(pagination.LimitOffsetPagination):
@@ -351,11 +362,36 @@ LINK_INVALID_MESSAGE = ('El enlace no es válido o venció. Pida uno nuevo al '
                         'administrador de seguridad.')
 
 
-class ResetLinkView(views.APIView):
-    """Generate a password reset link for an account (D24).
+LINK_CREATED_EVENTS = {
+    PasswordLink.RESET: SecurityEvent.RESET_LINK_CREATED,
+    PasswordLink.ACTIVATION: SecurityEvent.ACTIVATION_LINK_CREATED,
+}
+LINK_USED_EVENTS = {
+    PasswordLink.RESET: SecurityEvent.PASSWORD_RESET,
+    PasswordLink.ACTIVATION: SecurityEvent.ACCOUNT_ACTIVATED,
+}
 
-    Only the security admin. The link is in the response only once: the
-    server keeps a hash of it, so it cannot be shown again.
+
+def issue_password_link(request, user):
+    """Create a password link for user, record it and return the data the
+    security admin sees once: the link itself is never stored."""
+    link, token = create_password_link(user, created_by=request.user)
+    record_event(LINK_CREATED_EVENTS[link.purpose], request, target=user,
+                 vence=link.expires_at.isoformat())
+    return {
+        'url': link_url(token),
+        'purpose': link.purpose,
+        'expires_at': link.expires_at,
+    }
+
+
+class ResetLinkView(views.APIView):
+    """Generate a password link for an account (D24, D26).
+
+    Only the security admin. An account that was never activated gets a
+    new activation link; any other, a reset link. The link is in the
+    response only once: the server keeps a hash of it, so it cannot be
+    shown again.
     """
     serializer_class = ResetLinkRequestSerializer
     permission_classes = [permissions.IsAuthenticated, IsSecurityAdmin,
@@ -378,13 +414,9 @@ class ResetLinkView(views.APIView):
             raise exceptions.ValidationError(
                 {'email': ['La cuenta está desactivada.']})
 
-        link, token = create_reset_link(user, created_by=request.user)
-        record_event(SecurityEvent.RESET_LINK_CREATED, request, target=user,
-                     vence=link.expires_at.isoformat())
         response = Response({
             'username': user.username,
-            'url': link_url(token),
-            'expires_at': link.expires_at,
+            **issue_password_link(request, user),
         }, status=status.HTTP_201_CREATED)
         response['Cache-Control'] = 'no-store'
         return response
@@ -412,7 +444,7 @@ class PasswordLinkCheckView(views.APIView):
 
 
 class PasswordLinkUseView(views.APIView):
-    """Choose a new password with a password link (D24)."""
+    """Choose a password with a reset (D24) or activation (D26) link."""
     serializer_class = PasswordLinkUseSerializer
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -421,16 +453,16 @@ class PasswordLinkUseView(views.APIView):
         serializer = PasswordLinkUseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            user = use_link(serializer.validated_data['token'],
+            link = use_link(serializer.validated_data['token'],
                             serializer.validated_data['password'])
         except DjangoValidationError as error:
             return Response({'password': list(error.messages)},
                             status=status.HTTP_400_BAD_REQUEST)
-        if user is None:
+        if link is None:
             return Response({'detail': LINK_INVALID_MESSAGE},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        record_event(SecurityEvent.PASSWORD_RESET, request, actor=user,
-                     target=user)
+        record_event(LINK_USED_EVENTS[link.purpose], request,
+                     actor=link.user, target=link.user)
         return Response({'detail': 'Contraseña guardada. Ya puede iniciar '
                                    'sesión con su código de usuario.'})

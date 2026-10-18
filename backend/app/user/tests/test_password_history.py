@@ -17,7 +17,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import logIn
-from core.passwords import create_reset_link
+from core.passwords import create_password_link
 
 ME_URL = reverse('user:me')
 PASSWORD_LINK_URL = reverse('user:password-link')
@@ -96,7 +96,7 @@ class PasswordHistoryTests(TestCase):
     def test_reset_link_rejects_reuse(self):
         """Test the history also applies when the password is chosen
         with a reset link (D24)."""
-        _, token = create_reset_link(self.assistant, created_by=self.admin)
+        _, token = create_password_link(self.assistant, created_by=self.admin)
 
         res = APIClient().post(PASSWORD_LINK_URL,
                                {'token': token, 'password': PASSWORD})

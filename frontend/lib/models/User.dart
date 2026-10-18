@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/models/PasswordLink.dart';
 
 
 
@@ -26,6 +27,8 @@ abstract class User extends ChangeNotifier{
   String apellidoMaterno;
   bool isActive;
   Role role;
+  /// La cuenta aún no eligió su contraseña con el enlace de activación (D26).
+  bool activationPending = false;
 
   User({
         int? id,
@@ -79,6 +82,7 @@ abstract class User extends ChangeNotifier{
       );
     }
 
+    user.activationPending = userData['activation_pending'] ?? false;
     return user;
   }
 
@@ -93,6 +97,7 @@ abstract class User extends ChangeNotifier{
       'apellido_materno' : apellidoMaterno,
       'role_field' : role.name,
       'is_active' : isActive,
+      'activation_pending' : activationPending,
     };
   }
 
@@ -101,16 +106,17 @@ abstract class User extends ChangeNotifier{
   }
 
 
-  Future<User?> create({required String password}) async {
-    return await SessionManager.userManager.createUser(this, password);
+  /// Crea la cuenta sin contraseña y devuelve su enlace de activación (D26).
+  Future<PasswordLink?> create() async {
+    return await SessionManager.userManager.createUser(this);
   }
 
   Future<User?> update({required User newUser}) async {
     return await SessionManager.userManager.updateUser(this, newUser: newUser);
   }
 
-  Future<String?> createResetLink() async {
-    return await SessionManager.userManager.createResetLink(this);
+  Future<PasswordLink?> createPasswordLink() async {
+    return await SessionManager.userManager.createPasswordLink(this);
   }
 
   void deactivate(){
@@ -129,6 +135,7 @@ abstract class User extends ChangeNotifier{
     apellidoMaterno = newUser.apellidoMaterno;
     isActive =  newUser.isActive;
     role = newUser.role;
+    activationPending = newUser.activationPending;
     notifyListeners();
   }
 }

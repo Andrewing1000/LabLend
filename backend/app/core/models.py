@@ -198,8 +198,13 @@ class UserManager(BaseUserManager):
         user = self.model(email=self.normalize_email(email), **extra_fields)
         user.username = self.generate_username(
             username_prefix, user.nombres, user.apellido_paterno)
-        validate_password(password)
-        user.set_password(password)
+        if password is None:
+            # Cuenta nueva desde la aplicación (D26): sin contraseña hasta
+            # que su dueño la elija con el enlace de activación.
+            user.set_unusable_password()
+        else:
+            validate_password(password)
+            user.set_password(password)
         user.save(using=self._db)
 
         return user
@@ -243,6 +248,10 @@ class User(AbstractBaseUser, RolePermissionsMixin):
     apellido_paterno = models.CharField(max_length=255)
     apellido_materno = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
+    # Cuándo eligió el usuario su contraseña actual. Vacío mientras la cuenta
+    # espera su activación (D26); el vencimiento a los 90 días (D21) se
+    # cuenta desde aquí.
+    password_changed_at = models.DateTimeField(null=True, blank=True)
 
     objects = UserManager()
 
@@ -266,6 +275,16 @@ class User(AbstractBaseUser, RolePermissionsMixin):
                 'No se puede desactivar al último administrador de '
                 'seguridad activo.')
         super().save(*args, **kwargs)
+
+    def set_password(self, raw_password):
+        super().set_password(raw_password)
+        self.password_changed_at = timezone.now()
+
+    @property
+    def activation_pending(self):
+        """The account was created but its owner has not chosen a
+        password yet (D26)."""
+        return self.password_changed_at is None
 
     @property
     def name(self):
@@ -311,6 +330,8 @@ class SecurityEvent(models.Model):
     CURRENT_PASSWORD_FAILED = 'contrasena_actual_incorrecta'
     RESET_LINK_CREATED = 'enlace_restablecimiento_generado'
     PASSWORD_RESET = 'contrasena_restablecida'
+    ACTIVATION_LINK_CREATED = 'enlace_activacion_generado'
+    ACCOUNT_ACTIVATED = 'cuenta_activada'
     ACCESS_DENIED = 'acceso_denegado'
 
     EVENT_TYPES = [
@@ -326,6 +347,8 @@ class SecurityEvent(models.Model):
          'Contraseña actual incorrecta al cambiar la contraseña'),
         (RESET_LINK_CREATED, 'Enlace de restablecimiento generado'),
         (PASSWORD_RESET, 'Contraseña restablecida con un enlace'),
+        (ACTIVATION_LINK_CREATED, 'Enlace de activación generado'),
+        (ACCOUNT_ACTIVATED, 'Cuenta activada con un enlace'),
         (ACCESS_DENIED, 'Acción rechazada'),
     ]
 
@@ -367,8 +390,10 @@ class PasswordLink(models.Model):
     """
 
     RESET = 'restablecimiento'
+    ACTIVATION = 'activacion'
     PURPOSES = [
         (RESET, 'Restablecimiento de contraseña'),
+        (ACTIVATION, 'Activación de cuenta'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE,
