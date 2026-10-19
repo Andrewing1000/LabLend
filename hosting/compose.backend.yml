@@ -20,4 +20,12 @@ services:
       sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
              gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 3 --no-control-socket --access-logfile - --error-logfile -"
+    # El archivo del repositorio publica 8000 en 0.0.0.0, lo que deja el
+    # backend accesible desde la red salteandose el proxy. Eso no solo lo
+    # expone: con SECURE_PROXY_SSL_HEADER activo, quien llegue directo puede
+    # enviar X-Forwarded-Proto: https y Django tratara como segura una
+    # conexion en claro. nginx llega por la red de Docker, asi que aqui el
+    # puerto queda solo para depuracion desde la propia maquina.
+    ports: !override
+      - "127.0.0.1:8000:8000"
     restart: unless-stopped
