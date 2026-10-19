@@ -4,10 +4,15 @@ import 'package:frontend/models/Role.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
 import 'package:frontend/screens/role_edit_screen.dart';
+import 'package:frontend/widgets/access_matrix.dart';
 
 /// Gestión de roles (D15): lista los roles con su área, sus permisos y
-/// cuántas cuentas los tienen. El buscador filtra por nombre.
+/// cuántas cuentas los tienen, o los muestra como matriz de accesos (D19).
+/// El buscador filtra por nombre de rol.
 class RolesPage extends BrowsablePage {
+  /// Vista de matriz en lugar de lista.
+  final ValueNotifier<bool> showMatrix = ValueNotifier(false);
+
   RolesPage({super.key});
 
   Future<List<Role>> _fetchRoles(String pattern) async {
@@ -19,64 +24,129 @@ class RolesPage extends BrowsablePage {
         .toList();
   }
 
+  Future<(List<Role>, List<PermissionInfo>)> _fetchMatrix(
+      String pattern) async {
+    final roles = await _fetchRoles(pattern);
+    final permissions = await SessionManager.roleService.getPermissions();
+    return (roles, permissions);
+  }
+
   @override
   Widget build(BuildContext context, SearchField searchField,
       FilterList filters, Widget? child) {
     final canManage =
         SessionManager().session.user.can(AppPermission.gestionarRoles);
 
-    return Stack(
-      children: [
-        FutureBuilder<List<Role>>(
-          future: _fetchRoles(searchField.value),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              );
-            }
-            final roles = snapshot.data ?? [];
-            if (roles.isEmpty) {
-              return const Center(
-                child: Text('No se encontraron roles',
-                    style: TextStyle(color: Colors.white)),
-              );
-            }
-            return Column(
-              children: [
-                const _RolesHeader(),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: roles.length,
-                    itemBuilder: (context, index) => _RoleCard(
-                      role: roles[index],
-                      onTap: () => manager?.setPage(
-                          RoleEditScreen(role: roles[index])),
+    return ValueListenableBuilder<bool>(
+      valueListenable: showMatrix,
+      builder: (context, matrix, _) => Stack(
+        children: [
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                          value: false,
+                          icon: Icon(Icons.list),
+                          label: Text('Lista')),
+                      ButtonSegment(
+                          value: true,
+                          icon: Icon(Icons.grid_on),
+                          label: Text('Matriz de accesos')),
+                    ],
+                    selected: {matrix},
+                    showSelectedIcon: false,
+                    style: SegmentedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      selectedForegroundColor: Colors.black,
+                      selectedBackgroundColor: Colors.orange,
                     ),
+                    onSelectionChanged: (value) =>
+                        showMatrix.value = value.first,
                   ),
                 ),
-              ],
-            );
-          },
-        ),
-        if (canManage)
-          Align(
-            alignment: const Alignment(1, 1),
-            child: Container(
-              padding: const EdgeInsets.all(50),
-              child: FloatingActionButton(
-                tooltip: 'Nuevo rol',
-                backgroundColor: Theme.of(context).primaryColor,
-                shape: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(200),
+              ),
+              Expanded(
+                child: matrix
+                    ? _matrixView(searchField.value)
+                    : _listView(searchField.value),
+              ),
+            ],
+          ),
+          if (canManage && !matrix)
+            Align(
+              alignment: const Alignment(1, 1),
+              child: Container(
+                padding: const EdgeInsets.all(50),
+                child: FloatingActionButton(
+                  tooltip: 'Nuevo rol',
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(200),
+                  ),
+                  onPressed: () => manager?.setPage(RoleEditScreen()),
+                  child: const Icon(Icons.add, color: Colors.black),
                 ),
-                onPressed: () => manager?.setPage(RoleEditScreen()),
-                child: const Icon(Icons.add, color: Colors.black),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  static const _loading = Center(
+    child: CircularProgressIndicator(color: Colors.white),
+  );
+
+  static const _empty = Center(
+    child: Text('No se encontraron roles',
+        style: TextStyle(color: Colors.white)),
+  );
+
+  Widget _listView(String pattern) {
+    return FutureBuilder<List<Role>>(
+      future: _fetchRoles(pattern),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _loading;
+        }
+        final roles = snapshot.data ?? [];
+        if (roles.isEmpty) return _empty;
+        return Column(
+          children: [
+            const _RolesHeader(),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: roles.length,
+                itemBuilder: (context, index) => _RoleCard(
+                  role: roles[index],
+                  onTap: () =>
+                      manager?.setPage(RoleEditScreen(role: roles[index])),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _matrixView(String pattern) {
+    return FutureBuilder<(List<Role>, List<PermissionInfo>)>(
+      future: _fetchMatrix(pattern),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _loading;
+        }
+        final (roles, permissions) = snapshot.data ?? (<Role>[], <PermissionInfo>[]);
+        if (roles.isEmpty) return _empty;
+        return AccessMatrix(roles: roles, permissions: permissions);
+      },
     );
   }
 
