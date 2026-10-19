@@ -218,14 +218,197 @@ Reglas que acompañan la matriz:
 | D28 | Solo se registran el inicio y el cierre de sesión: los intentos fallidos, los bloqueos, los desbloqueos y los cambios de roles y permisos no dejan rastro | Registrar estos eventos de seguridad con fecha, usuario y acción, consultables por el administrador de seguridad. Bitácora de seguridad en una tabla propia, separada de la bitácora de sesiones, que solo crece: los eventos no se pueden modificar ni eliminar, ni desde la API ni desde el código, así que quien actúa no puede borrar su rastro. Cada evento guarda fecha, tipo, quién actuó, la cuenta afectada, la IP y el detalle (por ejemplo, qué campos cambiaron y sus valores anteriores y nuevos). Se registran hoy: inicio y cierre de sesión, inicio de sesión fallido, inicio de sesión rechazado por el límite de intentos, creación de cuentas (también la inicial), cambios hechos por el administrador (rol, estado y nombre), cambios del propio perfil y de la propia contraseña, la contraseña actual incorrecta al cambiar la contraseña propia (D14), los enlaces de restablecimiento generados y las contraseñas restablecidas con un enlace (D24), los enlaces de activación generados y las cuentas activadas (D26), los bloqueos por intentos fallidos y los desbloqueos (D23), los inicios de sesión con la contraseña vencida (D21), y toda acción rechazada por permisos. Nunca se guardan contraseñas: de un inicio de sesión fallido con un código inexistente solo se guarda el texto si tiene la forma de un código de usuario, por si alguien escribió su contraseña en ese campo. El administrador de seguridad la consulta en /user/events/ y en la pantalla "Bitácora de seguridad", filtrando por código de usuario, tipo de evento y fechas. También se registran la creación, modificación y eliminación de roles, con sus permisos anteriores y nuevos, y los roles asignados y quitados a cada cuenta (D15) | 9.2 y 9.3 | A09 | Implementado |
 | D29 | Si una validación del modelo falla, por ejemplo un préstamo con la fecha de devolución anterior a la de préstamo, la API responde con error 500 en lugar de 400 y, con DEBUG activo, muestra la traza completa | Convertir los errores de validación en respuestas 400 con un mensaje claro, revertir el préstamo completo si falla, y registrar los errores inesperados sin mostrar detalles internos | 10 (fallar de forma segura) | A10 | Implementado |
 
+## 9. Gestión de usuarios, roles y contraseñas
+
+Esta sección describe cómo quedó el sistema después de la reingeniería. La sección 8 enumera las deficiencias y su corrección; aquí se explica el funcionamiento resultante, con la deficiencia que lo originó entre paréntesis.
+
+### 9.1 Gestión de usuarios
+
+**Identificación.** Se inicia sesión con un **código de usuario** (User ID), no con el correo (D11). El código se genera al crear la cuenta con un formato estándar: prefijo, inicial del primer nombre y apellido paterno, en minúsculas y sin tildes ni ñ. El administrador de seguridad lleva el prefijo `adm.` y las demás cuentas `usr.`; si el código ya existe se le agrega un número. El código **no cambia** aunque después se edite el nombre, así que sirve como identificador estable en las bitácoras.
+
+El **correo tampoco se puede modificar** (D14): se fija al crear la cuenta. Ni el propio usuario ni el administrador de seguridad lo cambian, de modo que una sesión robada no puede desviar los avisos de una cuenta a otra dirección.
+
+**Quién administra las cuentas.** Solo el administrador de seguridad (D13, D18). El administrador de laboratorio recibe 403 en `/user/manage/` y en el resto de los endpoints de cuentas. Como existe un único nivel de administración de cuentas, no hay cuentas con más privilegio que otras a las que un administrador pudiera escalar.
+
+**Ciclo de vida de una cuenta.**
+
+| Paso | Qué ocurre |
+| --- | --- |
+| Creación | El administrador de seguridad crea la cuenta **sin contraseña** y el sistema genera un enlace de activación de un solo uso, válido 24 horas (D26) |
+| Activación | La persona abre el enlace y elige su propia contraseña, validada contra la política (D20) |
+| Uso | La cuenta inicia sesión con su código y su contraseña |
+| Bloqueo | Al tercer intento fallido seguido, la cuenta queda bloqueada (D23) |
+| Restablecimiento | El administrador de seguridad genera un enlace que repone la contraseña y desbloquea la cuenta (D24) |
+| Baja | La cuenta se desactiva; no se elimina, para no perder su rastro en las bitácoras |
+
+La cuenta inicial del sistema no se crea desde la aplicación sino con el comando `create_initial_admin` en el servidor, que se niega a ejecutarse si ya existe un administrador de seguridad (D3). Su contraseña se genera al azar y se muestra una sola vez.
+
+> **Captura 9.1.1** — Pantalla de inicio de sesión, mostrando que se pide código de usuario y no correo.
+>
+> **Captura 9.1.2** — Listado de usuarios con sus filtros, desde la cuenta de administrador de seguridad.
+>
+> **Captura 9.1.3** — Creación de una cuenta y el enlace de activación que el sistema muestra una sola vez.
+>
+> **Captura 9.1.4** — Respuesta 403 al intentar entrar a la gestión de cuentas con un rol de laboratorio.
+
+### 9.2 Gestión de roles y permisos
+
+**Roles en la base de datos.** Antes había dos roles fijos escritos en el código y no se podían crear ni modificar (D15). Ahora los roles viven en la base de datos con sus permisos por función, se administran desde la pantalla "Roles" de la aplicación, y una cuenta puede tener uno o varios.
+
+**Un único punto de verificación.** Cada vista comparaba el nombre del rol por su cuenta (D16). Ahora una sola clase de permiso, `RolePermission` en `core/permissions.py`, es la predeterminada de todas las vistas: exige una sesión abierta y el permiso que la función declara. No hay forma de agregar una vista que quede sin verificar por olvido, porque la verificación es el comportamiento por omisión y no algo que cada vista deba recordar.
+
+**Ninguna cuenta fuera del control de acceso.** Se eliminó el superusuario de Django, que pasaba todas las comprobaciones (D27). El comando `createsuperuser` está deshabilitado y responde con un error. El rol de administrador de seguridad queda protegido: no se puede modificar ni eliminar, y un administrador de seguridad no puede modificar ni desactivar la cuenta de otro.
+
+**Segregación de funciones.** El administrador de seguridad y el administrador de laboratorio son roles distintos y una regla impide asignar los dos a la misma cuenta (D18). Quien gestiona las cuentas y las bitácoras no gestiona el inventario ni los préstamos, y al revés.
+
+**El menú refleja los permisos reales.** La aplicación armaba su menú con nombres de rol fijos y mostraba opciones que el servidor después rechazaba (D17). Ahora el inicio de sesión y `/user/me/` devuelven los roles y los permisos de la cuenta, y la aplicación decide con eso cada opción y cada botón: nadie ve una acción que no puede ejecutar.
+
+**Matriz de accesos.** La matriz por rol y función está en la sección 8.3, con la ruta de la API que exige cada permiso, y la aplicación la reproduce en la vista "Matriz de accesos" de la pantalla "Roles", armada con los roles y el catálogo de permisos que devuelve el servidor (D19). Se mantiene en 8.3 y no se duplica aquí para que el documento tenga una sola versión de la matriz.
+
+**Rastro de los cambios.** Crear, modificar o eliminar un rol, y asignar o quitar un rol a una cuenta, quedan registrados en la bitácora de seguridad (D28).
+
+> **Captura 9.2.1** — Pantalla "Roles" con el listado de roles del sistema.
+>
+> **Captura 9.2.2** — Creación de un rol y asignación de sus permisos por función.
+>
+> **Captura 9.2.3** — Vista "Matriz de accesos", que debe coincidir con la matriz de la sección 8.3.
+>
+> **Captura 9.2.4** — Asignación de un rol a una cuenta y el mismo menú de la aplicación antes y después, para mostrar que las opciones cambian con los permisos.
+>
+> **Captura 9.2.5** — Bitácora de seguridad con los eventos de rol creado, modificado y asignado.
+
+### 9.3 Gestión de contraseñas
+
+La política completa, con sus reglas y sus mensajes, está en [politica-contrasenas.md](politica-contrasenas.md). Aquí va el resumen de cómo se protege cada contraseña.
+
+**Cómo se guardan.** Con **Argon2id** (D25), el algoritmo que recomiendan OWASP en su *Password Storage Cheat Sheet* y Django, ganador de la Password Hashing Competition y especificado en el RFC 9106. Con los valores de Django, cada verificación exige unos 100 MiB de memoria, 2 pasadas y paralelismo 8. Esa exigencia de memoria es la defensa: encarece el ataque por fuerza bruta con hardware especializado, que es justamente lo que vuelve barato a un algoritmo liviano. Antes no estaba definido y se usaba PBKDF2-SHA256 por omisión, sin documentarlo.
+
+**Qué se exige al elegirla.** La política de complejidad y longitud se valida en **toda** creación y cambio de contraseña, respondiendo 400 con la lista de requisitos que no se cumplen (D20). Antes el cambio de contraseña no validaba nada.
+
+**Historial.** No se pueden reutilizar las **últimas 5** contraseñas —la actual y las 4 anteriores— en ningún camino: el cambio propio, el cambio por vencimiento y los enlaces de activación y de restablecimiento (D22). Una más antigua sí se puede volver a usar.
+
+**Vencimiento.** Las contraseñas vencen a los **90 días** (`PASSWORD_MAX_AGE_DAYS`, D21). El usuario la renueva sin intervención del administrador: inicia sesión con la contraseña vencida y el sistema le exige cambiarla antes de cualquier otra acción, pidiendo la actual y una nueva. Mientras no la cambie, el resto de las peticiones se rechazan.
+
+**Cambio propio.** Exige la contraseña actual (D14), con un límite de 3 intentos por minuto por usuario. Así una sesión robada o un equipo dejado abierto no alcanzan para apropiarse de la cuenta.
+
+**Bloqueo por intentos fallidos.** Al **tercer** intento fallido seguido la cuenta se bloquea (`LOGIN_MAX_FAILED_ATTEMPTS`, D23). Antes solo había un límite por minuto que se reiniciaba solo, lo que permitía probar contraseñas indefinidamente.
+
+**Recuperación.** Si la persona olvidó su contraseña o su cuenta quedó bloqueada, lo solicita al administrador de seguridad, que genera un **enlace de restablecimiento de un solo uso** con vencimiento de 24 horas (`PASSWORD_LINK_HOURS`, D24). Al generarlo, la contraseña anterior deja de funcionar y se cierran las sesiones abiertas. El enlace se muestra una sola vez: el servidor guarda únicamente un hash SHA-256, así que ni quien lea la base de datos puede reconstruirlo.
+
+Elegir una contraseña nueva, por cualquiera de estos caminos, **también desbloquea la cuenta y reinicia el plazo de los 90 días**: está implementado en un solo lugar, el método `set_password` del modelo de usuario (`core/models.py`), de modo que ningún camino puede olvidarse de hacerlo.
+
+Para las cuentas de administrador de seguridad no se generan enlaces. Si una pierde su contraseña o queda bloqueada, se repone desde el servidor con `changepassword`, que aplica la misma política.
+
+**Qué queda registrado.** La bitácora de seguridad guarda el cambio de contraseña propio, el intento con la contraseña actual incorrecta, la generación de cada enlace, el restablecimiento, la activación de la cuenta, el inicio de sesión con contraseña vencida, el bloqueo y el desbloqueo (D28).
+
+> **Captura 9.3.1** — Mensaje de error al elegir una contraseña que no cumple la política, con los requisitos incumplidos.
+>
+> **Captura 9.3.2** — Cambio de la contraseña propia, mostrando que se pide la actual.
+>
+> **Captura 9.3.3** — Rechazo por historial al intentar reutilizar una contraseña anterior.
+>
+> **Captura 9.3.4** — Pantalla de contraseña vencida, que no deja hacer nada más hasta cambiarla.
+>
+> **Captura 9.3.5** — Cuenta bloqueada tras tres intentos fallidos, vista por el administrador de seguridad.
+>
+> **Captura 9.3.6** — Enlace de restablecimiento generado y mostrado una sola vez.
+>
+> **Captura 9.3.7** — Hash Argon2id en la base de datos, para mostrar que la contraseña no se guarda en claro. Se obtiene con:
+>
+> ```
+> docker compose -p lablend -f backend/docker-compose.yml -f hosting/compose.backend.yml --env-file backend/.env exec db psql -U lablend -d lablend -c "select username, left(password, 40) from core_user;"
+> ```
+
+## 10. Principios de diseño seguro y reglas de oro de OWASP
+
+Las deficiencias de la sección 8 no se corrigieron una por una de forma aislada: cada corrección aplica un principio de diseño seguro. Esta sección agrupa el trabajo por principio y señala en qué deficiencias se demuestra.
+
+Una misma corrección puede sostener más de un principio, y aquí se la cita en todos los que refuerza. La columna "Se demuestra en" de las tablas de la sección 8 indica, en cambio, dónde se demuestra **principalmente** cada deficiencia, para que cada una tenga un lugar único de referencia.
+
+### 10.1 Mínimo privilegio
+
+Cada cuenta recibe solo los permisos que su función necesita. El administrador de laboratorio dejó de poder editar cuentas ajenas y cambiarles la contraseña (D13), y se eliminó el superusuario de Django, que pasaba todas las comprobaciones de permisos por el simple hecho de ser superusuario (D27). No queda ninguna cuenta por encima del control de acceso.
+
+### 10.2 Segregación de roles
+
+Administrar la seguridad y administrar el negocio son funciones distintas y están en roles distintos, con una regla que impide acumular los dos en una misma cuenta (D18). Quien crea cuentas y lee las bitácoras no puede mover el inventario, así que nadie puede encubrir sus propias acciones.
+
+### 10.3 Mediación completa
+
+Toda petición se verifica, siempre, en un solo lugar. `RolePermission` es la clase de permiso predeterminada de todas las vistas (D16), y ninguna cuenta tiene excepciones (D27). Además se eliminó la autenticación HTTP Basic, que Django REST Framework acepta por omisión en todos los endpoints y que se verificaba **antes** del límite de intentos, dejando una vía para probar contraseñas sin tropezar con el bloqueo (D30).
+
+### 10.4 Economía del mecanismo
+
+Un solo mecanismo, simple, en lugar de varios parecidos. Hay una única forma de autenticarse —la sesión que se obtiene en `/user/token/` (D30)— y una única clase que verifica permisos (D16). Cuanto menos código de seguridad haya, menos lugares donde equivocarse.
+
+### 10.5 Seguridad por defecto
+
+La configuración insegura exige pedirla explícitamente; la segura es la que queda si nadie hace nada. `DEBUG` solo se activa si `DJANGO_DEBUG` vale `true`, `1` o `yes`: cualquier otro valor, un error de tipeo o la ausencia de la variable lo dejan apagado (D5). La clave secreta no tiene valor por omisión y el servidor **no arranca** sin ella (D1). Sin `DEBUG`, el servidor tampoco arranca si faltan los dominios permitidos o los orígenes de CORS. Las dependencias se actualizaron a versiones con soporte de seguridad (D10), y el tráfico va por HTTPS con redirección y HSTS (D8).
+
+### 10.6 Defensa en profundidad
+
+Varias barreras para el mismo riesgo, de modo que una falla no alcance. La cookie de sesión es `HttpOnly`, así que un error de XSS en la aplicación no permitiría leerla y robar la sesión, y es `SameSite=Lax` y `Secure` (D7). Eso se pudo hacer porque la aplicación y la API se sirven desde el mismo dominio. A ello se suman HSTS y la redirección a HTTPS (D8), y la bitácora que deja rastro si algo falla igual (D28).
+
+### 10.7 Fallar de forma segura
+
+Ante un error o una entrada inesperada, el sistema rechaza y no revela. El inicio de sesión responde un único 401 genérico —"Código de usuario o contraseña incorrectos"— si el código no existe, si la contraseña es incorrecta, si la cuenta está desactivada o si está bloqueada, y verifica la contraseña en todos los casos para no delatar nada por el tiempo de respuesta (D12). Las validaciones del modelo que antes provocaban un 500 con la traza completa ahora devuelven 400 con un mensaje claro, el préstamo se revierte entero si falla y los errores inesperados se registran sin mostrar detalles internos (D29). Con `DEBUG` apagado, un error no expone el código ni la configuración (D5).
+
+### 10.8 Minimizar la superficie de ataque
+
+Lo que no se usa, se quita. Se eliminó el panel `/admin/` de Django en todos los entornos, no solo en producción (D9); se quitó la configuración de correo Gmail, que el sistema no usaba (D2); se restringió CORS a un único origen en lugar de aceptar credenciales desde cualquiera (D6); y se quitó el botón de Google de la pantalla de login (D31). En el entorno publicado, el backend solo es accesible a través del proxy de entrada.
+
+### 10.9 Mecanismo menos común
+
+No se comparten credenciales ni cuentas. Las migraciones creaban un superusuario con correo y contraseña fijos escritos en el código (D3), y la aplicación Flutter iniciaba sesión sola como superadministrador con esa contraseña, de modo que todos los usuarios compartían la misma cuenta (D4). Hoy cada persona entra con su propia cuenta y su propia contraseña, que nadie más conoce.
+
+### 10.10 Menos asombro
+
+La interfaz no promete lo que el sistema no hace. El menú se arma con los permisos reales, así que no aparecen opciones que el servidor vaya a rechazar (D17); se quitó el botón de Google, que sugería un segundo método de ingreso inexistente (D31); y el botón "Recuperar contraseña", que antes no hacía nada, hoy corresponde a un procedimiento real con enlace de un solo uso (D24).
+
+### 10.11 Correspondencia con el OWASP Top 10
+
+Cada deficiencia de la sección 8 está clasificada con una categoría del [OWASP Top 10:2025](https://top10.owasp.org/2025), detalladas en [owasp-top10.md](owasp-top10.md).
+
+| Código | Nombre | Deficiencias |
+| --- | --- | --- |
+| A01 | Control de acceso roto | D6, D13, D15, D16, D17, D18, D19, D27 |
+| A02 | Configuración de seguridad incorrecta | D2, D5, D7, D9 |
+| A03 | Fallas en la cadena de suministro de software | D10 |
+| A04 | Fallas criptográficas | D1, D8, D25 |
+| A05 | Inyección | Ninguna: todas las consultas pasan por el ORM de Django |
+| A06 | Diseño inseguro | D26, D31 |
+| A07 | Fallas de autenticación | D3, D4, D12, D14, D20, D21, D22, D23, D24, D30 |
+| A08 | Fallas de integridad del software o de los datos | Ninguna |
+| A09 | Fallas en el registro y las alertas de seguridad | D28 |
+| A10 | Manejo incorrecto de condiciones excepcionales | D29 |
+
+D11, el código de usuario, no tiene categoría OWASP: es un requisito del curso.
+
+Las dos categorías sin deficiencias lo están por motivos distintos. **A05, inyección:** el sistema no construye SQL a mano, todas las consultas pasan por el ORM de Django, que trata los datos del usuario como parámetros y no como parte de la consulta. **A08, integridad:** el sistema no acepta código ni actualizaciones de terceros en tiempo de ejecución.
+
+> **Captura 10.1** — Respuesta del servidor con `DEBUG` apagado ante un error, sin traza ni configuración.
+>
+> **Captura 10.2** — Cabecera `Strict-Transport-Security` y redirección de HTTP a HTTPS en el sistema publicado. Se obtienen con:
+>
+> ```
+> curl -s -D - -o /dev/null https://lablend.dontrisk.org/ | grep -i strict
+> curl -s -o /dev/null -w "%{http_code} -> %{redirect_url}\n" http://lablend.dontrisk.org/
+> ```
+>
+> **Captura 10.3** — Cookie de sesión en las herramientas del navegador, mostrando las marcas `HttpOnly`, `Secure` y `SameSite=Lax`.
+>
+> **Captura 10.4** — `/admin/` respondiendo 404 en el sistema publicado.
+>
+> **Captura 10.5** — Resultado de `python manage.py check --deploy`, con la única advertencia restante (`SECURE_HSTS_PRELOAD`) y su justificación: anunciar `preload` solo sirve si el dominio se inscribe en la lista de los navegadores, y salir de esa lista lleva meses.
+
 ## Enlaces
 
 **Código fuente (GitHub):** https://github.com/Andrewing1000/LabLend
 
 **Política de contraseñas:** [politica-contrasenas.md](politica-contrasenas.md)
 
-**Sistema publicado (hosting):** [URL del sistema]
+**Sistema publicado (hosting):** https://lablend.dontrisk.org
 
-**Usuario administrador de seguridad:** [usuario]
+**Usuario administrador de seguridad:** `adm.ahinojosa`
 
 **Contraseña del administrador de seguridad:** [contraseña]
