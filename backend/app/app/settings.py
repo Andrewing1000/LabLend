@@ -347,6 +347,41 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
+# D8. En el servidor publicado el tráfico llega por HTTPS y lo termina el
+# proxy, que lo informa en X-Forwarded-Proto; con esa cabecera Django
+# reconoce la conexión como segura. Sin ella, la redirección de más abajo se
+# repetiría sin fin.
+#
+# Esto describe al despliegue, no al modo de depuración: un servidor sin
+# HTTPS por delante no debe redirigir ni prometer HSTS. Por eso lo activa
+# DJANGO_HTTPS, que solo define el entorno publicado. En desarrollo y en las
+# pruebas la variable no existe, así que la cabecera no se interpreta y nadie
+# puede fingir una conexión segura.
+HTTPS_ENABLED = os.environ.get('DJANGO_HTTPS', '').lower() in (
+    'true', '1', 'yes')
+
+if HTTPS_ENABLED:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Lo que llegue por HTTP se redirige a HTTPS.
+    SECURE_SSL_REDIRECT = True
+
+    # La verificación de estado la consulta el proxy por HTTP y sin pasar por
+    # el dominio público, así que redirigirla la dejaría inservible.
+    SECURE_REDIRECT_EXEMPT = [r'^health_check$']
+
+    # HSTS: el navegador recuerda durante un año que este dominio y sus
+    # subdominios solo se visitan por HTTPS, así que ni el primer intento
+    # viaja en claro.
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+    # 'preload' se deja apagado a propósito: anunciarlo solo sirve si el
+    # dominio se inscribe en la lista de los navegadores, y salir de esa
+    # lista después lleva meses.
+    SECURE_HSTS_PRELOAD = False
+
+
 SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST' : True,
 }

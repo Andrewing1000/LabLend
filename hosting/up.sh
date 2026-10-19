@@ -13,7 +13,9 @@
 set -euo pipefail
 
 raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# El segundo archivo cambia runserver por Gunicorn (D8).
 compose_backend=(docker compose -p lablend -f "$raiz/backend/docker-compose.yml"
+                 -f "$raiz/hosting/compose.backend.yml"
                  --env-file "$raiz/backend/.env")
 
 if [ ! -f "$raiz/backend/.env" ]; then

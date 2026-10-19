@@ -171,6 +171,8 @@ docker compose -f backend/docker-compose.yml run --rm app_new sh -c "python mana
 
 Las pruebas tardan cerca de un minuto y medio: cada cuenta que crean guarda su contraseña con Argon2id y en el historial de contraseñas, con los mismos parámetros que en producción.
 
+> **En un servidor donde `DJANGO_HTTPS` esté definida** (sección 5), agrega `-e DJANGO_HTTPS=` después de `run --rm`. Con la redirección a HTTPS activa, el cliente de pruebas recibe 301 en lugar de las respuestas que espera y falla casi toda la suite.
+
 ```bash
 docker compose -f backend/docker-compose.yml run --rm app_new flake8
 ```
@@ -188,6 +190,7 @@ En producción no se usa `backend/.env` de desarrollo: define estas variables de
 | `CORS_ALLOWED_ORIGINS` | El origen de la aplicación web, por ejemplo `https://lablend.example.edu`; varios separados por comas. Vacía (`CORS_ALLOWED_ORIGINS=`) si la aplicación y la API se sirven desde el mismo dominio | El servidor no arranca |
 | `FRONTEND_URL` | La dirección de la aplicación web, por ejemplo `https://lablend.example.edu`. Con ella se arman los enlaces de restablecimiento de contraseña (D24) | El servidor no arranca |
 | `CSRF_TRUSTED_ORIGINS` | El origen del servidor, por ejemplo `https://lablend.example.edu`; varios separados por comas. Sin él, Django rechaza con 403 toda petición que modifique datos | — (se toma el de `FRONTEND_URL`) |
+| `DJANGO_HTTPS` | `True` si un proxy termina HTTPS por delante del servidor: redirige a HTTPS lo que llegue por HTTP y envía HSTS (D8) | — (sin redirección ni HSTS: solo correcto si el servidor no está detrás de HTTPS) |
 
 Antes de abrir el sistema a los usuarios, revisa la configuración con la lista de verificación de Django y corrige lo que reporte:
 
@@ -217,3 +220,4 @@ Después del primer despliegue, crea la cuenta inicial en el servidor con `pytho
 | Una cuenta no puede iniciar sesión aunque la contraseña sea correcta | La cuenta se bloqueó tras tres inicios de sesión fallidos seguidos (D23); el servidor responde igual que ante una contraseña incorrecta | El administrador de seguridad ve "Cuenta bloqueada" al editarla y genera un enlace de restablecimiento; si es un administrador de seguridad, usa `changepassword` (ver [Crear la cuenta inicial](#crear-la-cuenta-inicial)) |
 | Al iniciar sesión solo aparece "Su contraseña venció" y nada más funciona (las peticiones responden 403) | La contraseña tiene más de 90 días (D21) | Es lo esperado: elige una contraseña nueva en esa pantalla, ingresando la actual. Para probarlo en desarrollo, envejece la contraseña desde el shell: `User.objects.filter(username=...).update(password_changed_at=...)` |
 | `docker compose up` falla porque el puerto 8000 está ocupado | Otro programa o contenedor usa ese puerto | Detén el otro proceso o contenedor |
+| Casi toda la suite de pruebas falla con `301 != 200` (o `301 != 401`, `301 != 403`) | `DJANGO_HTTPS` está definida en el entorno, así que la redirección a HTTPS alcanza al cliente de pruebas | Ejecuta las pruebas con `-e DJANGO_HTTPS=` (sección 4) |
