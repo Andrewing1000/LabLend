@@ -187,6 +187,7 @@ En producción no se usa `backend/.env` de desarrollo: define estas variables de
 | `DJANGO_ALLOWED_HOSTS` | El dominio del servidor, por ejemplo `lablend.example.edu`; varios separados por comas | El servidor no arranca |
 | `CORS_ALLOWED_ORIGINS` | El origen de la aplicación web, por ejemplo `https://lablend.example.edu`; varios separados por comas. Vacía (`CORS_ALLOWED_ORIGINS=`) si la aplicación y la API se sirven desde el mismo dominio | El servidor no arranca |
 | `FRONTEND_URL` | La dirección de la aplicación web, por ejemplo `https://lablend.example.edu`. Con ella se arman los enlaces de restablecimiento de contraseña (D24) | El servidor no arranca |
+| `CSRF_TRUSTED_ORIGINS` | El origen del servidor, por ejemplo `https://lablend.example.edu`; varios separados por comas. Sin él, Django rechaza con 403 toda petición que modifique datos | — (se toma el de `FRONTEND_URL`) |
 
 Antes de abrir el sistema a los usuarios, revisa la configuración con la lista de verificación de Django y corrige lo que reporte:
 

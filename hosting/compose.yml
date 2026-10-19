@@ -1,0 +1,26 @@
+# Puerta de entrada del entorno publicado. El backend y la base de datos los
+# levanta backend/docker-compose.yml con el nombre de proyecto "lablend";
+# este archivo se engancha a su red y a su volumen de estáticos.
+name: lablend-web
+
+services:
+  web:
+    image: nginx:1.29-alpine
+    ports:
+      - "127.0.0.1:15185:80"
+    volumes:
+      - ../frontend/build/web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - lablend_dev-static-data:/vol/web:ro
+    restart: unless-stopped
+    networks:
+      - lablend
+
+volumes:
+  lablend_dev-static-data:
+    external: true
+
+networks:
+  lablend:
+    name: lablend_default
+    external: true

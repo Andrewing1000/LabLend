@@ -317,21 +317,35 @@ CORS_ALLOW_HEADERS = [
 
 CORS_EXPOSE_HEADERS = ['Set-Cookie']
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000',
-                        'http://127.0.0.1:8000',
-                        'http://localhost:65420',
-                        'http://localhost:58315']  # Add your domain
+# Orígenes en los que Django confía para las peticiones que modifican datos
+# (POST, PUT, DELETE). Por omisión, el de la aplicación web (FRONTEND_URL);
+# CSRF_TRUSTED_ORIGINS permite listar otros, separados por comas. En
+# desarrollo se suman los puertos locales de la aplicación.
+CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS') or [FRONTEND_URL]
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS += ['http://localhost:8000',
+                             'http://127.0.0.1:8000',
+                             'http://localhost:65420',
+                             'http://localhost:58315']
 
 
 CSRF_COOKIE_NAME = 'csrftoken'
+# La aplicación web lee esta cookie para enviar el token en la cabecera
+# X-CSRFToken (frontend/lib/services/WebCookies.dart), así que no puede ser
+# HttpOnly: es el funcionamiento normal de la protección CSRF de Django. No es
+# una credencial, y sin la cookie de sesión no sirve para nada.
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE = True  # Asegúrate de que sea False solo si no estás usando HTTPS
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'  # 'None' si 'Lax' no funciona para tus necesidades
 
-# Configuración para la cookie de sesión
-SESSION_COOKIE_HTTPONLY = False
-SESSION_COOKIE_SECURE = True  # Asegúrate de que sea False solo si no estás usando HTTPS
-SESSION_COOKIE_SAMESITE = 'None'
+# Cookie de sesión (D7). Esta sí es la credencial: va HttpOnly para que un
+# XSS no pueda leerla ni robar la sesión, y SameSite=Lax porque la aplicación
+# y la API se sirven desde el mismo dominio, así que el navegador la envía sin
+# necesidad de 'None'. La aplicación nunca lee esta cookie: el navegador la
+# adjunta sola en cada petición (withCredentials).
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST' : True,
