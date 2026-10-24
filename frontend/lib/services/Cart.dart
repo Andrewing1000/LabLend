@@ -1,4 +1,3 @@
-import '../models/Item.dart';
 import '../models/Loan.dart';
 import 'package:flutter/foundation.dart';
 import '../models/Session.dart';
@@ -36,31 +35,24 @@ class CheckoutCart with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> confirmLoan(User usuario, DateTime fechaPrestamo, DateTime fechaDevolucion) async {
-    if (_items.isEmpty) {
-      throw Exception('Cannot confirm loan with an empty cart.');
-    }
+  /// Registra el préstamo con los equipos del carrito. Devuelve true si el
+  /// servidor lo aceptó; solo entonces se vacía el carrito (si falla, el
+  /// usuario no pierde lo que había elegido).
+  Future<bool> confirmLoan(User usuario, DateTime fechaPrestamo, DateTime fechaDevolucion) async {
+    if (_items.isEmpty) return false;
 
-    Loan newLoan = Loan(
-      id: 0,  // Assuming id will be set by the backend
+    final newLoan = Loan(
+      id: 0, // lo asigna el servidor
       usuario: usuario.email,
       fechaPrestamo: fechaPrestamo,
       fechaDevolucion: fechaDevolucion,
       devuelto: false,
-      items: _items,
+      items: List.of(_items),
     );
 
-    for(PrestamoItem pItem in _items){
-      Item? item = await SessionManager.inventory.getItemById(pItem.itemId);
-      if(item == null) continue;
-      item.onLoan += pItem.cantidad;
-    }
-
-    try {
-      await SessionManager.loanService.createLoan(newLoan);
-      clearCart();
-    } catch (e) {
-      throw Exception('Failed to confirm loan: $e');
-    }
+    final created = await SessionManager.loanService.createLoan(newLoan);
+    if (created == null) return false;
+    clearCart();
+    return true;
   }
 }

@@ -1,12 +1,14 @@
 import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:frontend/widgets/equipment_card.dart';
 import '../models/Loan.dart';
 import '../models/Session.dart';
 import '../models/Item.dart';
 import '../services/Cart.dart';
-import 'horizontal_card.dart';
 
+/// Un equipo dentro de un préstamo o del carrito: foto pequeña, nombre,
+/// número de serie y cantidad. En el carrito ([editable]) se cambia la
+/// cantidad o se quita el equipo.
 class PrestamoItemCard extends StatefulWidget {
   final PrestamoItem prestamoItem;
   final CheckoutCart? cart;
@@ -16,223 +18,107 @@ class PrestamoItemCard extends StatefulWidget {
     super.key,
     required this.prestamoItem,
     this.cart,
-    this.editable = true});
+    this.editable = true,
+  });
+
+  /// Equipos ya consultados, para no pedir el mismo al servidor cada vez
+  /// que se abre el carrito o un préstamo.
+  static final Map<int, Future<Item?>> _cache = {};
+
+  static Future<Item?> itemById(int id) =>
+      _cache.putIfAbsent(id, () => SessionManager.inventory.getItemById(id));
+
+  /// Después de prestar o devolver cambian las unidades disponibles.
+  static void clearCache() => _cache.clear();
 
   @override
-  _PrestamoItemCardState createState() => _PrestamoItemCardState();
+  State<PrestamoItemCard> createState() => _PrestamoItemCardState();
 }
 
 class _PrestamoItemCardState extends State<PrestamoItemCard> {
-  bool isHovered = false;
   Item? item;
-  int selectedQuantity = 1;
-  bool isInCart = true;
 
   @override
   void initState() {
     super.initState();
-    selectedQuantity = widget.prestamoItem.cantidad;
-    _fetchItem();
-  }
-
-  Future<void> _fetchItem() async {
-    final fetchedItem = await SessionManager.inventory.getItemById(widget.prestamoItem.itemId);
-    setState(() {
-      item = fetchedItem;
+    PrestamoItemCard.itemById(widget.prestamoItem.itemId).then((value) {
+      if (mounted) setState(() => item = value);
     });
   }
 
-  void _onEnter(PointerEvent event) {
-    setState(() {
-      isHovered = true;
-    });
-  }
-
-  void _onExit(PointerEvent event) {
-    setState(() {
-      isHovered = false;
-    });
-  }
-
-  void _removeItem() {
-    widget.cart?.removeItem(widget.prestamoItem.itemId);
+  void _setQuantity(int value) {
+    widget.cart?.addItem(PrestamoItem(itemId: widget.prestamoItem.itemId, cantidad: value));
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: MouseRegion(
-        onEnter: _onEnter,
-        onExit: _onExit,
-        child: MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: widget.prestamoItem),
-            ChangeNotifierProvider.value(value: widget.cart),
-          ],
-          child: Consumer2<PrestamoItem, CheckoutCart>(
-            builder: (context, prestamoItem, cart, child) {
-              if (item == null) {
-                return Container();
-              }
+    final quantity = widget.prestamoItem.cantidad;
+    final available = item == null ? quantity : item!.quantity - item!.quantityOnLoan;
 
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  double width = constraints.maxWidth;
-                  if (width > HorizontalCard.maxWidth) {
-                    width = HorizontalCard.maxWidth;
-                  } else if (width < HorizontalCard.minWidth) {
-                    width = HorizontalCard.minWidth;
-                  }
-
-                  double height = (2 / 7.5) * width;
-                  if (height > HorizontalCard.maxHeight) {
-                    height = HorizontalCard.maxHeight;
-                  } else if (height < HorizontalCard.minHeight) {
-                    height = HorizontalCard.minHeight;
-                  }
-
-                  return Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      height: height,
-                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                      decoration: BoxDecoration(
-                        color: isHovered
-                            ? AppColors.surfaceHigh
-                            : const Color.fromRGBO(255, 255, 255, 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          if (item != null)
-                            AspectRatio(
-                              aspectRatio: 1,
-                              child: SizedBox(
-                                height: double.infinity,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.network(
-                                    item!.imagePath ??
-                                        'assets/images/place_holder.png',
-                                    fit: BoxFit.cover,
-                                    isAntiAlias: true,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  item!.nombre,
-                                  style: TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  item!.serialNumber ?? 'Sin número de serie',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          if(widget.editable)  Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: selectedQuantity > 1
-                                    ? () {
-                                  setState(() {
-                                    selectedQuantity--;
-                                    if (isInCart) {
-                                      widget.cart?.addItem(PrestamoItem(
-                                          itemId: item!.id ?? 1,
-                                          cantidad: selectedQuantity));
-                                    }
-                                  });
-                                }
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isInCart
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(5),
-                                ),
-                                child: Icon(
-                                  size: 14,
-                                  Icons.remove,
-                                  color: isInCart
-                                      ? AppColors.textPrimary
-                                      : AppColors.background),
-                              ),
-                              Text(
-                                selectedQuantity.toString(),
-                                style: TextStyle(
-                                    color: AppColors.textPrimary, fontSize: 14),
-                              ),
-                              ElevatedButton(
-                                onPressed: selectedQuantity <
-                                    (item!.quantity -
-                                        item!.quantityOnLoan)
-                                    ? () {
-                                  setState(() {
-                                    selectedQuantity++;
-                                    if (isInCart) {
-                                      widget.cart?.addItem(PrestamoItem(
-                                          itemId: item!.id ?? 1,
-                                          cantidad: selectedQuantity));
-                                    }
-                                  });
-                                }
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isInCart
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(5),
-                                ),
-                                child: Icon(Icons.add,
-                                    size: 14,
-                                    color: isInCart
-                                        ? AppColors.textPrimary
-                                        : AppColors.background),
-                              ),
-                            ],
-                          ),
-                          if(!widget.editable)
-                            Text(
-                              'Cantidad: ${selectedQuantity.toString()}',
-                              style: TextStyle(
-                                  color: AppColors.textPrimary, fontSize: 14),
-                            ),
-                          const SizedBox(width: 16),
-                          if(widget.editable) IconButton(
-                            onPressed: _removeItem,
-                            icon: Icon(Icons.delete, color: AppColors.textPrimary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            child: Container(
+              width: 52,
+              height: 52,
+              color: const Color(0xFFFFFFFF), // fotos con fondo blanco
+              padding: const EdgeInsets.all(4),
+              child: EquipmentImage(url: item?.imagePath, fit: BoxFit.contain),
+            ),
           ),
-        ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item?.nombre ?? 'Cargando…',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  (item?.serialNumber ?? '').isEmpty ? 'Sin número de serie' : item!.serialNumber!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+          ),
+          if (widget.editable) ...[
+            IconButton(
+              onPressed: quantity > 1 ? () => _setQuantity(quantity - 1) : null,
+              tooltip: 'Una menos',
+              icon: const Icon(Icons.remove, size: 18),
+            ),
+            SizedBox(
+              width: 24,
+              child: Text('$quantity',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+            ),
+            IconButton(
+              onPressed: quantity < available ? () => _setQuantity(quantity + 1) : null,
+              tooltip: 'Una más',
+              icon: const Icon(Icons.add, size: 18),
+            ),
+            IconButton(
+              onPressed: () => widget.cart?.removeItem(widget.prestamoItem.itemId),
+              tooltip: 'Quitar del préstamo',
+              icon: const Icon(Icons.close, size: 18),
+              color: AppColors.textMuted,
+            ),
+          ] else
+            Text('× $quantity', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+        ],
       ),
     );
   }

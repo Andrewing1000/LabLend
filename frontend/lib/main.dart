@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/themes/AppTheme.dart';
 import 'package:frontend/themes/theme_controller.dart';
@@ -25,6 +26,10 @@ class MyApp extends StatelessWidget {
         // El cambio de modo lo anima ThemeTransitionHost; sin esto, el tema
         // también se interpolaría y se verían colores intermedios.
         themeAnimationDuration: Duration.zero,
+        // Calendario, menús y demás textos de Flutter en español.
+        locale: const Locale('es'),
+        supportedLocales: const [Locale('es'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: Scaffold(
             body: MultiProvider(
           providers: [

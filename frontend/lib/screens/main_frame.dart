@@ -181,8 +181,9 @@ class MainFrameState extends State<MainFrame> {
   void _openCart() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.background,
       isScrollControlled: true,
+      showDragHandle: true,
+      constraints: const BoxConstraints(maxWidth: 640),
       builder: (context) => cartList,
     );
   }

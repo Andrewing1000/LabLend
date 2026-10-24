@@ -30,6 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Textos de Flutter (calendario, menús) en español; viene con el SDK.
+  flutter_localizations:
+    sdk: flutter
   palette_generator: ^0.3.0
   provider: ^6.1.2
   dio: ^5.1.1
