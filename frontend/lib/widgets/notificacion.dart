@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/themes/AppTheme.dart';
@@ -33,95 +32,73 @@ class ConfirmationWidget extends NotificationWidget {
   @override
   Widget build(BuildContext context) {
     final destructive = _destructive;
-    final accent = destructive ? AppColors.error : AppColors.primary;
 
     return Stack(
       children: [
         Positioned.fill(
           child: GestureDetector(
             onTap: () => _answer(false),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(color: Colors.black.withOpacity(0.55)),
-            ),
+            child: Container(color: Colors.black.withOpacity(0.6)),
           ),
         ),
         Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.94, end: 1),
-              duration: const Duration(milliseconds: 200),
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 180),
               curve: Curves.easeOut,
-              builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
+              builder: (context, t, child) => Opacity(opacity: t, child: child),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
                 child: Material(
                   color: AppColors.surfaceHigh,
-                  elevation: 24,
+                  elevation: 12,
                   shadowColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.lg + 4),
-                    side: const BorderSide(color: AppColors.border),
-                  ),
+                  borderRadius: BorderRadius.circular(AppRadius.md + 2),
                   child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.xl, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: accent.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(AppRadius.md),
-                              ),
-                              child: Icon(
-                                destructive ? Icons.delete_outline : Icons.help_outline,
-                                color: accent,
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () => _answer(false),
-                              tooltip: 'Cerrar',
-                              icon: const Icon(Icons.close, size: 20),
-                              color: AppColors.textSecondary,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
                         Semantics(
                           liveRegion: true,
-                          child: Text(
-                            message,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              height: 1.45,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: AppSpacing.sm),
+                            child: Text(
+                              message,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                height: 1.55,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
-                        Wrap(
-                          alignment: WrapAlignment.end,
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            OutlinedButton(
+                            TextButton(
                               onPressed: () => _answer(false),
+                              style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
                               child: const Text('Cancelar'),
                             ),
-                            FilledButton(
-                              onPressed: () => _answer(true),
-                              style: FilledButton.styleFrom(backgroundColor: accent),
-                              child: Text(buttonText),
-                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            // Borrar o desactivar: el texto del botón va en
+                            // el tono de error, sin fondo de color.
+                            destructive
+                                ? TextButton(
+                                    onPressed: () => _answer(true),
+                                    style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                                    child: Text(buttonText),
+                                  )
+                                : FilledButton(
+                                    onPressed: () => _answer(true),
+                                    child: Text(buttonText),
+                                  ),
                           ],
                         ),
                       ],

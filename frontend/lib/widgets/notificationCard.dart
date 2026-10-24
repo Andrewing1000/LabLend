@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/services/ContextMessageService.dart';
 import 'package:frontend/themes/AppTheme.dart';
 
-/// Aviso flotante abajo de la pantalla. Su ícono y color dicen si es
-/// información, éxito, advertencia o error.
+/// Aviso flotante abajo de la pantalla. Es neutro: el tipo (información,
+/// éxito, advertencia o error) se nota solo por un punto de color.
 class NotificationWidget extends StatelessWidget {
   final String message;
   final NotificationKind kind;
@@ -16,16 +16,15 @@ class NotificationWidget extends StatelessWidget {
     this.onClose,
   });
 
-  static (IconData, Color) styleOf(NotificationKind kind) => switch (kind) {
-        NotificationKind.info => (Icons.info_outline, AppColors.primary),
-        NotificationKind.success => (Icons.check_circle_outline, AppColors.success),
-        NotificationKind.warning => (Icons.warning_amber_rounded, AppColors.warning),
-        NotificationKind.error => (Icons.error_outline, AppColors.error),
+  static Color colorOf(NotificationKind kind) => switch (kind) {
+        NotificationKind.info => AppColors.textSecondary,
+        NotificationKind.success => AppColors.success,
+        NotificationKind.warning => AppColors.warning,
+        NotificationKind.error => AppColors.error,
       };
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = styleOf(kind);
     // En pantallas angostas queda por encima del menú inferior.
     final bottom = AppBreakpoints.isWide(context) ? AppSpacing.xl : 100.0;
 
@@ -35,29 +34,30 @@ class NotificationWidget extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, bottom),
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
           builder: (context, t, child) => Opacity(
             opacity: t,
-            child: Transform.translate(offset: Offset(0, 24 * (1 - t)), child: child),
+            child: Transform.translate(offset: Offset(0, 12 * (1 - t)), child: child),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
+            constraints: const BoxConstraints(maxWidth: 440),
             child: Semantics(
               liveRegion: true,
               child: Material(
                 color: AppColors.surfaceHighest,
-                elevation: 12,
+                elevation: 6,
                 shadowColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md + 2),
-                  side: BorderSide(color: color.withOpacity(0.5)),
-                ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.xs, AppSpacing.md),
                   child: Row(
                     children: [
-                      Icon(icon, color: color, size: 22),
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(color: colorOf(kind), shape: BoxShape.circle),
+                      ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Text(
@@ -65,7 +65,7 @@ class NotificationWidget extends StatelessWidget {
                           style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 14,
-                            height: 1.4,
+                            height: 1.45,
                           ),
                         ),
                       ),
@@ -73,8 +73,8 @@ class NotificationWidget extends StatelessWidget {
                         IconButton(
                           onPressed: onClose,
                           tooltip: 'Cerrar aviso',
-                          icon: const Icon(Icons.close, size: 18),
-                          color: AppColors.textSecondary,
+                          icon: const Icon(Icons.close, size: 16),
+                          color: AppColors.textMuted,
                         )
                       else
                         const SizedBox(width: AppSpacing.md),

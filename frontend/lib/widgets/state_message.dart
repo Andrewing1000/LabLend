@@ -69,22 +69,14 @@ class StateMessage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 30, color: color),
-              ),
+              Icon(icon, size: 28, color: AppColors.textMuted),
               const SizedBox(height: AppSpacing.lg),
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -98,10 +90,9 @@ class StateMessage extends StatelessWidget {
               ],
               if (actionLabel != null && onAction != null) ...[
                 const SizedBox(height: AppSpacing.xl),
-                OutlinedButton.icon(
+                OutlinedButton(
                   onPressed: onAction,
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: Text(actionLabel!),
+                  child: Text(actionLabel!),
                 ),
               ],
             ],

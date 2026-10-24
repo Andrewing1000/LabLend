@@ -170,25 +170,12 @@ class ToolBarState extends State<ToolBar> {
               ),
               if (!sessionManager.isOnline)
                 Container(
-                  color: AppColors.warning,
+                  color: AppColors.surfaceHigh,
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_off, size: 16, color: AppColors.background),
-                      SizedBox(width: AppSpacing.sm),
-                      Flexible(
-                        child: Text(
-                          'Sin conexión con el servidor · modo offline',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: AppColors.background,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: const Text(
+                    'Sin conexión con el servidor',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                   ),
                 ),
             ],
@@ -482,7 +469,7 @@ class _AccountButton extends StatelessWidget {
           userInitials(user),
           style: const TextStyle(
             color: AppColors.background,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w600,
             fontSize: 15,
           ),
         ),
