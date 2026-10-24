@@ -176,7 +176,7 @@ class _UsersSummary extends StatelessWidget {
           TextSpan(children: [
             TextSpan(
               text: '${users.length}',
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
             ),
             TextSpan(
               text: users.length == 1 ? '  cuenta' : '  cuentas',

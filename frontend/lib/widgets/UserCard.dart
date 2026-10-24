@@ -27,31 +27,27 @@ enum AccountStatus {
   }
 }
 
-/// Píldora de color con el estado de la cuenta.
+/// Estado de la cuenta: un punto de color y el texto, sin fondo ni borde.
 class AccountStatusBadge extends StatelessWidget {
   final AccountStatus status;
   const AccountStatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs + 1),
-      decoration: BoxDecoration(
-        color: status.color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: status.color.withOpacity(0.4)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(status.icon, size: 14, color: status.color),
-          const SizedBox(width: AppSpacing.xs + 2),
-          Text(
-            status.label,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: status.color),
-          ),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: status.color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          status.label,
+          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+        ),
+      ],
     );
   }
 }
@@ -84,24 +80,23 @@ class _UserCardState extends State<UserCard> {
         builder: (context, user, child) {
           final status = AccountStatus.of(user);
           final compact = AppBreakpoints.isCompact(context);
-          final avatarColor = user.securityAccount ? AppColors.warning : AppColors.primary;
 
           final identity = Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: avatarColor.withOpacity(0.15),
+                decoration: const BoxDecoration(
+                  color: AppColors.surfaceHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   userInitials(user),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: avatarColor,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -116,7 +111,7 @@ class _UserCardState extends State<UserCard> {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -143,14 +138,15 @@ class _UserCardState extends State<UserCard> {
             ],
           );
 
-          final roles = user.roles.isEmpty
-              ? const Text('Sin roles',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontStyle: FontStyle.italic))
-              : Wrap(
-                  spacing: AppSpacing.xs + 2,
-                  runSpacing: AppSpacing.xs + 2,
-                  children: [for (final role in user.roles) _RoleChip(name: role)],
-                );
+          final roles = Text(
+            user.roles.isEmpty ? 'Sin roles' : user.roles.map(readableRole).join(', '),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              color: user.roles.isEmpty ? AppColors.textMuted : AppColors.textSecondary,
+            ),
+          );
 
           return Semantics(
             button: true,
@@ -163,14 +159,11 @@ class _UserCardState extends State<UserCard> {
                 onTap: widget.onTap,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg + 4, vertical: AppSpacing.md + 2),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: isHovered ? AppColors.surfaceHighest : AppColors.surfaceHigh,
-                    borderRadius: BorderRadius.circular(AppRadius.md + 2),
-                    border: Border.all(
-                      color: isHovered ? AppColors.primary.withOpacity(0.4) : Colors.transparent,
-                    ),
+                    color: isHovered ? AppColors.surfaceHigh : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    border: const Border(bottom: BorderSide(color: AppColors.border)),
                   ),
                   child: compact
                       ? Column(
@@ -201,7 +194,8 @@ class _UserCardState extends State<UserCard> {
                             ),
                             Icon(
                               Icons.chevron_right,
-                              color: isHovered ? AppColors.textPrimary : AppColors.textMuted,
+                              size: 18,
+                              color: isHovered ? AppColors.textSecondary : AppColors.border,
                             ),
                           ],
                         ),
@@ -215,27 +209,6 @@ class _UserCardState extends State<UserCard> {
   }
 }
 
-class _RoleChip extends StatelessWidget {
-  final String name;
-  const _RoleChip({required this.name});
-
-  /// "AdministradorSeguridad" → "Administrador Seguridad".
-  static String _readable(String name) =>
-      name.replaceAllMapped(RegExp(r'(?<=[a-záéíóúñ])(?=[A-ZÁÉÍÓÚÑ])'), (_) => ' ');
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppColors.background.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Text(
-        _readable(name),
-        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-      ),
-    );
-  }
-}
+/// "AdministradorSeguridad" → "Administrador Seguridad".
+String readableRole(String name) =>
+    name.replaceAllMapped(RegExp(r'(?<=[a-záéíóúñ])(?=[A-ZÁÉÍÓÚÑ])'), (_) => ' ');

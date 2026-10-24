@@ -134,7 +134,7 @@ class _PasswordCreationFieldState extends State<PasswordCreationField> {
                       curve: Curves.easeOut,
                       builder: (context, value, _) => LinearProgressIndicator(
                         value: value,
-                        minHeight: 6,
+                        minHeight: 4,
                         color: color,
                         backgroundColor: AppColors.surfaceHighest,
                       ),
@@ -182,10 +182,10 @@ class _RuleRow extends StatelessWidget {
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: Icon(
-              met ? Icons.check_circle : Icons.radio_button_unchecked,
+              met ? Icons.check : Icons.remove,
               key: ValueKey(met),
-              size: 18,
-              color: met ? AppColors.success : AppColors.textMuted,
+              size: 16,
+              color: met ? AppColors.textPrimary : AppColors.textMuted,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

@@ -98,8 +98,6 @@ class LoginPageState extends State<LoginScreen> {
           const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shield_outlined, size: 14, color: AppColors.textMuted),
-              SizedBox(width: AppSpacing.xs + 2),
               Flexible(
                 child: Text(
                   'Tras 3 intentos fallidos la cuenta se bloquea.',

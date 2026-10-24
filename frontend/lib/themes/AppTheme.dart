@@ -3,28 +3,29 @@ import 'package:flutter/material.dart';
 /// Paleta única de la aplicación. Los widgets deben tomar sus colores de aquí
 /// (o de Theme.of(context)) en lugar de escribir Colors.xxx a mano.
 class AppColors {
-  // Fondos, del más profundo al más elevado
-  static const Color background = Color(0xFF000000);
-  static const Color surface = Color(0xFF151515);
-  static const Color surfaceHigh = Color(0xFF212121);
-  static const Color surfaceHighest = Color(0xFF2E2E2E);
-  static const Color border = Color(0xFF3A3A3A);
+  // Neutros cálidos, del más profundo al más elevado. Las diferencias son
+  // pequeñas a propósito: la jerarquía la dan el texto y el espacio.
+  static const Color background = Color(0xFF0B0B0B);
+  static const Color surface = Color(0xFF141414);
+  static const Color surfaceHigh = Color(0xFF1B1B1B);
+  static const Color surfaceHighest = Color(0xFF242424);
+  static const Color border = Color(0xFF2C2C2C);
 
-  // Acento de marca
-  static const Color primary = Color(0xFF2195F1);
-  static const Color onPrimary = Color(0xFFFFFFFF);
-  // Azul apagado para superficies grandes (encabezados), donde el primario cansa
-  static const Color primaryMuted = Color(0xFF41659A);
+  // Acento: un azul apagado que se usa poco (acción principal, selección).
+  static const Color primary = Color(0xFF7FA6D9);
+  static const Color onPrimary = Color(0xFF0E1116);
+  // Azul más oscuro para superficies grandes, donde el acento cansa
+  static const Color primaryMuted = Color(0xFF34465E);
 
-  // Estados
-  static const Color success = Color(0xFF4CAF50);
-  static const Color warning = Color(0xFFFF9800);
-  static const Color error = Color(0xFFEF5350);
+  // Estados, desaturados: informan sin llamar la atención.
+  static const Color success = Color(0xFF8FB59A);
+  static const Color warning = Color(0xFFCFAE79);
+  static const Color error = Color(0xFFD08B85);
 
-  // Texto
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFB3B3B3);
-  static const Color textMuted = Color(0xFF8A8A8A);
+  // Texto: blanco roto en lugar de blanco puro.
+  static const Color textPrimary = Color(0xFFECECEC);
+  static const Color textSecondary = Color(0xFFA6A6A6);
+  static const Color textMuted = Color(0xFF808080);
 }
 
 /// Escala de espaciado (múltiplos de 4).
@@ -90,9 +91,9 @@ class AppTheme {
   // directamente y, sin ella, caían en Roboto.
   static final TextTheme _textTheme = const TextTheme(
     headlineLarge: TextStyle(fontWeight: FontWeight.w900, fontSize: 40, color: AppColors.textPrimary),
-    titleLarge: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, color: AppColors.textPrimary),
-    titleMedium: TextStyle(fontWeight: FontWeight.w900, fontSize: 25, color: AppColors.textPrimary),
-    titleSmall: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.textPrimary),
+    titleLarge: TextStyle(fontWeight: FontWeight.w700, fontSize: 32, color: AppColors.textPrimary),
+    titleMedium: TextStyle(fontWeight: FontWeight.w700, fontSize: 25, color: AppColors.textPrimary),
+    titleSmall: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: AppColors.textPrimary),
 
     bodyLarge: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: AppColors.textPrimary),
     bodyMedium: TextStyle(fontWeight: FontWeight.w300, fontSize: 14, color: AppColors.textPrimary),

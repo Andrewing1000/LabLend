@@ -53,7 +53,7 @@ class AccessMatrix extends StatelessWidget {
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: AppColors.surfaceHigh,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: Column(
@@ -141,8 +141,6 @@ class _RoleHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final security = role.area == securityArea;
-    final color = security ? AppColors.warning : AppColors.primary;
     final granted = role.permissions.length;
 
     return Padding(
@@ -150,41 +148,6 @@ class _RoleHeader extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  security ? Icons.admin_panel_settings_outlined : Icons.science_outlined,
-                  size: 20,
-                  color: color,
-                ),
-              ),
-              if (role.protected)
-                Positioned(
-                  right: -4,
-                  bottom: -2,
-                  child: Tooltip(
-                    message: 'Rol protegido: no se puede eliminar',
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: AppColors.surface,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.lock, size: 12, color: AppColors.textPrimary),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
           Text(
             AccessMatrix._readableName(role.name),
             textAlign: TextAlign.center,
@@ -192,14 +155,14 @@ class _RoleHeader extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 13,
-              height: 1.25,
-              fontWeight: FontWeight.w700,
+              height: 1.3,
+              fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '$granted de $total',
+            role.protected ? '$granted de $total · protegido' : '$granted de $total',
             style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
@@ -226,7 +189,7 @@ class _AreaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.surfaceHighest,
+        color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -237,13 +200,11 @@ class _AreaRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: Row(
                 children: [
-                  Icon(icon, size: 18, color: AppColors.primary),
-                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     areaNames[area] ?? area,
                     style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -370,19 +331,10 @@ class _AccessMark extends StatelessWidget {
       label: '$label: ${granted ? 'permitido' : 'no permitido'}',
       excludeSemantics: true,
       child: granted
-          ? Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.15),
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primary.withOpacity(0.5)),
-              ),
-              child: const Icon(Icons.check, size: 16, color: AppColors.primary),
-            )
+          ? const Icon(Icons.check, size: 18, color: AppColors.textPrimary)
           : Container(
-              width: 6,
-              height: 6,
+              width: 4,
+              height: 4,
               decoration: const BoxDecoration(
                 color: AppColors.border,
                 shape: BoxShape.circle,
@@ -409,14 +361,9 @@ class _Legend extends StatelessWidget {
           Text('Tiene el permiso', style: style),
         ]),
         const Row(mainAxisSize: MainAxisSize.min, children: [
-          SizedBox(width: 28, child: Center(child: _AccessMark(granted: false, label: 'Leyenda'))),
+          SizedBox(width: 18, child: Center(child: _AccessMark(granted: false, label: 'Leyenda'))),
           SizedBox(width: AppSpacing.sm),
           Text('No lo tiene', style: style),
-        ]),
-        const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.lock, size: 14, color: AppColors.textSecondary),
-          SizedBox(width: AppSpacing.sm),
-          Text('Rol protegido', style: style),
         ]),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),

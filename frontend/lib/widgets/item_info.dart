@@ -134,7 +134,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                                 style: TextStyle(
                                   color: dominantColor.computeLuminance() < 0.5 ? AppColors.background : AppColors.textPrimary,
                                   fontSize: 28,
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w700,
                                   overflow: TextOverflow.ellipsis,
                                   shadows: [
                                     Shadow(

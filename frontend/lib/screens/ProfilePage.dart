@@ -69,11 +69,9 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceHigh,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: child,
     );
@@ -87,15 +85,9 @@ class _CardTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppColors.primary),
-        const SizedBox(width: AppSpacing.sm),
-        Text(text,
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-      ],
-    );
+    return Text(text,
+        style: const TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary));
   }
 }
 
@@ -108,56 +100,32 @@ class _IdentityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = user.securityAccount ? AppColors.warning : AppColors.primary;
-    return _Card(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
       child: Row(
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 56,
+            height: 56,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
+            decoration: const BoxDecoration(color: AppColors.surfaceHighest, shape: BoxShape.circle),
             child: Text(userInitials(user),
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color)),
+                style: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
           ),
-          const SizedBox(width: AppSpacing.lg + 4),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user.name,
                     style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 const SizedBox(height: AppSpacing.xs),
-                Text.rich(
-                  TextSpan(children: [
-                    TextSpan(
-                        text: user.username,
-                        style: const TextStyle(
-                            fontFamily: 'monospace', color: AppColors.textSecondary)),
-                    const TextSpan(text: '  ·  '),
-                    TextSpan(text: user.email),
-                  ]),
-                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Wrap(
-                  spacing: AppSpacing.xs + 2,
-                  runSpacing: AppSpacing.xs + 2,
-                  children: [
-                    for (final role in user.roles)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm + 2, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                        child: Text(_readable(role),
-                            style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w600, color: color)),
-                      ),
-                  ],
+                Text(
+                  [user.username, user.email, if (user.roles.isNotEmpty) user.roles.map(_readable).join(', ')]
+                      .join('  ·  '),
+                  style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
                 ),
               ],
             ),
@@ -188,7 +156,7 @@ class _PasswordCard extends StatelessWidget {
     final expiresAt = user.passwordExpiresAt;
     final days = user.passwordDaysLeft;
 
-    final (String label, IconData icon, Color color) = user.passwordExpired || (days != null && days <= 0)
+    final (String label, IconData _, Color color) = user.passwordExpired || (days != null && days <= 0)
         ? ('Vencida', Icons.error_outline, AppColors.error)
         : user.passwordExpiresSoon
             ? ('Vence pronto', Icons.warning_amber_rounded, AppColors.warning)
@@ -204,19 +172,12 @@ class _PasswordCard extends StatelessWidget {
             children: [
               const Expanded(child: _CardTitle(icon: Icons.key_outlined, text: 'Contraseña')),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                  border: Border.all(color: color.withOpacity(0.4)),
-                ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(icon, size: 14, color: color),
-                  const SizedBox(width: AppSpacing.xs + 2),
-                  Text(label,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
-                ]),
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -238,8 +199,8 @@ class _PasswordCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.pill),
                 child: LinearProgressIndicator(
                   value: remaining,
-                  minHeight: 8,
-                  color: color,
+                  minHeight: 4,
+                  color: user.passwordExpiresSoon || user.passwordExpired ? color : AppColors.textSecondary,
                   backgroundColor: AppColors.surfaceHighest,
                 ),
               ),
@@ -255,10 +216,9 @@ class _PasswordCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Align(
             alignment: Alignment.centerLeft,
-            child: FilledButton.icon(
+            child: OutlinedButton(
               onPressed: onChangePassword,
-              icon: const Icon(Icons.key_outlined, size: 18),
-              label: const Text('Cambiar contraseña'),
+              child: const Text('Cambiar contraseña'),
             ),
           ),
         ],
@@ -418,23 +378,20 @@ class _PolicyTileState extends State<_PolicyTile> {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: hovered ? AppColors.surfaceHighest : AppColors.background.withOpacity(0.35),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                  color: hovered ? AppColors.primary.withOpacity(0.4) : Colors.transparent),
+              color: hovered ? AppColors.surfaceHigh : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              border: Border.all(color: AppColors.border),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(policy.icon, size: 20, color: AppColors.primary),
-                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(policy.title,
                           style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                              fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                       const SizedBox(height: AppSpacing.xs),
                       Text(policy.summary,
                           style: const TextStyle(
@@ -444,7 +401,7 @@ class _PolicyTileState extends State<_PolicyTile> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Icon(Icons.chevron_right,
-                    size: 20, color: hovered ? AppColors.textPrimary : AppColors.textMuted),
+                    size: 18, color: hovered ? AppColors.textSecondary : AppColors.textMuted),
               ],
             ),
           ),
@@ -475,25 +432,9 @@ void _showPolicyDetail(BuildContext context, _Policy policy) {
         controller: controller,
         padding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xxl),
         children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(policy.icon, color: AppColors.primary),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(policy.title,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-              ),
-            ],
-          ),
+          Text(policy.title,
+              style: const TextStyle(
+                  fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: AppSpacing.xl),
           const _SheetHeading('¿Qué es?'),
           Text(policy.concept,
@@ -507,10 +448,15 @@ void _showPolicyDetail(BuildContext context, _Policy policy) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.only(top: 2),
-                    child: Icon(Icons.check, size: 16, color: AppColors.primary),
+                    padding: EdgeInsets.only(top: 9, right: AppSpacing.md),
+                    child: SizedBox(
+                      width: 4,
+                      height: 4,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(color: AppColors.textMuted, shape: BoxShape.circle),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(rule,
                         style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.textPrimary)),
@@ -560,26 +506,27 @@ class _ExampleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = ok ? AppColors.success : AppColors.error;
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm + 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(ok ? Icons.check_circle : Icons.cancel, size: 18, color: color),
-          const SizedBox(width: AppSpacing.sm),
-          Text(password,
-              style: const TextStyle(
-                  fontFamily: 'monospace', fontSize: 14, color: AppColors.textPrimary)),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(
+            width: 20,
+            child: Text(ok ? '✓' : '✕',
+                style: TextStyle(fontSize: 14, color: ok ? AppColors.success : AppColors.error)),
+          ),
           Expanded(
-            child: Text('· $note',
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            child: Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: password,
+                  style: const TextStyle(fontFamily: 'monospace', color: AppColors.textPrimary),
+                ),
+                TextSpan(text: '   $note'),
+              ]),
+              style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
+            ),
           ),
         ],
       ),
