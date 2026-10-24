@@ -29,6 +29,7 @@ import "../services/PageManager.dart";
 
 import "../services/SelectedItemContext.dart";
 import "LoginPage.dart";
+import "ProfilePage.dart";
 import "PageContainer.dart";
 import "SearchItemPage.dart";
 import "SearchLoanPage.dart";
@@ -64,6 +65,7 @@ class MainFrameState extends State<MainFrame> {
   late CreateItemScreen createItemPage;
   late CategoryBrandScreen categoryBrandPage;
   late CreateUserScreen createUserPage;
+  late ProfilePage profilePage;
   late ItemInfoWidget sidePanel;
 
   late PageManager pageManager;
@@ -88,6 +90,7 @@ class MainFrameState extends State<MainFrame> {
     createItemPage = CreateItemScreen();
     categoryBrandPage = CategoryBrandScreen();
     createUserPage = CreateUserScreen();
+    profilePage = ProfilePage(onChangePassword: _openChangePassword);
     pageManager = PageManager(defaultPage: homePage);
     cartList = CheckoutCartList(cart: cart);
 
@@ -150,6 +153,7 @@ class MainFrameState extends State<MainFrame> {
       onLogin: _openLogin,
       onLogout: _logout,
       onChangePassword: _openChangePassword,
+      onProfile: _openProfile,
       onCartLookup: _openCart,
     );
     sidePanel = ItemInfoWidget(
@@ -166,6 +170,8 @@ class MainFrameState extends State<MainFrame> {
       });
 
   void _openChangePassword() => setState(() => onChangePassword = true);
+
+  void _openProfile() => pageManager.setPage(profilePage);
 
   Future<void> _logout() async {
     await SessionManager().logOut();
@@ -269,6 +275,7 @@ class MainFrameState extends State<MainFrame> {
                           onLogin: _openLogin,
                           onLogout: _logout,
                           onChangePassword: _openChangePassword,
+                          onProfile: _openProfile,
                         ),
                       ),
                     ),

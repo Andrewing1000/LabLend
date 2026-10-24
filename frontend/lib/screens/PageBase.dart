@@ -19,12 +19,16 @@ abstract class PageBase extends StatefulWidget {
 
 abstract class BrowsablePage extends PageBase {
   bool searchEnabled;
+
+  /// Texto de ayuda del buscador: dice por qué campo busca la página.
+  final String searchHint;
   final SearchField searchField = SearchField();
   final FilterList filterSet = FilterList();
 
   BrowsablePage({
     super.key,
     this.searchEnabled = true,
+    this.searchHint = 'Buscar por nombre',
     super.manager,
     List<Filter> filters = const [],
   }) {

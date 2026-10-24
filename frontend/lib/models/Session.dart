@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'dart:core';
 
 import 'package:frontend/models/Request.dart';
@@ -78,6 +79,38 @@ class SessionManager with ChangeNotifier {
 
   SessionManager._inner(){
     connectionCheck();
+    restoreSession();
+  }
+
+  /// Recupera la sesión al recargar la página. La cookie de sesión es
+  /// HttpOnly (D7): la aplicación no puede leerla, pero el navegador la
+  /// envía, así que se pregunta al servidor quién es el usuario. Si la
+  /// sesión venció (15 minutos) o no hay, se sigue como visitante sin avisar.
+  /// Aviso de que la contraseña está por vencer (D21): se da al entrar,
+  /// para que el usuario la cambie antes de que el sistema lo obligue.
+  void _warnPasswordExpiry(User user) {
+    if (!user.passwordExpiresSoon) return;
+    final days = user.passwordDaysLeft!;
+    warningNotification(
+        warning: days <= 0
+            ? 'Su contraseña vence hoy. Cámbiela desde Mi perfil.'
+            : 'Su contraseña vence en $days ${days == 1 ? 'día' : 'días'}. '
+                'Cámbiela desde Mi perfil.');
+  }
+
+  Future<void> restoreSession() async {
+    if (_session is! AnonymousSession) return;
+    try {
+      final response = await httpHandler.getRequest('/user/me/');
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>
+          && _session is AnonymousSession) {
+        _session = Session(user: User.fromJson(response.data), loginTime: DateTime.now());
+        notifyListeners();
+        _warnPasswordExpiry(_session.user);
+      }
+    } on DioException catch (_) {
+      // Sin sesión (403) o sin conexión: queda como visitante.
+    }
   }
 
   factory SessionManager(){
@@ -102,11 +135,19 @@ class SessionManager with ChangeNotifier {
       String detail = formatDjangoErrors(details);
       message = "$message\n$detail";
     }
-    messageService.notify(message: message);
+    messageService.notify(message: message, kind: NotificationKind.error);
   }
 
-  void notification({required String notification}){
-    messageService.notify(message: notification);
+  /// Aviso de que algo salió bien (por defecto) o informativo.
+  void notification({
+    required String notification,
+    NotificationKind kind = NotificationKind.success,
+  }){
+    messageService.notify(message: notification, kind: kind);
+  }
+
+  void warningNotification({required String warning}){
+    messageService.notify(message: warning, kind: NotificationKind.warning);
   }
 
   Future<bool> confirmNotification({required String message}) async {
@@ -123,14 +164,13 @@ class SessionManager with ChangeNotifier {
     bool connectionRes;
     try{
       connectionRes = await httpHandler.connectionCheck();
-      if(!isOnline) errorNotification(error : 'Sin conexión');
       if(connectionRes == isOnline) return isOnline;
       isOnline = connectionRes;
     }catch (e){
       isOnline = false;
     }
 
-    if(!isOnline) errorNotification(error : 'Sin conexión');
+    if(!isOnline) errorNotification(error : 'Sin conexión con el servidor. Algunas funciones no están disponibles.');
     return isOnline;
   }
 
@@ -142,7 +182,7 @@ class SessionManager with ChangeNotifier {
         return true;
       }
     }on DioException catch (e){
-      print(e.stackTrace);
+      if (kDebugMode) debugPrint(e.stackTrace.toString());
     }
 
     _session = AnonymousSession();
@@ -181,7 +221,7 @@ class SessionManager with ChangeNotifier {
     if(_session is! AnonymousSession){
       if(await sessionCheck()){
         if(_session.user.username == username){
-          notification(notification: "Ya ha iniciado sesión.");
+          notification(notification: "Ya ha iniciado sesión.", kind: NotificationKind.info);
           return _session;
         }
         else{
@@ -204,9 +244,14 @@ class SessionManager with ChangeNotifier {
         return AnonymousSession();
       }
 
-      notification(notification : 'Sesión iniciada');
       _session = Session(user: user, loginTime: DateTime.now());
       notifyListeners();
+      // Si la contraseña está por vencer, ese aviso reemplaza al de bienvenida.
+      if (user.passwordExpiresSoon) {
+        _warnPasswordExpiry(user);
+      } else {
+        notification(notification : 'Sesión iniciada');
+      }
       return _session;
 
     } on DioException catch(e){
@@ -229,7 +274,7 @@ class SessionManager with ChangeNotifier {
       }
       else{
 
-        print("Unknown Error");
+        if (kDebugMode) debugPrint("Unknown Error");
         return AnonymousSession();
       }
     }
@@ -241,11 +286,13 @@ class SessionManager with ChangeNotifier {
   /// mantiene abierta esta sesión.
   Future<bool> changeOwnPassword(
       String currentPassword, String newPassword) async {
+    dynamic data;
     try {
-      await httpHandler.patchRequest('/user/me/', body: {
+      final response = await httpHandler.patchRequest('/user/me/', body: {
         'current_password': currentPassword,
         'password': newPassword,
       });
+      data = response.data;
     } on DioException catch (e) {
       errorNotification(
           error: 'No se pudo cambiar la contraseña',
@@ -253,6 +300,11 @@ class SessionManager with ChangeNotifier {
       return false;
     }
     _session.user.passwordExpired = false;
+    // La contraseña nueva empieza otros 90 días: el servidor devuelve la fecha.
+    final expiresAt = data is Map ? data['password_expires_at'] : null;
+    _session.user.passwordExpiresAt = expiresAt is String
+        ? DateTime.tryParse(expiresAt)?.toLocal()
+        : DateTime.now().add(const Duration(days: 90));
     notification(notification: 'Contraseña cambiada');
     notifyListeners();
     return true;
@@ -269,8 +321,7 @@ class SessionManager with ChangeNotifier {
     var response = await httpHandler.postRequest('/user/logout/');
 
     if(response.statusCode == 200){
-      errorNotification(error : 'Sesión cerrada');
-      print("Hasta aqui llegamos");
+      notification(notification: 'Sesión cerrada', kind: NotificationKind.info);
       mainFrame = MainFrame(messageService: messageService);
       _session = AnonymousSession();
     }
@@ -279,9 +330,8 @@ class SessionManager with ChangeNotifier {
       _session = AnonymousSession();
     }
     else{
-      print("Hasta aqui llegamos");
       mainFrame = MainFrame(messageService: messageService);
-      errorNotification(error :'Sesión cerrada');
+      notification(notification: 'Sesión cerrada', kind: NotificationKind.info);
       _session = AnonymousSession();
     }
 

@@ -25,6 +25,9 @@ class ToolBar extends StatefulWidget {
   /// Abre el cambio de la contraseña propia (D14, D21).
   final Function? onChangePassword;
 
+  /// Abre "Mi perfil".
+  final VoidCallback? onProfile;
+
   /// Sin fondo, para ir encima de la foto de portada del inicio.
   final bool transparent;
 
@@ -37,6 +40,7 @@ class ToolBar extends StatefulWidget {
     required this.onLogout,
     required this.onCartLookup,
     this.onChangePassword,
+    this.onProfile,
     this.transparent = false,
   });
 
@@ -133,6 +137,7 @@ class ToolBarState extends State<ToolBar> {
                           onChangePassword: widget.onChangePassword == null
                               ? null
                               : () => widget.onChangePassword!(),
+                          onProfile: widget.onProfile,
                         ),
                       ],
                     ),
@@ -149,6 +154,7 @@ class ToolBarState extends State<ToolBar> {
                               constraints: const BoxConstraints(maxWidth: 560),
                               child: _SearchField(
                                 controller: searchBarController,
+                                hint: page.searchHint,
                                 onChanged: (value) => page.searchField.value = value,
                               ),
                             ),
@@ -274,8 +280,9 @@ class _NavLinkState extends State<_NavLink> {
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final String hint;
 
-  const _SearchField({required this.controller, required this.onChanged});
+  const _SearchField({required this.controller, required this.onChanged, required this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +293,7 @@ class _SearchField extends StatelessWidget {
       style: const TextStyle(color: AppColors.background, fontSize: 15),
       cursorColor: AppColors.primary,
       decoration: InputDecoration(
-        hintText: 'Buscar por nombre',
+        hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF666666), fontSize: 15),
         prefixIcon: const Icon(Icons.search, color: Color(0xFF555555)),
         filled: true,
@@ -375,6 +382,7 @@ class _AccountButton extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onLogout;
   final VoidCallback? onChangePassword;
+  final VoidCallback? onProfile;
 
   const _AccountButton({
     required this.user,
@@ -382,6 +390,7 @@ class _AccountButton extends StatelessWidget {
     required this.onLogin,
     required this.onLogout,
     this.onChangePassword,
+    this.onProfile,
   });
 
   @override
@@ -415,6 +424,7 @@ class _AccountButton extends StatelessWidget {
       tooltip: 'Mi cuenta',
       offset: const Offset(0, 52),
       onSelected: (value) {
+        if (value == 'profile') onProfile?.call();
         if (value == 'password') onChangePassword?.call();
         if (value == 'logout') onLogout();
       },
@@ -433,6 +443,15 @@ class _AccountButton extends StatelessWidget {
           ),
         ),
         const PopupMenuDivider(),
+        if (onProfile != null)
+          const PopupMenuItem<String>(
+            value: 'profile',
+            child: ListTile(
+              leading: Icon(Icons.person_outline),
+              title: Text('Mi perfil'),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
         if (onChangePassword != null)
           const PopupMenuItem<String>(
             value: 'password',

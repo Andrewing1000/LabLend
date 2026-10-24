@@ -20,6 +20,21 @@ abstract class User extends ChangeNotifier{
   bool isLocked = false;
   /// La contraseña venció (D21): debe cambiarla antes de seguir.
   bool passwordExpired = false;
+  /// Cuándo vence la contraseña (90 días después de elegirla, D21). Null si
+  /// la cuenta todavía no tiene contraseña.
+  DateTime? passwordExpiresAt;
+
+  /// Días que le quedan a la contraseña; negativo si ya venció.
+  int? get passwordDaysLeft => passwordExpiresAt == null
+      ? null
+      : (passwordExpiresAt!.difference(DateTime.now()).inHours / 24).ceil();
+
+  /// Faltan [passwordWarningDays] días o menos para que venza: se avisa.
+  static const int passwordWarningDays = 7;
+  bool get passwordExpiresSoon {
+    final days = passwordDaysLeft;
+    return !passwordExpired && days != null && days <= passwordWarningDays;
+  }
   /// Nombres de todos los roles de la cuenta (D15).
   List<String> roles;
   /// Permisos de todos sus roles, según el servidor. Deciden qué opciones
@@ -66,6 +81,9 @@ abstract class User extends ChangeNotifier{
     user.activationPending = userData['activation_pending'] ?? false;
     user.isLocked = userData['is_locked'] ?? false;
     user.passwordExpired = userData['password_expired'] ?? false;
+    final expiresAt = userData['password_expires_at'];
+    user.passwordExpiresAt =
+        expiresAt is String ? DateTime.tryParse(expiresAt)?.toLocal() : null;
     return user;
   }
 

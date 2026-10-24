@@ -187,6 +187,7 @@ Future<void> showMoreSheet({
   required VoidCallback onLogin,
   required VoidCallback onLogout,
   VoidCallback? onChangePassword,
+  VoidCallback? onProfile,
 }) {
   final user = SessionManager().session.user;
   final isVisitor = user is VisitorUser;
@@ -239,6 +240,14 @@ Future<void> showMoreSheet({
                   onTap: () => go(() => manager.setPage(item.page)),
                 ),
               const Divider(height: AppSpacing.xl),
+              if (!isVisitor && onProfile != null)
+                ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: const Text('Mi perfil'),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md)),
+                  onTap: () => go(onProfile),
+                ),
               if (!isVisitor && onChangePassword != null)
                 ListTile(
                   leading: const Icon(Icons.key_outlined),

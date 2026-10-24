@@ -18,6 +18,9 @@ class PageContainer extends StatefulWidget {
   /// Abre el cambio de la contraseña propia (D14, D21).
   final Function? onChangePassword;
 
+  /// Abre "Mi perfil".
+  final VoidCallback? onProfile;
+
   const PageContainer({
     super.key,
     required this.manager,
@@ -27,6 +30,7 @@ class PageContainer extends StatefulWidget {
     required this.onLogout,
     required this.onCartLookup,
     this.onChangePassword,
+    this.onProfile,
   });
 
   @override
@@ -46,6 +50,7 @@ class PageContainerState extends State<PageContainer> {
         onLogout: widget.onLogout,
         onCartLookup: widget.onCartLookup,
         onChangePassword: widget.onChangePassword,
+        onProfile: widget.onProfile,
         transparent: transparent,
       );
 
