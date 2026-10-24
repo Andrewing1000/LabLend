@@ -31,6 +31,17 @@ class ItemViewSet(viewsets.ModelViewSet):
             return ItemImageSerializer
         return self.serializer_class
 
+    def destroy(self, request, *args, **kwargs):
+        # Borrar un equipo prestado borraba también esas líneas de los
+        # préstamos en curso: se perdía qué tiene cada persona.
+        item = self.get_object()
+        if item.prestamoitem_set.filter(prestamo__devuelto=False).exists():
+            return Response(
+                {'detail': 'El equipo tiene préstamos en curso; '
+                           'se puede eliminar cuando se devuelvan.'},
+                status=status.HTTP_400_BAD_REQUEST)
+        return super().destroy(request, *args, **kwargs)
+
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, pk = None):
         item = self.get_object()

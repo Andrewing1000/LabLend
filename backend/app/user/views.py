@@ -42,7 +42,16 @@ from user.serializers import (
 from user.filters import SecurityEventFilter, UserFilter
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404 as _get_object_or_404
+from django.http import Http404
+
+
+def get_object_or_404(model, **filters):
+    """Como el de Django, pero con el mensaje en español."""
+    try:
+        return _get_object_or_404(model, **filters)
+    except Http404:
+        raise exceptions.NotFound('No existe una cuenta con ese correo.')
 
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.openapi import OpenApiParameter
