@@ -12,9 +12,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return MaterialApp(
-      theme: AppTheme.lightTheme,
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.darkTheme,
       home: Scaffold(
           body: MultiProvider(
         providers: [

@@ -66,6 +66,11 @@ flutter:
         - asset: assets/fonts/Metropolis-ExtraBoldItalic.ttf
           weight: 800
           style: italic
+        - asset: assets/fonts/Metropolis-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Metropolis-BoldItalic.ttf
+          weight: 700
+          style: italic
         - asset: assets/fonts/Metropolis-ExtraLight.ttf
           weight: 200
         - asset: assets/fonts/Metropolis-ExtraLightItalic.ttf
@@ -110,6 +115,7 @@ flutter:
           weight: 700
           style: italic
         - asset: assets/fonts/Roboto-Italic.ttf
+          weight: 400
           style: italic
         - asset: assets/fonts/Roboto-Light.ttf
           weight: 300
@@ -123,7 +129,6 @@ flutter:
           style: italic
         - asset: assets/fonts/Roboto-Regular.ttf
           weight: 400
-          style: italic
         - asset: assets/fonts/Roboto-Thin.ttf
           weight: 100
         - asset: assets/fonts/Roboto-ThinItalic.ttf
