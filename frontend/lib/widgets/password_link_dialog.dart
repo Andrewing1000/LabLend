@@ -29,7 +29,7 @@ Future<void> showPasswordLinkDialog(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Entregue este enlace a ${link.username}. $what',
-                style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.textSecondary)),
+                style: TextStyle(fontSize: 14, height: 1.5, color: AppColors.textSecondary)),
             const SizedBox(height: AppSpacing.lg),
             Container(
               padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.xs, AppSpacing.sm),
@@ -43,7 +43,7 @@ Future<void> showPasswordLinkDialog(
                   Expanded(
                     child: SelectableText(
                       link.url,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontFamily: 'monospace', fontSize: 13, color: AppColors.textPrimary),
                     ),
                   ),
@@ -56,7 +56,7 @@ Future<void> showPasswordLinkDialog(
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            const Text(
+            Text(
               'Vence en 24 horas, sirve una sola vez y no se volverá a mostrar: '
               'cópielo antes de cerrar.',
               style: TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),

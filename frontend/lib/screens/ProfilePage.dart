@@ -32,7 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
         builder: (context, sessionManager, _) {
           final user = sessionManager.session.user;
           if (user is VisitorUser) {
-            return const Center(
+            return Center(
               child: Text('Inicie sesión para ver su perfil.',
                   style: TextStyle(color: AppColors.textSecondary)),
             );
@@ -70,7 +70,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: child,
@@ -86,7 +86,7 @@ class _CardTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text,
-        style: const TextStyle(
+        style: TextStyle(
             fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary));
   }
 }
@@ -108,9 +108,9 @@ class _IdentityCard extends StatelessWidget {
             width: 56,
             height: 56,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(color: AppColors.surfaceHighest, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppColors.surfaceHighest, shape: BoxShape.circle),
             child: Text(userInitials(user),
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
           ),
           const SizedBox(width: AppSpacing.lg),
@@ -119,13 +119,13 @@ class _IdentityCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   [user.username, user.email, if (user.roles.isNotEmpty) user.roles.map(_readable).join(', ')]
                       .join('  ·  '),
-                  style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
                 ),
               ],
             ),
@@ -177,7 +177,7 @@ class _PasswordCard extends StatelessWidget {
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              Text(label, style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -187,10 +187,10 @@ class _PasswordCard extends StatelessWidget {
                 TextSpan(text: days > 0 ? 'Vence el ' : 'Venció el '),
                 TextSpan(
                     text: _date(expiresAt),
-                    style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 if (days > 0) TextSpan(text: '  ·  quedan $days ${days == 1 ? 'día' : 'días'}'),
               ]),
-              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.md),
             Semantics(
@@ -210,7 +210,7 @@ class _PasswordCard extends StatelessWidget {
               'Las contraseñas duran $lifeDays días. Se avisa desde '
               '${User.passwordWarningDays} días antes; al vencer, el sistema '
               'pide cambiarla antes de cualquier otra acción.',
-              style: const TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),
+              style: TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
@@ -329,7 +329,7 @@ class _PolicyCard extends StatelessWidget {
         children: [
           const _CardTitle(icon: Icons.policy_outlined, text: 'Política de contraseñas'),
           const SizedBox(height: AppSpacing.xs),
-          const Text('Toque una política para ver el detalle.',
+          Text('Toque una política para ver el detalle.',
               style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
           const SizedBox(height: AppSpacing.lg),
           LayoutBuilder(builder: (context, constraints) {
@@ -390,11 +390,11 @@ class _PolicyTileState extends State<_PolicyTile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(policy.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                       const SizedBox(height: AppSpacing.xs),
                       Text(policy.summary,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 12, height: 1.45, color: AppColors.textSecondary)),
                     ],
                   ),
@@ -433,12 +433,12 @@ void _showPolicyDetail(BuildContext context, _Policy policy) {
         padding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xxl),
         children: [
           Text(policy.title,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: AppSpacing.xl),
           const _SheetHeading('¿Qué es?'),
           Text(policy.concept,
-              style: const TextStyle(fontSize: 14, height: 1.6, color: AppColors.textSecondary)),
+              style: TextStyle(fontSize: 14, height: 1.6, color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.xl),
           const _SheetHeading('Cómo la aplica LabLend'),
           for (final rule in policy.rules)
@@ -447,7 +447,7 @@ void _showPolicyDetail(BuildContext context, _Policy policy) {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(top: 9, right: AppSpacing.md),
                     child: SizedBox(
                       width: 4,
@@ -459,7 +459,7 @@ void _showPolicyDetail(BuildContext context, _Policy policy) {
                   ),
                   Expanded(
                     child: Text(rule,
-                        style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.textPrimary)),
+                        style: TextStyle(fontSize: 14, height: 1.5, color: AppColors.textPrimary)),
                   ),
                 ],
               ),
@@ -473,7 +473,7 @@ void _showPolicyDetail(BuildContext context, _Policy policy) {
               _ExampleRow(password: policy.valid!, note: 'cumple todas las políticas', ok: true),
           ],
           const SizedBox(height: AppSpacing.lg),
-          const Text(
+          Text(
             'Estas reglas las valida el servidor: no se pueden saltar desde la aplicación.',
             style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
@@ -492,7 +492,7 @@ class _SheetHeading extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(text.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
     );
   }
@@ -521,11 +521,11 @@ class _ExampleRow extends StatelessWidget {
               TextSpan(children: [
                 TextSpan(
                   text: password,
-                  style: const TextStyle(fontFamily: 'monospace', color: AppColors.textPrimary),
+                  style: TextStyle(fontFamily: 'monospace', color: AppColors.textPrimary),
                 ),
                 TextSpan(text: '   $note'),
               ]),
-              style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
+              style: TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
             ),
           ),
         ],

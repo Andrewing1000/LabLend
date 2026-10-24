@@ -114,7 +114,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             onSubmitted: (_) => _save(),
           ),
           const SizedBox(height: AppSpacing.sm),
-          const Text(
+          Text(
             'Tampoco puede ser una contraseña común ni una de las últimas 5 que usó.',
             style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),

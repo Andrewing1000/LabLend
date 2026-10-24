@@ -55,7 +55,7 @@ class _LoanCardState extends State<LoanCard> {
                         fit: FlexFit.tight,
                         child: Text(
                           loan.usuario,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
@@ -70,7 +70,7 @@ class _LoanCardState extends State<LoanCard> {
                         fit: FlexFit.tight,
                         child: Text(
                           loan.fechaPrestamo.toIso8601String().split("T").join(" "),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             color: AppColors.textMuted,
                           ),
@@ -84,7 +84,7 @@ class _LoanCardState extends State<LoanCard> {
                         fit: FlexFit.tight,
                         child: Text(
                           loan.fechaDevolucion.toIso8601String().split("T").join(" "),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             color: AppColors.textMuted,
                           ),

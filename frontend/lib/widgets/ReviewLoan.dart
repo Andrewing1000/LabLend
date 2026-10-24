@@ -20,7 +20,7 @@ class Reviewloan extends StatelessWidget {
       child: Consumer<Loan>(
         builder: (context, loan, child) {
           if(loan.items.isEmpty){
-            return const Center(
+            return Center(
               child: Text(
                 "El carrito está vacío",
                 style: TextStyle(
@@ -76,15 +76,15 @@ class Reviewloan extends StatelessWidget {
                               borderRadius: BorderRadius.circular(200),
                             ),
                             backgroundColor: AppColors.primary,
-                            icon: const Icon(Icons.check, size: 20, color: AppColors.textPrimary,),
-                            label: const Text("Devolver", style: TextStyle(
+                            icon: Icon(Icons.check, size: 20, color: AppColors.textPrimary,),
+                            label: Text("Devolver", style: TextStyle(
                               color: AppColors.textPrimary,
                               ),
                             )
                         ),
 
                         if(loan.devuelto)
-                          const Center(
+                          Center(
                             child: Row(
                               children: [
                                 Text("Devuelto",

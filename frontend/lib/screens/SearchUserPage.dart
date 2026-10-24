@@ -180,10 +180,10 @@ class _UsersSummary extends StatelessWidget {
             ),
             TextSpan(
               text: users.length == 1 ? '  cuenta' : '  cuentas',
-              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
             ),
           ]),
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
         for (final (status, n) in chips)
           Row(
@@ -196,7 +196,7 @@ class _UsersSummary extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.xs + 2),
               Text('$n ${status.label.toLowerCase()}',
-                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             ],
           ),
       ],
@@ -208,7 +208,7 @@ class _UsersSummary extends StatelessWidget {
 class _UsersHeader extends StatelessWidget {
   const _UsersHeader();
 
-  static const _style = TextStyle(
+  static TextStyle get _style => TextStyle(
     fontSize: 12,
     letterSpacing: 1.2,
     fontWeight: FontWeight.w700,
@@ -217,7 +217,7 @@ class _UsersHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg + 5),
       child: Row(
         children: [

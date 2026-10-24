@@ -130,16 +130,16 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+                Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
                 const SizedBox(width: AppSpacing.md),
-                const Text('Código de usuario',
+                Text('Código de usuario',
                     style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                 const Spacer(),
                 Flexible(
                   child: Text(
                     link!.username,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                 ),

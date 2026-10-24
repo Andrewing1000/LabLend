@@ -131,7 +131,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               children: [
                                 Text(
                                   item!.nombre,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -140,7 +140,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                 ),
                                 Text(
                                   item!.serialNumber ?? 'Sin número de serie',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.textSecondary,
                                     fontSize: 12,
                                   ),
@@ -180,7 +180,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                               ),
                               Text(
                                 selectedQuantity.toString(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                     color: AppColors.textPrimary, fontSize: 14),
                               ),
                               ElevatedButton(
@@ -216,13 +216,13 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                           if(!widget.editable)
                             Text(
                               'Cantidad: ${selectedQuantity.toString()}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: AppColors.textPrimary, fontSize: 14),
                             ),
                           const SizedBox(width: 16),
                           if(widget.editable) IconButton(
                             onPressed: _removeItem,
-                            icon: const Icon(Icons.delete, color: AppColors.textPrimary),
+                            icon: Icon(Icons.delete, color: AppColors.textPrimary),
                           ),
                         ],
                       ),

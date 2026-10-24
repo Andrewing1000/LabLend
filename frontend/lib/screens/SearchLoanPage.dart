@@ -78,7 +78,7 @@ class SearchLoanPage extends BrowsablePage {
           return Column(
             children: [
               Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                     color: AppColors.background,
                     border: Border.symmetric(
                       horizontal: BorderSide(
@@ -88,7 +88,7 @@ class SearchLoanPage extends BrowsablePage {
                     )
                 ),
                 padding: const EdgeInsets.fromLTRB(40.0, 20, 40, 20),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(

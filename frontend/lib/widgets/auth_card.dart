@@ -11,7 +11,7 @@ class AuthCard extends StatelessWidget {
   final Widget child;
 
   /// Color del círculo del ícono (por defecto, el azul de marca).
-  final Color accent;
+  final Color? accent;
 
   /// Si se da, muestra la X para cerrar la tarjeta.
   final VoidCallback? onClose;
@@ -22,7 +22,7 @@ class AuthCard extends StatelessWidget {
     required this.title,
     required this.child,
     this.subtitle,
-    this.accent = AppColors.primary,
+    this.accent,
     this.onClose,
   });
 
@@ -54,7 +54,7 @@ class AuthCard extends StatelessWidget {
                         header: true,
                         child: Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.2,
@@ -66,7 +66,7 @@ class AuthCard extends StatelessWidget {
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           subtitle!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             height: 1.5,
                             color: AppColors.textSecondary,
@@ -122,7 +122,7 @@ class AuthPrimaryButton extends StatelessWidget {
         disabledForegroundColor: AppColors.onPrimary,
       ),
       child: loading
-          ? const SizedBox(
+          ? SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.onPrimary),

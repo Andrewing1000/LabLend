@@ -124,24 +124,24 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                       controller: _categoryNameController,
                       decoration: InputDecoration(
                         labelText: 'Nombre de la Categoría',
-                        labelStyle: const TextStyle(color: AppColors.textSecondary),
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
                         filled: true,
                         fillColor: AppColors.surfaceHighest,
                         border: const OutlineInputBorder(),
                       ),
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: _categoryDescriptionController,
                       decoration: InputDecoration(
                         labelText: 'Descripción',
-                        labelStyle: const TextStyle(color: AppColors.textSecondary),
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
                         filled: true,
                         fillColor: AppColors.surfaceHighest,
                         border: const OutlineInputBorder(),
                       ),
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
@@ -191,7 +191,7 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
           ),
 
           const SizedBox(height: 30,),
-          const Divider(
+          Divider(
             color: AppColors.textPrimary, // Custom color
             height: 10, // Space around the divider
             thickness: 1, // Thickness of the line
@@ -213,12 +213,12 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                       controller: _brandNameController,
                       decoration: InputDecoration(
                         labelText: 'Nombre de la Marca',
-                        labelStyle: const TextStyle(color: AppColors.textSecondary),
+                        labelStyle: TextStyle(color: AppColors.textSecondary),
                         filled: true,
                         fillColor: AppColors.surfaceHighest,
                         border: const OutlineInputBorder(),
                       ),
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(

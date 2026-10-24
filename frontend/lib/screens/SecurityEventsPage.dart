@@ -55,7 +55,7 @@ class SecurityEventsPage extends BrowsablePage {
           padding: const EdgeInsets.all(20),
           itemCount: events.length,
           separatorBuilder: (_, __) =>
-              const Divider(color: AppColors.border, height: 1),
+              Divider(color: AppColors.border, height: 1),
           itemBuilder: (context, index) =>
               SecurityEventTile(event: events[index]),
         );
@@ -112,21 +112,21 @@ class SecurityEventTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(event.label,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(_date,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                 if (who.isNotEmpty)
                   Text(who,
                       style:
-                          const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                          TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                 if (detail.isNotEmpty)
                   Text(detail,
                       style:
-                          const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                          TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               ],
             ),
           ),

@@ -95,7 +95,7 @@ class LoginPageState extends State<LoginScreen> {
             onPressed: _submit,
           ),
           const SizedBox(height: AppSpacing.lg),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Flexible(

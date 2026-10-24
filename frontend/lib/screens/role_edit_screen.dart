@@ -161,16 +161,16 @@ class RoleEditScreenState extends State<RoleEditScreen> {
                   width: fieldWidth,
                 ),
                 const SizedBox(height: 20),
-                const Text('Permisos',
+                Text('Permisos',
                     style: TextStyle(color: AppColors.textPrimary, fontSize: 18)),
-                const Text(
+                Text(
                     'Un rol no combina permisos de seguridad y de '
                     'laboratorio. Un rol con usuarios no puede ganar ni '
                     'perder permisos de seguridad.',
                     style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                 const SizedBox(height: 10),
                 if (loading)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(20),
                     child: CircularProgressIndicator(color: AppColors.textPrimary),
                   )
@@ -188,9 +188,9 @@ class RoleEditScreenState extends State<RoleEditScreen> {
                       const SizedBox(width: 20),
                       if (!creating && canManage)
                         OutlinedButton.icon(
-                          icon: const Icon(Icons.delete_outline,
+                          icon: Icon(Icons.delete_outline,
                               color: AppColors.error),
-                          label: const Text('Eliminar rol',
+                          label: Text('Eliminar rol',
                               style: TextStyle(color: AppColors.error)),
                           onPressed: _delete,
                         ),
@@ -211,7 +211,7 @@ class RoleEditScreenState extends State<RoleEditScreen> {
       Padding(
         padding: const EdgeInsets.only(top: 10),
         child: Text(areaNames[area] ?? area,
-            style: const TextStyle(color: AppColors.primary, fontSize: 16)),
+            style: TextStyle(color: AppColors.primary, fontSize: 16)),
       ),
       for (final permission in permissions)
         CheckboxListTile(
@@ -225,7 +225,7 @@ class RoleEditScreenState extends State<RoleEditScreen> {
               style: TextStyle(
                   color: otherArea ? AppColors.textMuted : AppColors.textPrimary)),
           subtitle: Text(permission.codename,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+              style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
           onChanged: readOnly || otherArea
               ? null
               : (value) => setState(() {
@@ -249,11 +249,11 @@ class _Note extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          const Icon(Icons.info_outline, color: AppColors.warning, size: 18),
+          Icon(Icons.info_outline, color: AppColors.warning, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(text,
-                style: const TextStyle(color: AppColors.warning)),
+                style: TextStyle(color: AppColors.warning)),
           ),
         ],
       ),

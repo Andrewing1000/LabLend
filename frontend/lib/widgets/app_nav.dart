@@ -168,12 +168,12 @@ class _Badge extends StatelessWidget {
       height: 18,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.all(Radius.circular(AppRadius.pill)),
       ),
       child: Text('$count',
-          style: const TextStyle(
+          style: TextStyle(
               color: AppColors.onPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
     );
   }
@@ -218,7 +218,7 @@ Future<void> showMoreSheet({
                   leading: CircleAvatar(
                     backgroundColor: AppColors.primaryMuted,
                     child: Text(userInitials(user),
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
                   ),
                   title: Text(user.name, style: Theme.of(context).textTheme.bodyLarge),

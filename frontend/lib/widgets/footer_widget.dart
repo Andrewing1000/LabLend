@@ -17,7 +17,7 @@ class FooterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       padding: EdgeInsets.fromLTRB(gutter, compact ? AppSpacing.xl : 48, gutter, AppSpacing.xxl),
@@ -32,7 +32,7 @@ class FooterWidget extends StatelessWidget {
               children: [
                 ColorFiltered(
                   colorFilter:
-                      const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+                      ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
                   child: Image.asset('assets/images/ucb_logo.png',
                       height: 40, semanticLabel: 'Universidad Católica Boliviana'),
                 ),

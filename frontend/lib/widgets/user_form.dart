@@ -113,7 +113,7 @@ class _UserFormState extends State<UserForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (lockedAccount)
-          const _Notice(
+          _Notice(
             icon: Icons.admin_panel_settings_outlined,
             color: AppColors.warning,
             text: 'Las cuentas de administrador de seguridad no se modifican '
@@ -135,7 +135,7 @@ class _UserFormState extends State<UserForm> {
                 _ReadOnlyField(label: 'Correo electrónico', value: widget.user!.email),
               ),
               const SizedBox(height: AppSpacing.md),
-              const Text(
+              Text(
                 'El código y el correo identifican a la persona: se fijan al crear la cuenta y no se cambian.',
                 style: TextStyle(fontSize: 12, color: AppColors.textMuted),
               ),
@@ -185,7 +185,7 @@ class _UserFormState extends State<UserForm> {
             ),
             if (!updateMode) ...[
               const SizedBox(height: AppSpacing.md),
-              const Text(
+              Text(
                 'El código de usuario lo genera el sistema con el nombre y el apellido '
                 '(por ejemplo, usr.jperez; adm. si tiene un rol de seguridad).',
                 style: TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),
@@ -215,11 +215,11 @@ class _UserFormState extends State<UserForm> {
                             RegExp(r'(?<=[a-záéíóúñ])(?=[A-ZÁÉÍÓÚÑ])'), (_) => ' '))
                         .join(', ')
                     : 'Sin roles',
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: AppColors.textSecondary),
               ),
             if (!canAssignRoles && !lockedAccount) ...[
               const SizedBox(height: AppSpacing.sm),
-              const Text('No tiene permiso para asignar roles.',
+              Text('No tiene permiso para asignar roles.',
                   style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
             ],
           ],
@@ -237,19 +237,19 @@ class _UserFormState extends State<UserForm> {
                 contentPadding: EdgeInsets.zero,
                 activeColor: AppColors.primary,
                 title: Text(isActive ? 'Cuenta activa' : 'Cuenta inactiva',
-                    style: const TextStyle(color: AppColors.textPrimary)),
+                    style: TextStyle(color: AppColors.textPrimary)),
                 subtitle: Text(
                   isActive
                       ? 'La persona puede iniciar sesión.'
                       : 'No puede iniciar sesión hasta que se reactive. Sus datos se conservan.',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
               ),
             ],
           ),
 
         if (!updateMode)
-          const _Notice(
+          _Notice(
             icon: Icons.link,
             color: AppColors.primary,
             text: 'No se escribe ninguna contraseña. Al crear la cuenta se genera un '
@@ -274,7 +274,7 @@ class _UserFormState extends State<UserForm> {
                 onPressed: saving ? null : _submit,
                 style: FilledButton.styleFrom(minimumSize: const Size(180, 48)),
                 icon: saving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary),
@@ -304,14 +304,14 @@ class FormSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(title,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
           const SizedBox(height: AppSpacing.lg),
           ...children,
@@ -335,7 +335,7 @@ class _ReadOnlyField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        Text(label, style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
         const SizedBox(height: 4),
         Text(
           value,
@@ -364,7 +364,7 @@ class _Notice extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xl),
       child: Text(text,
-          style: const TextStyle(fontSize: 13, height: 1.6, color: AppColors.textSecondary)),
+          style: TextStyle(fontSize: 13, height: 1.6, color: AppColors.textSecondary)),
     );
   }
 }

@@ -93,7 +93,7 @@ class RoleSelector extends StatelessWidget {
                           'Los roles de seguridad solo se asignan al crear la cuenta.'
                       : 'Una cuenta no combina roles de seguridad y de laboratorio '
                           '(segregación de funciones).',
-                  style: const TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),
                 ),
               ),
             ],
@@ -163,11 +163,11 @@ class _RoleOption extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(name,
-                          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+                          style: TextStyle(fontSize: 14, color: AppColors.textPrimary)),
                       const SizedBox(height: 2),
                       Text(
                         blockedReason ?? (description.isNotEmpty ? '$areaLabel · $description' : areaLabel),
-                        style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.textMuted),
+                        style: TextStyle(fontSize: 12, height: 1.4, color: AppColors.textMuted),
                       ),
                     ],
                   ),

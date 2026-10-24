@@ -7,16 +7,24 @@ import 'app_nav.dart';
 /// Estado de una cuenta para mostrar, del más importante al menos: una
 /// cuenta inactiva o bloqueada no puede entrar aunque cumpla lo demás.
 enum AccountStatus {
-  inactive('Inactiva', Icons.block, AppColors.textMuted),
-  locked('Bloqueada', Icons.lock_outline, AppColors.error),
-  pending('Sin activar', Icons.mark_email_unread_outlined, AppColors.primary),
-  expired('Contraseña vencida', Icons.lock_clock_outlined, AppColors.warning),
-  active('Activa', Icons.check_circle_outline, AppColors.success);
+  inactive('Inactiva', Icons.block),
+  locked('Bloqueada', Icons.lock_outline),
+  pending('Sin activar', Icons.mark_email_unread_outlined),
+  expired('Contraseña vencida', Icons.lock_clock_outlined),
+  active('Activa', Icons.check_circle_outline);
 
   final String label;
   final IconData icon;
-  final Color color;
-  const AccountStatus(this.label, this.icon, this.color);
+  const AccountStatus(this.label, this.icon);
+
+  /// Color del modo actual (noche o día).
+  Color get color => switch (this) {
+        inactive => AppColors.textMuted,
+        locked => AppColors.error,
+        pending => AppColors.primary,
+        expired => AppColors.warning,
+        active => AppColors.success,
+      };
 
   static AccountStatus of(User user) {
     if (!user.isActive) return inactive;
@@ -45,7 +53,7 @@ class AccountStatusBadge extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(
           status.label,
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -87,13 +95,13 @@ class _UserCardState extends State<UserCard> {
                 width: 40,
                 height: 40,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.surfaceHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   userInitials(user),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -109,7 +117,7 @@ class _UserCardState extends State<UserCard> {
                       user.name.isEmpty ? user.username : user.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -120,7 +128,7 @@ class _UserCardState extends State<UserCard> {
                       TextSpan(children: [
                         TextSpan(
                           text: user.username,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'monospace',
                             color: AppColors.textSecondary,
                           ),
@@ -130,7 +138,7 @@ class _UserCardState extends State<UserCard> {
                       ]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -163,7 +171,7 @@ class _UserCardState extends State<UserCard> {
                   decoration: BoxDecoration(
                     color: isHovered ? AppColors.surfaceHigh : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
-                    border: const Border(bottom: BorderSide(color: AppColors.border)),
+                    border: Border(bottom: BorderSide(color: AppColors.border)),
                   ),
                   child: compact
                       ? Column(

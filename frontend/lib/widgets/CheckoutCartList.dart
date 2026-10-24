@@ -19,7 +19,7 @@ class CheckoutCartList extends StatelessWidget {
       child: Consumer<CheckoutCart>(
         builder: (context, cart, child) {
           if(cart.items.isEmpty){
-            return const Center(
+            return Center(
               child: Text(
                 "El carrito está vacío",
                 style: TextStyle(
@@ -76,8 +76,8 @@ class CheckoutCartList extends StatelessWidget {
                               borderRadius: BorderRadius.circular(200),
                             ),
                             backgroundColor: AppColors.primary,
-                            icon: const Icon(Icons.check, size: 20, color: AppColors.textPrimary,),
-                            label: const Text("Prestar", style: TextStyle(
+                            icon: Icon(Icons.check, size: 20, color: AppColors.textPrimary,),
+                            label: Text("Prestar", style: TextStyle(
                               color: AppColors.textPrimary,
                             ),)
                         ),
@@ -91,8 +91,8 @@ class CheckoutCartList extends StatelessWidget {
                               borderRadius: BorderRadius.circular(200),
                             ),
                             backgroundColor: AppColors.textPrimary,
-                            icon: const Icon(Icons.clear, size: 20, color: AppColors.background),
-                            label: const Text("Cancelar", style: TextStyle(
+                            icon: Icon(Icons.clear, size: 20, color: AppColors.background),
+                            label: Text("Cancelar", style: TextStyle(
                               color: AppColors.background,
                               )
                             )

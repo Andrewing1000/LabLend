@@ -66,7 +66,7 @@ class RolesPage extends BrowsablePage {
                       foregroundColor: AppColors.textSecondary,
                       selectedForegroundColor: AppColors.onPrimary,
                       selectedBackgroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.border),
+                      side: BorderSide(color: AppColors.border),
                       shape: const StadiumBorder(),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     ),
@@ -94,7 +94,7 @@ class RolesPage extends BrowsablePage {
                     borderRadius: BorderRadius.circular(200),
                   ),
                   onPressed: () => manager?.setPage(RoleEditScreen()),
-                  child: const Icon(Icons.add, color: AppColors.background),
+                  child: Icon(Icons.add, color: AppColors.background),
                 ),
               ),
             ),
@@ -171,17 +171,17 @@ class _RolesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(
+    final style = TextStyle(
         fontSize: 18, fontWeight: FontWeight.w100, color: AppColors.textPrimary);
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.background,
         border: Border.symmetric(
           horizontal: BorderSide(color: AppColors.textPrimary, width: 1),
         ),
       ),
       padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
-      child: const Row(
+      child: Row(
         children: [
           Expanded(flex: 4, child: Text('Rol', style: style)),
           Expanded(flex: 2, child: Text('Área', style: style)),
@@ -227,14 +227,14 @@ class _RoleCard extends StatelessWidget {
                         Flexible(
                           child: Text(role.name,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textPrimary)),
                         ),
                         if (role.protected) ...[
                           const SizedBox(width: 8),
-                          const Tooltip(
+                          Tooltip(
                             message: 'Rol protegido: no se modifica ni se '
                                 'elimina',
                             child: Icon(Icons.lock,
@@ -246,7 +246,7 @@ class _RoleCard extends StatelessWidget {
                     if (role.description.isNotEmpty)
                       Text(role.description,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 13, color: AppColors.textMuted)),
                   ],
                 ),
@@ -254,19 +254,19 @@ class _RoleCard extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: Text(areaNames[role.area] ?? 'Sin permisos',
-                    style: const TextStyle(color: AppColors.textMuted)),
+                    style: TextStyle(color: AppColors.textMuted)),
               ),
               Expanded(
                 flex: 2,
                 child: Text('${role.permissions.length}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textPrimary)),
+                    style: TextStyle(color: AppColors.textPrimary)),
               ),
               Expanded(
                 flex: 2,
                 child: Text('${role.userCount}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textPrimary)),
+                    style: TextStyle(color: AppColors.textPrimary)),
               ),
             ],
           ),

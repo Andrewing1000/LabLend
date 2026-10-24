@@ -118,7 +118,7 @@ class SearchItemPage extends BrowsablePage {
                                   manager?.setPage(CreateItemScreen());
                                 }
                             },
-                            child: const Icon(Icons.add, color: AppColors.background,)),
+                            child: Icon(Icons.add, color: AppColors.background,)),
                         ),
                       ),
                   ],

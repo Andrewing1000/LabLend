@@ -101,7 +101,7 @@ class _HeaderRow extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Expanded(
+            Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: Align(
@@ -153,7 +153,7 @@ class _RoleHeader extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               height: 1.3,
               fontWeight: FontWeight.w600,
@@ -163,7 +163,7 @@ class _RoleHeader extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             role.protected ? '$granted de $total · protegido' : '$granted de $total',
-            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            style: TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
       ),
@@ -188,7 +188,7 @@ class _AreaRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
@@ -202,7 +202,7 @@ class _AreaRow extends StatelessWidget {
                 children: [
                   Text(
                     areaNames[area] ?? area,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -211,7 +211,7 @@ class _AreaRow extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     '${permissions.length} funciones',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -224,7 +224,7 @@ class _AreaRow extends StatelessWidget {
                 child: Text(
                   '${permissions.where((p) => role.permissions.contains(p.codename)).length}'
                   '/${permissions.length}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
@@ -263,7 +263,7 @@ class _PermissionRowState extends State<_PermissionRow> {
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
           color: hovered ? AppColors.surfaceHighest.withOpacity(0.6) : Colors.transparent,
-          border: const Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+          border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
         ),
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md + 2),
         child: Row(
@@ -276,7 +276,7 @@ class _PermissionRowState extends State<_PermissionRow> {
                   children: [
                     Text(
                       permission.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         height: 1.35,
                         color: AppColors.textPrimary,
@@ -291,7 +291,7 @@ class _PermissionRowState extends State<_PermissionRow> {
                       ),
                       child: Text(
                         permission.codename,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'monospace',
                           fontSize: 11,
                           color: AppColors.textMuted,
@@ -331,11 +331,11 @@ class _AccessMark extends StatelessWidget {
       label: '$label: ${granted ? 'permitido' : 'no permitido'}',
       excludeSemantics: true,
       child: granted
-          ? const Icon(Icons.check, size: 18, color: AppColors.textPrimary)
+          ? Icon(Icons.check, size: 18, color: AppColors.textPrimary)
           : Container(
               width: 4,
               height: 4,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.border,
                 shape: BoxShape.circle,
               ),
@@ -349,25 +349,25 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(fontSize: 12, color: AppColors.textSecondary);
+    final style = TextStyle(fontSize: 12, color: AppColors.textSecondary);
     return Wrap(
       spacing: AppSpacing.xl,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        const Row(mainAxisSize: MainAxisSize.min, children: [
+        Row(mainAxisSize: MainAxisSize.min, children: [
           _AccessMark(granted: true, label: 'Leyenda'),
           SizedBox(width: AppSpacing.sm),
           Text('Tiene el permiso', style: style),
         ]),
-        const Row(mainAxisSize: MainAxisSize.min, children: [
+        Row(mainAxisSize: MainAxisSize.min, children: [
           SizedBox(width: 18, child: Center(child: _AccessMark(granted: false, label: 'Leyenda'))),
           SizedBox(width: AppSpacing.sm),
           Text('No lo tiene', style: style),
         ]),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
-          child: const Text(
+          child: Text(
             'Sin sesión (visitante): solo consulta el catálogo de equipos. Toda '
             'cuenta, con cualquier rol, ve y edita su perfil y cambia su contraseña.',
             style: TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),

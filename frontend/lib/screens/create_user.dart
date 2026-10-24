@@ -116,11 +116,11 @@ class PageHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 const SizedBox(height: AppSpacing.xs),
                 Text(subtitle,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
               ],
             ),
           ),

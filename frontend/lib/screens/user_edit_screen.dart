@@ -143,7 +143,7 @@ class EditUserScreenState extends State<EditUserScreen> {
                               'desbloquea cuando la persona elige una '
                               'contraseña nueva con un enlace de '
                               'restablecimiento.',
-                      style: const TextStyle(fontSize: 13, height: 1.6, color: AppColors.textPrimary),
+                      style: TextStyle(fontSize: 13, height: 1.6, color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: AppSpacing.md),
                   ],
@@ -154,7 +154,7 @@ class EditUserScreenState extends State<EditUserScreen> {
                         : 'El administrador nunca ve ni escribe contraseñas. Si la persona '
                             'la olvidó, genere un enlace de restablecimiento: vence en 24 horas '
                             'y sirve una sola vez.',
-                    style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 13, height: 1.5, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   if (canGenerateLink)
@@ -175,7 +175,7 @@ class EditUserScreenState extends State<EditUserScreen> {
                           : !user.isActive
                               ? 'Reactive la cuenta para poder generarle un enlace.'
                               : 'No tiene permiso para generar enlaces.',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                     ),
                 ],
               ),
@@ -208,9 +208,9 @@ class _EditHeader extends StatelessWidget {
                 width: 56,
                 height: 56,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(color: AppColors.surfaceHighest, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppColors.surfaceHighest, shape: BoxShape.circle),
                 child: Text(userInitials(user),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
               ),
               const SizedBox(width: AppSpacing.lg),
@@ -218,10 +218,10 @@ class _EditHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(user.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                   Text(user.username,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontFamily: 'monospace', fontSize: 13, color: AppColors.textSecondary)),
                 ],
               ),

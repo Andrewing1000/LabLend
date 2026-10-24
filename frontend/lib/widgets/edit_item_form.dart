@@ -84,10 +84,10 @@ class _EditItemFormState extends State<EditItemForm> {
         const SizedBox(height: 20),
         DropdownButton<Brand>(
           value: selectedBrand,
-          hint: const Text("Selecciona una Marca",
+          hint: Text("Selecciona una Marca",
               style: TextStyle(color: AppColors.textPrimary)),
           dropdownColor: AppColors.surfaceHigh,
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
           items: [
             Brand(id: 1, marca: 'Example Brand A'),
             Brand(id: 2, marca: 'Example Brand B'),
@@ -107,10 +107,10 @@ class _EditItemFormState extends State<EditItemForm> {
         ),
         const SizedBox(height: 20),
         DropdownButton<Category>(
-          hint: const Text("Selecciona Categorías",
+          hint: Text("Selecciona Categorías",
               style: TextStyle(color: AppColors.textPrimary)),
           dropdownColor: AppColors.surfaceHigh,
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
           items: [
             Category(
                 id: 1,

@@ -211,7 +211,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                           ),
                           Text(
                             selectedQuantity.toString(),
-                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+                            style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
                           ),
                           ElevatedButton(
                             onPressed: selectedQuantity < (item!.quantity - item!.quantityOnLoan)
@@ -232,7 +232,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                             ),
                             child: Icon(Icons.add, color: isInCart ? AppColors.textPrimary : AppColors.background),
                           ),
-                          if (isInCart) const Icon(Icons.check_circle, color: AppColors.textPrimary, size: 30),
+                          if (isInCart) Icon(Icons.check_circle, color: AppColors.textPrimary, size: 30),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -278,12 +278,12 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
         children: [
           Text(
             '$title: ',
-            style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16, overflow: TextOverflow.ellipsis),
+            style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16, overflow: TextOverflow.ellipsis),
           ),
           Expanded(
             child: Text(
               content,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, overflow: TextOverflow.ellipsis),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, overflow: TextOverflow.ellipsis),
             ),
           ),
         ],

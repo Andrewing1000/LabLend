@@ -8,7 +8,7 @@ class StateMessage extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? message;
-  final Color color;
+  final Color? color;
   final String? actionLabel;
   final VoidCallback? onAction;
 
@@ -17,13 +17,13 @@ class StateMessage extends StatelessWidget {
     required this.icon,
     required this.title,
     this.message,
-    this.color = AppColors.textSecondary,
+    this.color,
     this.actionLabel,
     this.onAction,
   });
 
   /// No hay resultados para la búsqueda o los filtros.
-  const StateMessage.empty({
+  StateMessage.empty({
     super.key,
     required this.title,
     this.message = 'Pruebe con otra búsqueda o quite algún filtro.',
@@ -34,7 +34,7 @@ class StateMessage extends StatelessWidget {
 
   /// No se pudieron cargar los datos. El detalle técnico no se muestra:
   /// puede revelar rutas o datos internos del servidor.
-  const StateMessage.error({
+  StateMessage.error({
     super.key,
     this.title = 'No se pudieron cargar los datos',
     this.message = 'Revise su conexión e intente de nuevo.',
@@ -74,7 +74,7 @@ class StateMessage extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -85,7 +85,7 @@ class StateMessage extends StatelessWidget {
                 Text(
                   message!,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 14, height: 1.5, color: AppColors.textSecondary),
                 ),
               ],
               if (actionLabel != null && onAction != null) ...[

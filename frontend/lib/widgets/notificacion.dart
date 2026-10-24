@@ -69,7 +69,7 @@ class ConfirmationWidget extends NotificationWidget {
                             padding: const EdgeInsets.only(right: AppSpacing.sm),
                             child: Text(
                               message,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 15,
                                 height: 1.55,
                                 color: AppColors.textPrimary,

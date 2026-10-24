@@ -67,13 +67,13 @@ class _Step extends StatelessWidget {
             width: 28,
             height: 28,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.surfaceHighest,
               shape: BoxShape.circle,
             ),
             child: Text(
               '$number',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
                 color: AppColors.textPrimary,
@@ -86,7 +86,7 @@ class _Step extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 text,
-                style: const TextStyle(fontSize: 14, height: 1.45, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 14, height: 1.45, color: AppColors.textPrimary),
               ),
             ),
           ),

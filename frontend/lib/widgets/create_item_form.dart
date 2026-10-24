@@ -53,7 +53,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
       future: _loadImageBytes(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary,));
+          return Center(child: CircularProgressIndicator(color: AppColors.textPrimary,));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
@@ -107,7 +107,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       future: SessionManager.inventory.getBrands(),
                       builder: (context, AsyncSnapshot<List<Brand>> snapshot) {
                         if(snapshot.connectionState == ConnectionState.waiting){
-                          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary,),);
+                          return Center(child: CircularProgressIndicator(color: AppColors.textPrimary,),);
                         }
                         else if(!snapshot.hasData || snapshot.data!.isEmpty){
                           return Container();
@@ -123,10 +123,10 @@ class _CreateItemFormState extends State<CreateItemForm> {
                           builder: (context, setState) {
                             return DropdownButton<Brand>(
                               value: selectedBrand,
-                              hint: const Text("Selecciona una Marca",
+                              hint: Text("Selecciona una Marca",
                                   style: TextStyle(color: AppColors.textPrimary)),
                               dropdownColor: AppColors.surfaceHigh,
-                              style: const TextStyle(color: AppColors.textPrimary),
+                              style: TextStyle(color: AppColors.textPrimary),
                               items: brands.map((Brand brand) {
                                 return DropdownMenuItem<Brand>(
                                   value: brand,
@@ -149,7 +149,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       future: SessionManager.inventory.getCategories(),
                       builder: (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
                         if(snapshot.connectionState == ConnectionState.waiting){
-                          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary,),);
+                          return Center(child: CircularProgressIndicator(color: AppColors.textPrimary,),);
                         }
                         else if(!snapshot.hasData || snapshot.data!.isEmpty){
                           return Container();
@@ -163,10 +163,10 @@ class _CreateItemFormState extends State<CreateItemForm> {
                             return Column(
                               children: [
                                 DropdownButton<Category>(
-                                  hint: const Text("Selecciona Categorías",
+                                  hint: Text("Selecciona Categorías",
                                       style: TextStyle(color: AppColors.textPrimary)),
                                   dropdownColor: AppColors.surfaceHigh,
-                                  style: const TextStyle(color: AppColors.textPrimary),
+                                  style: TextStyle(color: AppColors.textPrimary),
                                   items: categories.map((Category category) {
                                     return DropdownMenuItem<Category>(
                                       value: category,

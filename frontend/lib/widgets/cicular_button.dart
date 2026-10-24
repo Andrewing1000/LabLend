@@ -11,8 +11,9 @@ class CircularButton extends StatefulWidget{
   final bool isAvailable;
   final bool isAnimated;
   final Function? onPressed;
-  final Color iconColor;
-  final Color backgroundColor;
+  /// Sin valor, se usan los colores del modo actual.
+  final Color? iconColor;
+  final Color? backgroundColor;
 
   /// Texto que se muestra al pasar el mouse y que lee el lector de pantalla.
   final String? tooltip;
@@ -25,8 +26,8 @@ class CircularButton extends StatefulWidget{
     this.isAvailable = true,
     required this.onPressed,
     this.isAnimated = true,
-    this.iconColor = AppColors.textPrimary,
-    this.backgroundColor = AppColors.background,
+    this.iconColor,
+    this.backgroundColor,
     this.tooltip,
   });
 
@@ -38,8 +39,8 @@ class CircularButton extends StatefulWidget{
     this.isAvailable = true,
     required this.onPressed,
     this.isAnimated = false,
-    this.iconColor = AppColors.textPrimary,
-    this.backgroundColor = AppColors.background,
+    this.iconColor,
+    this.backgroundColor,
     this.tooltip,
   });
 
@@ -100,7 +101,7 @@ class CircularButtonState extends State<CircularButton>{
 
           Color color = Color.fromRGBO(255, 255, 255, value);
           if(!widget.isAnimated || !widget.isAvailable || widget.isSelected){
-             color = widget.iconColor;
+             color = widget.iconColor ?? AppColors.textPrimary;
           }
 
           Icon icon = Icon(
@@ -115,7 +116,7 @@ class CircularButtonState extends State<CircularButton>{
 
               child: CircleAvatar(
                 radius: 0.8*widget.size,
-                backgroundColor: widget.backgroundColor,
+                backgroundColor: widget.backgroundColor ?? AppColors.background,
                 foregroundColor: Colors.transparent,
 
                 child: Material(

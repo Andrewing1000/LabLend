@@ -24,7 +24,7 @@ class DropDownFilterState extends State<DropDownFilter> {
       future: filter.getItems(),
       builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
               color: AppColors.textPrimary,
             ),
@@ -49,7 +49,7 @@ class DropDownFilterState extends State<DropDownFilter> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  textStyle: const TextStyle(
+                  textStyle: TextStyle(
                     color: AppColors.textPrimary,
                   ),
                   requestFocusOnTap: true,
@@ -62,11 +62,11 @@ class DropDownFilterState extends State<DropDownFilter> {
                     border: InputBorder.none,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(200),
-                      borderSide: const BorderSide(color: AppColors.textMuted),
+                      borderSide: BorderSide(color: AppColors.textMuted),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(200),
-                      borderSide: const BorderSide(color: AppColors.textMuted),
+                      borderSide: BorderSide(color: AppColors.textMuted),
                     ),
                   ),
                   menuStyle: MenuStyle(
@@ -134,7 +134,7 @@ class DropdownMenuItem extends StatelessWidget{
 
           Text(
             filter.getRepresentation(item),
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textPrimary,
               overflow: TextOverflow.ellipsis,
             ),

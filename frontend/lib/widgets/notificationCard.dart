@@ -62,7 +62,7 @@ class NotificationWidget extends StatelessWidget {
                       Expanded(
                         child: Text(
                           message,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 14,
                             height: 1.45,

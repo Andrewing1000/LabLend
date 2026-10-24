@@ -115,7 +115,7 @@ class CustomCardState extends State<CustomCard> {
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         textAlign: TextAlign.start,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.textPrimary,
                                           fontSize: 14,
                                           fontFamily: "/assets/fonts/Metropolis-Black.ttf",
@@ -126,7 +126,7 @@ class CustomCardState extends State<CustomCard> {
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 2,
                                         textAlign: TextAlign.start,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.textSecondary,
                                           fontFamily: "/assets/fonts/Metropolis-Black.ttf",
                                           fontSize: 13,

@@ -135,7 +135,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
       future: _loadImageBytes(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
+          return Center(
               child: CircularProgressIndicator(color: AppColors.textPrimary));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -252,7 +252,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
       future: _fetchBrands(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
+          return Center(
               child: CircularProgressIndicator(color: AppColors.textPrimary));
         } else
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
@@ -271,10 +271,10 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
           builder: (context, setState) {
             return DropdownButton<Brand>(
               value: selectedBrand,
-              hint: const Text(
+              hint: Text(
                   "Selecciona una Marca", style: TextStyle(color: AppColors.textPrimary)),
               dropdownColor: AppColors.surfaceHigh,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               items: brands.map((Brand brand) {
                 return DropdownMenuItem<Brand>(
                   value: brand,
@@ -301,7 +301,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
       future: _fetchCategories(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary));
+          return Center(child: CircularProgressIndicator(color: AppColors.textPrimary));
         } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
           return Container();
         }
@@ -316,9 +316,9 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
             return Column(
               children: [
                 DropdownButton<Category>(
-                  hint: const Text("Selecciona Categorías", style: TextStyle(color: AppColors.textPrimary)),
+                  hint: Text("Selecciona Categorías", style: TextStyle(color: AppColors.textPrimary)),
                   dropdownColor: AppColors.surfaceHigh,
-                  style: const TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: AppColors.textPrimary),
                   items: categories.map((Category category) {
                     return DropdownMenuItem<Category>(
                       value: category,
