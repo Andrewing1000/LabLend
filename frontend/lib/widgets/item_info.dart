@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Loan.dart';
@@ -26,7 +27,7 @@ class ItemInfoWidget extends StatefulWidget {
 }
 
 class _ItemInfoWidgetState extends State<ItemInfoWidget> {
-  Color dominantColor = Colors.black;
+  Color dominantColor = AppColors.background;
   Item? item;
   int selectedQuantity = 1;
   bool isInCart = false;
@@ -45,7 +46,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
       NetworkImage(item?.imagePath ?? imagePath),
     );
     setState(() {
-      dominantColor = generator.dominantColor?.color ?? Colors.black;
+      dominantColor = generator.dominantColor?.color ?? AppColors.background;
     });
   }
 
@@ -89,7 +90,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
             selectedQuantity = 1;
           }
           return Container(
-            width: MediaQuery.of(context).size.width * 0.25,
+            width: double.infinity,
             color: Colors.transparent,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +132,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                               Text(
                                 item!.nombre,
                                 style: TextStyle(
-                                  color: dominantColor.computeLuminance() < 0.5 ? Colors.black : Colors.white,
+                                  color: dominantColor.computeLuminance() < 0.5 ? AppColors.background : AppColors.textPrimary,
                                   fontSize: 28,
                                   fontWeight: FontWeight.w900,
                                   overflow: TextOverflow.ellipsis,
@@ -140,7 +141,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                                       blurRadius: 4.0,
                                       color: dominantColor.computeLuminance() > 0.5 ?
                                       Colors.black.withAlpha(100) :
-                                      Colors.white.withAlpha(100),
+                                      AppColors.textPrimary.withAlpha(100),
                                       offset: const Offset(1.0, 1.0),
                                     ),
                                   ],
@@ -158,7 +159,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                             onPressed: () {
                               itemContext.unsetItem();
                             },
-                            color: dominantColor.computeLuminance() < 0.5 ? Colors.black : Colors.white,
+                            color: dominantColor.computeLuminance() < 0.5 ? AppColors.background : AppColors.textPrimary,
                             icon: const Icon(
                               Icons.clear,
                               size: 30,
@@ -174,7 +175,7 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                 Container(
                   padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[900],
+                    color: AppColors.surfaceHigh,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -202,15 +203,15 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                             }
                                 : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isInCart ? Colors.orange : Colors.white,
+                              backgroundColor: isInCart ? AppColors.primary : AppColors.textPrimary,
                               shape: const CircleBorder(),
                               padding: const EdgeInsets.all(10),
                             ),
-                            child: Icon(Icons.remove, color: isInCart ? Colors.white : Colors.black),
+                            child: Icon(Icons.remove, color: isInCart ? AppColors.textPrimary : AppColors.background),
                           ),
                           Text(
                             selectedQuantity.toString(),
-                            style: const TextStyle(color: Colors.white, fontSize: 16),
+                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
                           ),
                           ElevatedButton(
                             onPressed: selectedQuantity < (item!.quantity - item!.quantityOnLoan)
@@ -225,13 +226,13 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                             }
                                 : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isInCart ? Colors.orange : Colors.white,
+                              backgroundColor: isInCart ? AppColors.primary : AppColors.textPrimary,
                               shape: const CircleBorder(),
                               padding: const EdgeInsets.all(10),
                             ),
-                            child: Icon(Icons.add, color: isInCart ? Colors.white : Colors.black),
+                            child: Icon(Icons.add, color: isInCart ? AppColors.textPrimary : AppColors.background),
                           ),
-                          if (isInCart) const Icon(Icons.check_circle, color: Colors.white, size: 30),
+                          if (isInCart) const Icon(Icons.check_circle, color: AppColors.textPrimary, size: 30),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -247,15 +248,15 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
                             cart.addItem(PrestamoItem(itemId: item!.id ?? 1, cantidad: selectedQuantity));
                           }
                           else{
-                            SessionManager().notification(notification: "No hay suficientes unidades disponibles");
+                            SessionManager().warningNotification(warning: "No hay suficientes unidades disponibles");
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          backgroundColor: isInCart? Colors.white: Theme.of(context).primaryColor,
+                          backgroundColor: isInCart? AppColors.textPrimary: Theme.of(context).primaryColor,
                         ),
                         child: Text( isInCart? 'Quitar':'Agregar', style: TextStyle(
-                            color: isInCart? Colors.black: Colors.white,
+                            color: isInCart? AppColors.background: AppColors.textPrimary,
                             fontSize: 16)),
                       ),
                     ],
@@ -277,12 +278,12 @@ class _ItemInfoWidgetState extends State<ItemInfoWidget> {
         children: [
           Text(
             '$title: ',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, overflow: TextOverflow.ellipsis),
+            style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16, overflow: TextOverflow.ellipsis),
           ),
           Expanded(
             child: Text(
               content,
-              style: const TextStyle(color: Colors.white, fontSize: 16, overflow: TextOverflow.ellipsis),
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, overflow: TextOverflow.ellipsis),
             ),
           ),
         ],
