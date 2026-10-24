@@ -92,14 +92,15 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 /// Encabezado de las pantallas de formulario: ícono, título y una línea de
 /// ayuda.
 class PageHeader extends StatelessWidget {
-  final IconData icon;
+  /// Ya no se dibuja; se conserva para no romper a quien lo pasa.
+  final IconData? icon;
   final String title;
   final String subtitle;
   final Widget? trailing;
 
   const PageHeader({
     super.key,
-    required this.icon,
+    this.icon,
     required this.title,
     required this.subtitle,
     this.trailing,

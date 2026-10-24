@@ -83,19 +83,16 @@ class RolesPage extends BrowsablePage {
             ],
           ),
           if (canManage && !matrix)
-            Align(
-              alignment: const Alignment(1, 1),
-              child: Container(
-                padding: const EdgeInsets.all(50),
-                child: FloatingActionButton(
-                  tooltip: 'Nuevo rol',
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shape: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(200),
-                  ),
-                  onPressed: () => manager?.setPage(RoleEditScreen()),
-                  child: Icon(Icons.add, color: AppColors.background),
-                ),
+            Positioned(
+              right: AppSpacing.xl,
+              bottom: AppSpacing.xl,
+              child: FloatingActionButton.extended(
+                onPressed: () => manager?.setPage(RoleEditScreen()),
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                shape: const StadiumBorder(),
+                icon: const Icon(Icons.add),
+                label: const Text('Nuevo rol'),
               ),
             ),
         ],
@@ -124,12 +121,25 @@ class RolesPage extends BrowsablePage {
         if (snapshot.hasError) return _error;
         final roles = snapshot.data ?? [];
         if (roles.isEmpty) return _empty;
-        return Column(
-          children: [
-            const _RolesHeader(),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(10),
+        final compact = AppBreakpoints.isCompact(context);
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl, AppSpacing.sm, AppSpacing.xl, 0),
+              sliver: SliverToBoxAdapter(child: _RolesSummary(roles: roles)),
+            ),
+            if (!compact)
+              const SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                    AppSpacing.xl, AppSpacing.lg, AppSpacing.xl, AppSpacing.xs),
+                sliver: SliverToBoxAdapter(child: _RolesHeader()),
+              ),
+            SliverPadding(
+              // Abajo deja lugar al botón "Nuevo rol".
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl, AppSpacing.sm, AppSpacing.xl, 110),
+              sliver: SliverList.builder(
                 itemCount: roles.length,
                 itemBuilder: (context, index) => _RoleCard(
                   role: roles[index],
@@ -166,109 +176,209 @@ class RolesPage extends BrowsablePage {
   void onSet() {}
 }
 
+/// Total de roles y cuántos tiene cada área.
+class _RolesSummary extends StatelessWidget {
+  final List<Role> roles;
+
+  const _RolesSummary({required this.roles});
+
+  @override
+  Widget build(BuildContext context) {
+    int count(String? area) => roles.where((r) => r.area == area).length;
+    final parts = [
+      for (final area in [securityArea, labArea])
+        if (count(area) > 0) '${count(area)} de ${areaNames[area]!.toLowerCase()}',
+      if (count(null) > 0) '${count(null)} sin permisos',
+    ];
+
+    return Wrap(
+      spacing: AppSpacing.lg,
+      runSpacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text.rich(
+          TextSpan(children: [
+            TextSpan(
+              text: '${roles.length}',
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+            ),
+            TextSpan(
+              text: roles.length == 1 ? '  rol' : '  roles',
+              style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+            ),
+          ]),
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
+        if (parts.isNotEmpty)
+          Text(parts.join('  ·  '),
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+      ],
+    );
+  }
+}
+
+/// Anchos de las columnas, compartidos por el encabezado y las filas.
+const int _roleFlex = 5;
+const double _areaWidth = 150;
+const double _countWidth = 96;
+
+/// Títulos de las columnas, alineados con [_RoleCard].
 class _RolesHeader extends StatelessWidget {
   const _RolesHeader();
 
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(
-        fontSize: 18, fontWeight: FontWeight.w100, color: AppColors.textPrimary);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border.symmetric(
-          horizontal: BorderSide(color: AppColors.textPrimary, width: 1),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
+      fontSize: 12,
+      letterSpacing: 1.2,
+      fontWeight: FontWeight.w700,
+      color: AppColors.textMuted,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
-          Expanded(flex: 4, child: Text('Rol', style: style)),
-          Expanded(flex: 2, child: Text('Área', style: style)),
-          Expanded(
-              flex: 2,
-              child: Text('Permisos',
-                  style: style, textAlign: TextAlign.center)),
-          Expanded(
-              flex: 2,
-              child: Text('Usuarios',
-                  style: style, textAlign: TextAlign.center)),
+          Expanded(flex: _roleFlex, child: Text('ROL', style: style)),
+          SizedBox(width: _areaWidth, child: Text('ÁREA', style: style)),
+          SizedBox(
+              width: _countWidth,
+              child: Text('PERMISOS', style: style, textAlign: TextAlign.right)),
+          SizedBox(
+              width: _countWidth,
+              child: Text('USUARIOS', style: style, textAlign: TextAlign.right)),
+          const SizedBox(width: 18 + AppSpacing.md),
         ],
       ),
     );
   }
 }
 
-class _RoleCard extends StatelessWidget {
+/// Fila de la lista de roles: nombre y descripción, área, cantidad de
+/// permisos y de usuarios. En pantallas angostas los datos bajan a otra
+/// línea.
+class _RoleCard extends StatefulWidget {
   final Role role;
   final VoidCallback onTap;
 
   const _RoleCard({required this.role, required this.onTap});
 
   @override
+  State<_RoleCard> createState() => _RoleCardState();
+}
+
+class _RoleCardState extends State<_RoleCard> {
+  bool hovered = false;
+
+  static String _readable(String name) =>
+      name.replaceAllMapped(RegExp(r'(?<=[a-záéíóúñ])(?=[A-ZÁÉÍÓÚÑ])'), (_) => ' ');
+
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.background,
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 14, 30, 14),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(role.name,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary)),
-                        ),
-                        if (role.protected) ...[
-                          const SizedBox(width: 8),
-                          Tooltip(
-                            message: 'Rol protegido: no se modifica ni se '
-                                'elimina',
-                            child: Icon(Icons.lock,
-                                size: 16, color: AppColors.primary),
-                          ),
-                        ],
-                      ],
-                    ),
-                    if (role.description.isNotEmpty)
-                      Text(role.description,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 13, color: AppColors.textMuted)),
-                  ],
+    final role = widget.role;
+    final compact = AppBreakpoints.isCompact(context);
+    final area = areaNames[role.area] ?? 'Sin permisos';
+    final permissions = role.permissions.length;
+    final users = role.userCount;
+
+    final identity = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: Text(
+                _readable(role.name),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              Expanded(
-                flex: 2,
-                child: Text(areaNames[role.area] ?? 'Sin permisos',
-                    style: TextStyle(color: AppColors.textMuted)),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text('${role.permissions.length}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textPrimary)),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text('${role.userCount}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textPrimary)),
+            ),
+            if (role.protected) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Tooltip(
+                message: 'Rol protegido: no se modifica ni se elimina',
+                child: Icon(Icons.lock_outline, size: 15, color: AppColors.textMuted),
               ),
             ],
+          ],
+        ),
+        if (role.description.isNotEmpty) ...[
+          const SizedBox(height: 3),
+          Text(
+            role.description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+          ),
+        ],
+      ],
+    );
+
+    final secondary = TextStyle(
+      fontSize: 13,
+      color: role.area == null ? AppColors.textMuted : AppColors.textSecondary,
+    );
+    final number = TextStyle(
+      fontSize: 14,
+      color: AppColors.textPrimary,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+
+    return Semantics(
+      button: true,
+      label: '${role.name}, $area, $permissions permisos, $users usuarios'
+          '${role.protected ? ', protegido' : ''}',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => hovered = true),
+        onExit: (_) => setState(() => hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: hovered ? AppColors.surfaceHigh : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
+            child: compact
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      identity,
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        '$area  ·  ${permissions == 1 ? '1 permiso' : '$permissions permisos'}'
+                        '  ·  ${users == 1 ? '1 usuario' : '$users usuarios'}',
+                        style: secondary,
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(flex: _roleFlex, child: identity),
+                      SizedBox(width: _areaWidth, child: Text(area, style: secondary)),
+                      SizedBox(
+                        width: _countWidth,
+                        child: Text('$permissions', textAlign: TextAlign.right, style: number),
+                      ),
+                      SizedBox(
+                        width: _countWidth,
+                        child: Text('$users', textAlign: TextAlign.right, style: number),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: hovered ? AppColors.textSecondary : AppColors.border,
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),

@@ -1,11 +1,12 @@
-import 'package:frontend/themes/AppTheme.dart';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/PageBase.dart';
 
-import 'cicular_button.dart';
+import 'DropDownFilter.dart';
 
+/// Filtro por fecha en la barra superior ("Desde", "Hasta"): el mismo botón
+/// que los demás filtros; al tocarlo abre el calendario.
 class DropdownDateFilter extends StatefulWidget {
+  /// Fecha en la que abre el calendario si todavía no se eligió ninguna.
   final DateTime? initialDate;
   final DateTime firstDate;
   final DateTime lastDate;
@@ -15,95 +16,68 @@ class DropdownDateFilter extends StatefulWidget {
     super.key,
     this.initialDate,
     required this.filter,
-  }):
-    firstDate = DateTime(2024, 1, 1),
-    lastDate = DateTime.now().add(const Duration(days: 1));
+  })  : firstDate = DateTime(2024, 1, 1),
+        lastDate = DateTime.now().add(const Duration(days: 1));
 
   @override
-  CustomDatePickerState createState() => CustomDatePickerState();
+  DropdownDateFilterState createState() => DropdownDateFilterState();
 }
 
-class CustomDatePickerState extends State<DropdownDateFilter> {
-  late DateTime? _selectedDate;
+class DropdownDateFilterState extends State<DropdownDateFilter> {
+  bool _open = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate = widget.initialDate;
+  /// La fecha se lee del filtro y no de una copia propia: así el botón
+  /// muestra siempre lo que de verdad filtra la página.
+  DateTime? get _selectedDate {
+    final selected = widget.filter.getSelected();
+    return selected.isEmpty ? null : selected.first;
+  }
+
+  DateTime _clamp(DateTime date) {
+    if (date.isBefore(widget.firstDate)) return widget.firstDate;
+    if (date.isAfter(widget.lastDate)) return widget.lastDate;
+    return date;
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    setState(() => _open = true);
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: _clamp(_selectedDate ?? widget.initialDate ?? DateTime.now()),
       firstDate: widget.firstDate,
       lastDate: widget.lastDate,
-
+      helpText: widget.filter.attributeName,
+      cancelText: 'Cancelar',
+      confirmText: 'Aplicar',
     );
-    if(picked == null || picked == _selectedDate){
-      if(_selectedDate == null) return;
-      setState(() {
-        _selectedDate = null;
-        widget.filter.clearSelected();
-      });
-      return;
-    }
+    if (!mounted) return;
+    setState(() => _open = false);
+    // Cancelar deja el filtro como estaba (antes lo borraba).
+    if (picked == null || picked == _selectedDate) return;
+    widget.filter.select(picked);
+  }
 
-    setState(() {
-        _selectedDate = picked;
-        widget.filter.select(picked);
-      });
-      return;
+  static String _format(DateTime date) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    final local = date.toLocal();
+    return '${two(local.day)}/${two(local.month)}/${local.year}';
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _selectDate(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceHigh,
-          borderRadius: BorderRadius.circular(200.0),
-          border: Border.all(color: AppColors.textMuted),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              width: 180,
-              height: 30,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                //crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Icon(Icons.calendar_today, color: AppColors.textPrimary.withAlpha(150)),
-                  Container(width: 20,),
-                  if(_selectedDate != null) Text(
-                    "${_selectedDate?.toLocal()}".split(' ')[0],
-                    style: TextStyle(color: AppColors.textPrimary.withAlpha(150)),
-                  ),
-                  Container(width: 20,),
-                  if(_selectedDate != null) CircularButton.static(
-                    tooltip: 'Quitar fecha',
-                    isSelected: true,
-                    normalIcon: Icons.close,
-                    size: 20,
-                    iconColor: AppColors.textPrimary.withAlpha(150),
-                    backgroundColor: AppColors.surfaceHigh,
-                    onPressed: (){
-                      setState(() {
-                        _selectedDate = null;
-                        widget.filter.clearSelected();
-                      });
-                    },
-                  ),
-                ],
-              ),
-            );
-          }
-        ),
-      ),
+    return ListenableBuilder(
+      listenable: widget.filter,
+      builder: (context, _) {
+        final date = _selectedDate;
+        return FilterPill(
+          label: widget.filter.attributeName,
+          value: date == null ? null : _format(date),
+          leadingIcon: Icons.calendar_today_outlined,
+          open: _open,
+          onTap: () => _selectDate(context),
+          onClear: date == null ? null : widget.filter.clearSelected,
+        );
+      },
     );
   }
 }
