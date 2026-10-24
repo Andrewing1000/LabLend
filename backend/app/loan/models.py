@@ -38,28 +38,35 @@ class PrestamoItem(models.Model):
     cantidad = models.PositiveIntegerField(default=1)
 
     def clean(self):
+        if self.cantidad < 1:
+            raise ValidationError({'cantidad': 'Debe prestar al menos una unidad.'})
         if self.cantidad > (self.item.quantity - self.item.quantity_on_loan):
             raise ValidationError(f'No hay suficiente cantidad del ítem "{self.item.nombre}" para el préstamo.')
 
     def save(self, *args, **kwargs):
-        # Calcula la diferencia en cantidad prestada antes de la actualización
-
-
         previous_cantidad = 0
         if self.pk:
             previous_cantidad = PrestamoItem.objects.get(pk=self.pk).cantidad
 
+        # El stock se lee de nuevo y bloqueado: con una copia vieja del ítem,
+        # dos líneas del mismo equipo (o dos préstamos a la vez) pasaban la
+        # validación con el mismo saldo y quantity_on_loan quedaba mal.
+        self.item = Item.objects.select_for_update().get(pk=self.item_id)
+        if not self.prestamo.devuelto:
+            # La línea ya tenía reservadas sus unidades anteriores.
+            self.item.quantity_on_loan -= previous_cantidad
         self.full_clean()  # Validar la instancia del modelo
         super().save(*args, **kwargs)
 
-
         if not self.prestamo.devuelto:
-            difference = self.cantidad - previous_cantidad
-            self.item.quantity_on_loan += difference
+            self.item.quantity_on_loan += self.cantidad
             self.item.save()
 
     def delete(self, *args, **kwargs):
-        # Al eliminar, resta la cantidad prestada del campo quantity_on_loan
-        self.item.quantity_on_loan -= self.cantidad
-        self.item.save()
+        # Al eliminar, libera las unidades si el préstamo seguía en curso
+        # (las de un préstamo devuelto ya se liberaron).
+        if not self.prestamo.devuelto:
+            self.item = Item.objects.select_for_update().get(pk=self.item_id)
+            self.item.quantity_on_loan -= self.cantidad
+            self.item.save()
         super().delete(*args, **kwargs)

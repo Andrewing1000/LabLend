@@ -15,6 +15,9 @@ class PrestamoViewSet(viewsets.ModelViewSet):
     queryset = Prestamo.objects.all()
     serializer_class = PrestamoSerializer
     filterset_class = PrestamoFilter
+    # Los préstamos son el historial del laboratorio: no se borran (borrar
+    # uno dejaba sus unidades reservadas para siempre).
+    http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options']
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
