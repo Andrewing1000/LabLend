@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/HomePage.dart';
+import 'package:frontend/services/Cart.dart';
 import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/services/SelectedItemContext.dart';
 import 'package:frontend/widgets/tool_bar.dart';
@@ -18,6 +19,8 @@ void main(){
             ),
           ),
         child: ToolBar(
+            navItems: const [],
+            cart: CheckoutCart(),
             onLogin: (){},
             onLogout: (){},
             onCartLookup: (){},

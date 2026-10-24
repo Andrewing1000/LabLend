@@ -17,9 +17,10 @@ import 'package:provider/provider.dart';
 import "package:frontend/models/Session.dart";
 import "package:frontend/screens/HomePage.dart";
 import "package:frontend/services/ContextMessageService.dart";
-import "package:frontend/widgets/navbar.dart";
-import "package:frontend/widgets/resizable_panel.dart";
+import "package:frontend/themes/AppTheme.dart";
+import "package:frontend/widgets/app_nav.dart";
 
+import "../models/Item.dart";
 import "../models/Permissions.dart";
 import "../models/User.dart";
 import "../services/PageManager.dart";
@@ -46,16 +47,6 @@ class MainFrame extends StatefulWidget {
 }
 
 class MainFrameState extends State<MainFrame> {
-  double maxWidth = double.infinity;
-  double maxHeight = double.infinity;
-
-  bool onFrontier1 = false;
-  bool onFrontier2 = false;
-  bool grabbing1 = false;
-  bool grabbing2 = false;
-  ResizeController sizeLeft = ResizeController();
-  ResizeController sizeRight = ResizeController();
-
   bool onLogin = false;
   bool onPasswordReset = false;
   bool onChangePassword = false;
@@ -77,15 +68,18 @@ class MainFrameState extends State<MainFrame> {
 
   late PageManager pageManager;
   late PageContainer pageContainer;
-  late VerticalNavbar navBar;
+  late List<AppNavItem> navItems;
   late CheckoutCartList cartList;
 
   SelectedItemContext selectedItem = SelectedItemContext();
   CheckoutCart cart = CheckoutCart();
 
-  MainFrameState()
-  {
-    homePage = HomePage(selectedItem: selectedItem);
+  MainFrameState() {
+    homePage = HomePage(
+      selectedItem: selectedItem,
+      onSearch: _searchItems,
+      onCategory: _browseCategory,
+    );
     searchItemPage = SearchItemPage(selectedItem: selectedItem);
     searchUserPage = SearchUserPage();
     securityEventsPage = SecurityEventsPage();
@@ -97,356 +91,282 @@ class MainFrameState extends State<MainFrame> {
     pageManager = PageManager(defaultPage: homePage);
     cartList = CheckoutCartList(cart: cart);
 
+    navItems = [
+      AppNavItem(
+        label: 'Inicio',
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+        page: homePage,
+      ),
+      AppNavItem(
+        label: 'Equipos',
+        icon: Icons.biotech_outlined,
+        selectedIcon: Icons.biotech,
+        page: searchItemPage,
+      ),
+      AppNavItem(
+        label: 'Préstamos',
+        icon: Icons.swap_horiz_outlined,
+        selectedIcon: Icons.swap_horiz,
+        page: searchLoanPage,
+        permission: AppPermission.registrarPrestamos,
+      ),
+      AppNavItem(
+        label: 'Marcas y categorías',
+        icon: Icons.category_outlined,
+        selectedIcon: Icons.category,
+        page: categoryBrandPage as PageBase,
+        // El asistente ya no ve esta opción, que el servidor le rechazaba.
+        permission: AppPermission.gestionarInventario,
+      ),
+      AppNavItem(
+        label: 'Usuarios',
+        icon: Icons.people_outline,
+        selectedIcon: Icons.people,
+        page: searchUserPage,
+        permission: AppPermission.verUsuarios,
+      ),
+      AppNavItem(
+        label: 'Roles',
+        icon: Icons.badge_outlined,
+        selectedIcon: Icons.badge,
+        page: rolesPage,
+        // Gestión de roles y sus permisos (D15).
+        permission: AppPermission.verRoles,
+      ),
+      AppNavItem(
+        label: 'Bitácora',
+        icon: Icons.shield_outlined,
+        selectedIcon: Icons.shield,
+        page: securityEventsPage,
+        permission: AppPermission.verBitacoras,
+      ),
+    ];
+
     pageContainer = PageContainer(
       manager: pageManager,
-      onLogin: (){
-        setState(() {onLogin = true;});
-      },
-      onLogout: () async {
-        await SessionManager().logOut();
-        pageManager.clear();
-      },
-      onChangePassword: (){
-        setState(() {onChangePassword = true;});
-      },
-      onCartLookup: (){
-        showModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.black,
-            builder: (context){
-              return cartList;
-            });
-      },
+      navItems: navItems,
+      cart: cart,
+      onLogin: _openLogin,
+      onLogout: _logout,
+      onChangePassword: _openChangePassword,
+      onCartLookup: _openCart,
     );
     sidePanel = ItemInfoWidget(
         itemContext: selectedItem,
         pageManager: pageManager,
         cart: cart);
-
-    final List<NavItem> items = [
-      NavItem(
-          iconNormal: Icons.home_outlined,
-          iconSelected: Icons.home,
-          onPressed: () {
-            pageManager.setPage(homePage);
-          },
-          title: "Home",
-      ),
-      NavItem(
-          iconNormal: Icons.biotech_outlined,
-          iconSelected: Icons.biotech,
-          onPressed: () {
-            pageManager.setPage(searchItemPage);
-          },
-          title: "Search",
-      ),
-
-      NavItem(
-        iconNormal: Icons.category_outlined,
-        iconSelected: Icons.category,
-        onPressed: () {
-          pageManager.setPage(categoryBrandPage as PageBase);
-        },
-        title: "Marcas y categorías",
-        // El asistente ya no ve esta opción, que el servidor le rechazaba.
-        permission: AppPermission.gestionarInventario,
-      ),
-      NavItem(
-          iconNormal: Icons.people_outline,
-          iconSelected: Icons.people,
-          onPressed: () {
-            pageManager.setPage(searchUserPage);
-          },
-          title: "Search",
-          permission: AppPermission.verUsuarios,
-      ),
-      NavItem(
-          iconNormal: Icons.shield_outlined,
-          iconSelected: Icons.shield,
-          onPressed: () {
-            pageManager.setPage(securityEventsPage);
-          },
-          title: "Bitácora de seguridad",
-          permission: AppPermission.verBitacoras,
-      ),
-      NavItem(
-          iconNormal: Icons.badge_outlined,
-          iconSelected: Icons.badge,
-          onPressed: () {
-            pageManager.setPage(rolesPage);
-          },
-          title: "Roles",
-          // Gestión de roles y sus permisos (D15).
-          permission: AppPermission.verRoles,
-      ),
-      NavItem(
-          iconNormal: Icons.swap_horiz_outlined,
-          iconSelected: Icons.swap_horiz,
-          onPressed: () {
-            pageManager.setPage(searchLoanPage);
-          },
-          title: "Search",
-          permission: AppPermission.registrarPrestamos,
-      ),
-
-    ];
-
-    navBar = VerticalNavbar(iconSize: 30, items: items);
-    //print("Se creo la wea otra vez");
   }
 
-  void performResize(double dx) {
-    if (grabbing1) {
-      sizeLeft.widthUpdate(delta: dx);
-      return;
-    }
+  void _openLogin() => setState(() => onLogin = true);
 
-    if (grabbing2) {
-      sizeRight.widthUpdate(delta: -dx);
-      return;
-    }
-  }
-
-  void endResize() {
-    if(grabbing1 || grabbing2){
-      setState(() {
-        grabbing1 = false;
-        grabbing2 = false;
-        sizeLeft.commitUpdate();
-        sizeRight.commitUpdate();
+  void _closeAuth() => setState(() {
+        onLogin = false;
+        onPasswordReset = false;
       });
+
+  void _openChangePassword() => setState(() => onChangePassword = true);
+
+  Future<void> _logout() async {
+    await SessionManager().logOut();
+    pageManager.clear();
+  }
+
+  void _openCart() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.background,
+      isScrollControlled: true,
+      builder: (context) => cartList,
+    );
+  }
+
+  void _searchItems(String text) {
+    searchItemPage.searchField.value = text;
+    pageManager.setPage(searchItemPage);
+  }
+
+  Future<void> _browseCategory(Category category) async {
+    final filter = searchItemPage.categoryFilter;
+    await filter.getItems();
+    filter.clearSelected();
+    // El filtro compara por instancia: se busca la categoría por su id.
+    for (final c in filter.items) {
+      if (c.id == category.id) filter.select(c);
     }
+    searchItemPage.searchField.value = '';
+    pageManager.setPage(searchItemPage);
+  }
+
+  /// Panel con el detalle del equipo elegido. En pantallas anchas va acoplado
+  /// a la derecha; en las angostas ocupa toda la pantalla.
+  Widget _itemPanel({required bool docked}) {
+    return Container(
+      width: docked ? 400 : double.infinity,
+      margin: docked
+          ? const EdgeInsets.fromLTRB(0, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg)
+          : EdgeInsets.zero,
+      padding: const EdgeInsets.all(AppSpacing.lg + 4),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(docked ? AppRadius.lg : 0),
+      ),
+      child: SafeArea(child: sidePanel),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      maxWidth = constraints.maxWidth;
-      maxHeight = constraints.maxHeight;
+    final wide = AppBreakpoints.isWide(context);
 
-      return GestureDetector(
-        onPanStart: (event) {
-          if (onFrontier1) {
-            setState(() {
-              grabbing1 = true;
-            });
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: pageManager),
+        ChangeNotifierProvider.value(value: selectedItem),
+        ChangeNotifierProvider.value(value: cart),
+        ChangeNotifierProvider.value(value: SessionManager()),
+      ],
+      child: Consumer4<PageManager, SelectedItemContext, CheckoutCart, SessionManager>(
+        builder: (context, manager, selection, cart, sessionManager, child) {
+          final itemOpen = selection.isSet();
+          final user = sessionManager.session.user;
 
-            return;
-          }
-
-          if (onFrontier2) {
-            setState(() {
-              grabbing2 = true;
-            });
-            return;
-          }
-        },
-        onPanUpdate: (event) {
-          performResize(event.delta.dx);
-        },
-        onPanEnd: (event) {
-          endResize();
-        },
-        onPanCancel: () {
-          setState(() {
-            grabbing1 = false;
-            grabbing2 = false;
-          });
-        },
-        child: Stack(
-          children: [
-            Container(
-              height: double.infinity,
-              width: double.infinity,
-              color: Theme.of(context).scaffoldBackgroundColor,
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ResizablePanel(
-                      stops: [ResizeRange(start: 70, end: double.infinity)],
-                      controller: sizeLeft,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: navBar,
-                      )),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.grab,
-                    onEnter: (event) {
-                      setState(() {
-                        onFrontier1 = true;
-                      });
-                    },
-                    onExit: (event) {
-                      setState(() {
-                        onFrontier1 = false;
-                      });
-                    },
-                    child: Container(
-                      height: double.infinity,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: grabbing1
-                            ? Colors.white.withAlpha(70)
-                            : onFrontier1
-                                ? Colors.white.withAlpha(40)
-                                : Colors.transparent,
+          return Stack(
+            children: [
+              Container(
+                color: AppColors.background,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: pageContainer),
+                    if (wide)
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOut,
+                        child: itemOpen ? _itemPanel(docked: true) : const SizedBox.shrink(),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ResizablePanel(
-                      //controller: sizeRight,
-                      stops: [ResizeRange(start: 0, end: double.infinity)],
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).canvasColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: pageContainer,
-                      )
-                    ),
-                  ),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.grab,
-                    onEnter: (event) {
-                      setState(() {
-                        onFrontier2 = true;
-                      });
-                    },
-                    onExit: (event) {
-                      setState(() {
-                        onFrontier2 = false;
-                      });
-                    },
-                    child: Container(
-                      height: double.infinity,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: grabbing2
-                            ? Colors.white.withAlpha(70)
-                            : onFrontier2
-                                ? Colors.white.withAlpha(40)
-                                : Colors.transparent,
-                      ),
-                    ),
-                  ),
-                  ResizablePanel(
-                      controller: sizeRight,
-                      stops: [
-                        ResizeRange.point(300.0),
-                        ResizeRange.point(400.0),
-                        ResizeRange(start: 400.0, end: 600.0)
-                        //ResizeRange(start: 700, end: double.infinity),
-                      ],
-                      child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).canvasColor,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: sidePanel,
-                      ),
-                  ),
-                ],
-              ),
-            ),
-            if (onLogin || onPasswordReset || linkToken != null)
-              GestureDetector(
-                onTapDown: (e) {
-                  setState(() {
-                    onLogin = false;
-                    onPasswordReset = false;
-                  });
-                },
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                  child: Container(
-                    color: onLogin || linkToken != null
-                        ? Colors.black.withOpacity(0.2)
-                        : Colors.transparent,
-                  ),
+                  ],
                 ),
               ),
-            if (onLogin) LoginScreen(
-              onSubmit: (username, password) async {
-                  await SessionManager().login(username, password);
-                  if(SessionManager().session.user.username ==
-                      username.trim().toLowerCase()){
-                  setState(() {
-                  onLogin = false;
-                    });
-                }
-              },
-              onPasswordReset: (){
-                setState(() {
-                  onLogin = false;
-                  onPasswordReset = true;
-                });
-              },
-            ),
-            if(onPasswordReset) const RecuperarContrasenaScreen(),
-            if (linkToken != null) PasswordLinkScreen(
-              token: linkToken!,
-              onDone: () {
-                setState(() {
-                  linkToken = null;
-                  onLogin = true;
-                });
-              },
-            ),
-            // Cambio de la contraseña propia: obligatorio si venció (D21),
-            // voluntario desde la barra superior.
-            Consumer<SessionManager>(
-              builder: (context, sessionManager, child) {
-                final user = sessionManager.session.user;
-                final forced = user is! VisitorUser && user.passwordExpired;
-                if (!forced && !onChangePassword) return const SizedBox.shrink();
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                        child: Container(color: Colors.black.withOpacity(0.2)),
+              if (!wide)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: AppSpacing.lg + 2,
+                  child: SafeArea(
+                    top: false,
+                    child: Center(
+                      child: BottomNavPill(
+                        items: navItems,
+                        manager: manager,
+                        cartCount: cart.items.length,
+                        showCart: user.can(AppPermission.registrarPrestamos),
+                        onCart: _openCart,
+                        onMore: () => showMoreSheet(
+                          context: context,
+                          items: visibleNavItems(navItems),
+                          manager: manager,
+                          onLogin: _openLogin,
+                          onLogout: _logout,
+                          onChangePassword: _openChangePassword,
+                        ),
                       ),
                     ),
-                    ChangePasswordScreen(
-                      forced: forced,
-                      onDone: () {
-                        setState(() {onChangePassword = false;});
-                      },
-                      onLogout: () async {
-                        setState(() {onChangePassword = false;});
-                        await SessionManager().logOut();
-                        pageManager.clear();
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-
-
-            MultiProvider(
-              providers: [
-                ChangeNotifierProvider.value(value: widget.messageService),
-              ],
-              child: Consumer<ContextMessageService>(
-                builder: (context, messageService, child){
-                  final messageView = messageService.notification;
-                  if(messageView != null && messageService.displaying){
-                    return  messageView;
+                  ),
+                ),
+              if (!wide && itemOpen) Positioned.fill(child: _itemPanel(docked: false)),
+              if (onLogin || onPasswordReset || linkToken != null)
+                GestureDetector(
+                  onTapDown: (e) => _closeAuth(),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+                    child: Container(color: Colors.black.withOpacity(0.6)),
+                  ),
+                ),
+              if (onLogin) LoginScreen(
+                onSubmit: (username, password) async {
+                  await SessionManager().login(username, password);
+                  if (SessionManager().session.user.username ==
+                      username.trim().toLowerCase()) {
+                    setState(() => onLogin = false);
                   }
-                  return Container();
+                },
+                onPasswordReset: () {
+                  setState(() {
+                    onLogin = false;
+                    onPasswordReset = true;
+                  });
+                },
+                onClose: _closeAuth,
+              ),
+              if (onPasswordReset) RecuperarContrasenaScreen(
+                onClose: _closeAuth,
+                onBack: () {
+                  setState(() {
+                    onPasswordReset = false;
+                    onLogin = true;
+                  });
                 },
               ),
-            )
-          ],
-        ),
-      );
-    });
+              if (linkToken != null) PasswordLinkScreen(
+                token: linkToken!,
+                onDone: () {
+                  setState(() {
+                    linkToken = null;
+                    onLogin = true;
+                  });
+                },
+              ),
+              // Cambio de la contraseña propia: obligatorio si venció (D21),
+              // voluntario desde la barra superior.
+              Consumer<SessionManager>(
+                builder: (context, sessionManager, child) {
+                  final user = sessionManager.session.user;
+                  final forced = user is! VisitorUser && user.passwordExpired;
+                  if (!forced && !onChangePassword) return const SizedBox.shrink();
+                  return Stack(
+                    children: [
+                      Positioned.fill(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                          child: Container(color: Colors.black.withOpacity(0.6)),
+                        ),
+                      ),
+                      ChangePasswordScreen(
+                        forced: forced,
+                        onDone: () {
+                          setState(() {onChangePassword = false;});
+                        },
+                        onLogout: () async {
+                          setState(() {onChangePassword = false;});
+                          await SessionManager().logOut();
+                          pageManager.clear();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+
+
+              MultiProvider(
+                providers: [
+                  ChangeNotifierProvider.value(value: widget.messageService),
+                ],
+                child: Consumer<ContextMessageService>(
+                  builder: (context, messageService, child){
+                    final messageView = messageService.notification;
+                    if(messageView != null && messageService.displaying){
+                      return  messageView;
+                    }
+                    return Container();
+                  },
+                ),
+              )
+            ],
+          );
+        },
+      ),
+    );
   }
 }
