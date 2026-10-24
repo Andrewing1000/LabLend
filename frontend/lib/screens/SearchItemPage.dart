@@ -10,13 +10,14 @@ import 'package:frontend/widgets/card.dart';
 import '../models/Item.dart';
 import '../services/SelectedItemContext.dart';
 
-import "package:provider/provider.dart";
 class SearchItemPage extends BrowsablePage {
   BrandFilter brandFilter = BrandFilter();
   CategoryFilter categoryFilter = CategoryFilter();
   SelectedItemContext selectedItem;
-  SearchItemPage({super.key,
-    required this.selectedItem,}) {
+  SearchItemPage({
+    super.key,
+    required this.selectedItem,
+  }) {
     filterSet.add(brandFilter);
     filterSet.add(categoryFilter);
   }
@@ -25,8 +26,34 @@ class SearchItemPage extends BrowsablePage {
     return await SessionManager.inventory.getItems(
       namePattern: pattern,
       categoryIds: categoryFilter.getSelected().map((cat) => cat.id).toList(),
-      brandId: brandFilter.getSelected().isNotEmpty ? brandFilter.getSelected().first.id : null,
+      brandId: brandFilter.getSelected().isNotEmpty
+          ? brandFilter.getSelected().first.id
+          : null,
     );
+  }
+
+  // La lista se guarda mientras no cambien la búsqueda ni los filtros: así no
+  // se vuelve a pedir al servidor cada vez que la pantalla se redibuja (por
+  // ejemplo, al cambiar de modo noche o día).
+  String? _cacheKey;
+  Future<List<Item>>? _cache;
+
+  Future<List<Item>> _items(String? pattern) {
+    final key = [
+      pattern ?? '',
+      categoryFilter.getSelected().map((c) => c.id).join(','),
+      brandFilter.getSelected().map((b) => b.id).join(','),
+    ].join('|');
+    if (key != _cacheKey || _cache == null) {
+      _cacheKey = key;
+      _cache = _fetchItems(pattern);
+    }
+    return _cache!;
+  }
+
+  void _invalidate() {
+    _cacheKey = null;
+    _cache = null;
   }
 
   @override
@@ -37,96 +64,102 @@ class SearchItemPage extends BrowsablePage {
       pattern = searchField.value;
     }
 
+    void retry() {
+      _invalidate();
+      searchField.value = searchField.value;
+    }
+
     return FutureBuilder<List<Item>>(
-      future: _fetchItems(pattern),
+      future: _items(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
-        List<Item> items = [];
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const LoadingState();
-        } else if (snapshot.hasError) {
-          return StateMessage.error(onAction: () => searchField.value = searchField.value);
-        } else {
-        if (snapshot.hasData && !snapshot.data!.isEmpty) {
-          items = snapshot.data!;
         }
-          return MultiProvider(
+        if (snapshot.hasError) {
+          return StateMessage.error(onAction: retry);
+        }
+        final items = snapshot.data ?? <Item>[];
 
-            providers: [
-                  ChangeNotifierProvider.value(value: SessionManager()),
-            ],
-            child: Consumer<SessionManager>(
-              builder: (context, sessionManager, child) {
-                return Stack(
-                  children: [
-                    if(items.isEmpty)
-                    StateMessage.emptyOrOffline(title: 'No se encontraron equipos', onRetry: () => searchField.value = searchField.value),
-                    if(items.isNotEmpty) CustomScrollView(
-                      slivers: <Widget>[
-                        StatefulBuilder(
-                          builder: (context, setState) {
-                            return SliverPadding(
-                              padding: const EdgeInsets.all(10.0),
-                              sliver: SliverGrid(
-                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: CustomCard.width, // Maximum width of each item
-                                  mainAxisSpacing: 10.0, // Spacing between rows
-                                  crossAxisSpacing: 10.0, // Spacing between columns
-                                  childAspectRatio: CustomCard.width/CustomCard.height,
-                                ),
-                                delegate: SliverChildBuilderDelegate(
-                                  (BuildContext context, int index) {
-                                    return CustomCard(
-                                      item: items[index],
-                                      onTap: (){
-                                        selectedItem.setItem(items[index]);
-                                      },
-                                      onEdit: (){
-                                        manager?.setPage(EditItemScreen(item: items[index]));
-                                      },
-                                      onDelete: () async {
-                                        var res = await sessionManager.confirmNotification(
-                                            message: "El item \"${items[index].nombre}\" será eliminado");
-                                        if(!res) return;
-                                        SessionManager.inventory.deleteItem(items[index]);
-                                        items.removeAt(index);
-                                        setState((){});
+        // Escucha la sesión: el botón de nuevo equipo aparece al iniciar
+        // sesión con permiso y desaparece al cerrarla.
+        return ListenableBuilder(
+          listenable: SessionManager(),
+          builder: (context, _) {
+            final canManage = SessionManager()
+                .session
+                .user
+                .can(AppPermission.gestionarInventario);
 
-                                      },
-                                    );
+            return Stack(
+              children: [
+                if (items.isEmpty)
+                  StateMessage.emptyOrOffline(
+                      title: 'No se encontraron equipos', onRetry: retry)
+                else
+                  StatefulBuilder(
+                    builder: (context, setState) => CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 110),
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: CustomCard.width,
+                              mainAxisSpacing: AppSpacing.xl,
+                              crossAxisSpacing: AppSpacing.lg + 4,
+                              childAspectRatio:
+                                  CustomCard.width / CustomCard.height,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final item = items[index];
+                                return CustomCard(
+                                  item: item,
+                                  onTap: () => selectedItem.setItem(item),
+                                  onEdit: () => manager
+                                      ?.setPage(EditItemScreen(item: item)),
+                                  onDelete: () async {
+                                    final confirmed = await SessionManager()
+                                        .confirmNotification(
+                                            message:
+                                                'El equipo "${item.nombre}" será eliminado.');
+                                    if (!confirmed) return;
+                                    // Solo se quita de la lista si el servidor lo eliminó.
+                                    final deleted = await SessionManager
+                                        .inventory
+                                        .deleteItem(item);
+                                    if (!deleted) return;
+                                    if (selectedItem.item == item)
+                                      selectedItem.unsetItem();
+                                    setState(() => items.remove(item));
                                   },
-                                  childCount: items.length, // Number of items in the grid
-                                ),
-                              ),
-                            );
-                          }
+                                );
+                              },
+                              childCount: items.length,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    if(sessionManager.session.user.can(AppPermission.gestionarInventario))
-                      Align(
-                        alignment: const Alignment(1, 1),
-                        child: Container(
-                          padding: const EdgeInsets.all(30),
-                          child: FloatingActionButton(
-                            backgroundColor: Theme.of(context).primaryColor,
-                            shape: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(200),
-                            ),
-                            //label: Text("Agregar"),
-                            onPressed: (){
-                                if(manager != null){
-                                  manager?.setPage(CreateItemScreen());
-                                }
-                            },
-                            child: Icon(Icons.add, color: AppColors.background,)),
-                        ),
-                      ),
-                  ],
-                );
-              }
-            ),
-          );
-        }
+                  ),
+                if (canManage)
+                  Positioned(
+                    right: AppSpacing.xl,
+                    bottom: AppSpacing.xl,
+                    child: FloatingActionButton.extended(
+                      onPressed: () => manager?.setPage(CreateItemScreen()),
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.onPrimary,
+                      shape: const StadiumBorder(),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Nuevo equipo'),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
       },
     );
   }
@@ -136,13 +169,15 @@ class SearchItemPage extends BrowsablePage {
     return;
   }
 
+  /// Al volver a la página (por ejemplo, después de crear o editar un
+  /// equipo) la lista se pide de nuevo.
   @override
   void onSet() {
-    return;
+    _invalidate();
   }
 }
 
-class BrandFilter extends SingleFilter<Brand>{
+class BrandFilter extends SingleFilter<Brand> {
   BrandFilter({super.items}) : super(attributeName: "Marca");
 
   @override
