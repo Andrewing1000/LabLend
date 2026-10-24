@@ -1,190 +1,206 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/themes/AppTheme.dart';
 
-// Definición del widget PasswordCreationField que extiende StatefulWidget
+/// Una regla de la política de contraseñas que se puede revisar en el cliente.
+class PasswordRule {
+  final String label;
+  final bool Function(String password) test;
+  const PasswordRule(this.label, this.test);
+}
+
+/// Campo para elegir una contraseña nueva: muestra en vivo qué reglas de la
+/// política se cumplen y un medidor de seguridad.
+///
+/// Las reglas son las mismas que valida el servidor (ver
+/// docs/politica-contrasenas.md). Las que dependen de la cuenta (que no sea
+/// común, ni parecida al usuario, ni una de las 5 últimas) solo las revisa el
+/// servidor.
 class PasswordCreationField extends StatefulWidget {
-  final TextEditingController controller; // Controlador para el campo de texto
-  final String hintText; // Texto de sugerencia para el campo de texto
-  final String labelText; // Etiqueta del campo
-  final double width; // Ancho del campo de texto
+  final TextEditingController controller;
+  final String hintText;
+  final String labelText;
+  final double width;
 
   const PasswordCreationField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.width,
-    this.labelText = 'contraseña',
+    this.labelText = 'Contraseña',
   });
 
-  // Método para verificar si la contraseña es válida
-  bool isValid(String password) {
-    final RegExp hasUpperCase =
-        RegExp(r'[A-Z]'); // Verifica si contiene mayúsculas
-    final RegExp hasLowerCase =
-        RegExp(r'[a-z]'); // Verifica si contiene minúsculas
-    final RegExp hasDigit = RegExp(r'\d'); // Verifica si contiene dígitos
-    final RegExp hasSpecialCharacter = RegExp(
-        r'[!@#$%^&*(),.?":{}|<>]'); // Verifica si contiene caracteres especiales
+  /// Caracteres especiales que acepta el servidor. Otros (como - . ? /) no
+  /// cuentan.
+  static const String specialCharacters = '~!@#\$%^&*()_+{}":;\'[]';
 
-    // Verifica los requisitos mínimos de la contraseña
-    return password.length >= 12 &&
-        hasUpperCase.hasMatch(password) &&
-        hasLowerCase.hasMatch(password) &&
-        hasDigit.hasMatch(password) &&
-        hasSpecialCharacter.hasMatch(password);
-  }
+  static final List<PasswordRule> rules = [
+    PasswordRule('Al menos 12 letras',
+        (p) => RegExp(r'[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]').allMatches(p).length >= 12),
+    PasswordRule('Una letra mayúscula', (p) => RegExp(r'[A-ZÁÉÍÓÚÜÑ]').hasMatch(p)),
+    PasswordRule('Una letra minúscula', (p) => RegExp(r'[a-záéíóúüñ]').hasMatch(p)),
+    PasswordRule('Un número', (p) => RegExp(r'\d').hasMatch(p)),
+    PasswordRule('Un símbolo: ~ ! @ # \$ % ^ & * ( ) _ + { } " : ; \' [ ]',
+        (p) => p.split('').any(specialCharacters.contains)),
+  ];
 
-  // Método para evaluar la fuerza de la contraseña
+  /// Cumple todas las reglas que se revisan en el cliente.
+  bool isValid(String password) => rules.every((rule) => rule.test(password));
+
+  /// Seguridad estimada de 0 a 1: reglas cumplidas, largo y variedad, con
+  /// penalización por repeticiones y secuencias (aaa, abc, 123).
   double getStrength(String password) {
-    double strength = 0;
-    final int length = password.length;
-    final RegExp hasUpperCase = RegExp(r'[A-Z]');
-    final RegExp hasLowerCase = RegExp(r'[a-z]');
-    final RegExp hasDigit = RegExp(r'\d');
-    final RegExp hasSpecialCharacter = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
+    if (password.isEmpty) return 0;
+    double strength = rules.where((rule) => rule.test(password)).length / rules.length * 0.7;
 
-    // Incremento de la fuerza basado en la longitud
-    if (length >= 8) strength += 0.1;
-    if (length >= 12) strength += 0.1;
-    if (length >= 16) strength += 0.1;
+    if (password.length >= 16) strength += 0.15;
+    if (password.split('').toSet().length > 12) strength += 0.15;
 
-    // Incremento de la fuerza basado en la complejidad
-    if (hasUpperCase.hasMatch(password)) strength += 0.15;
-    if (hasLowerCase.hasMatch(password)) strength += 0.15;
-    if (hasDigit.hasMatch(password)) strength += 0.15;
-    if (hasSpecialCharacter.hasMatch(password)) strength += 0.15;
+    if (RegExp(r'(.)\1\1').hasMatch(password)) strength -= 0.2;
 
-    // Diversidad de caracteres
-    final uniqueChars = password.split('').toSet().length;
-    if (uniqueChars > 10) strength += 0.1;
-    if (uniqueChars > 15) strength += 0.1;
-
-    // Penalización por patrones repetitivos (e.g., Maria123@123)
-    final RegExp repetitivePattern = RegExp(r'(.)\1\1');
-    if (repetitivePattern.hasMatch(password)) strength -= 0.2;
-
-    // Penalización por secuencias predecibles (e.g., abc, 123)
-    final List<String> sequences = [
-      'abcdefghijklmnopqrstuvwxyz',
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      '0123456789'
-    ];
-    for (String sequence in sequences) {
+    const sequences = ['abcdefghijklmnopqrstuvwxyz', '0123456789'];
+    final lower = password.toLowerCase();
+    for (final sequence in sequences) {
       for (int i = 0; i < sequence.length - 2; i++) {
-        if (password.contains(sequence.substring(i, i + 2))) {
-          strength -= 0.1;
-        }
+        if (lower.contains(sequence.substring(i, i + 3))) strength -= 0.1;
       }
     }
-
-    return strength.clamp(0, 1);
+    return strength.clamp(0, 1).toDouble();
   }
 
   @override
-  _PasswordCreationFieldState createState() => _PasswordCreationFieldState();
+  State<PasswordCreationField> createState() => _PasswordCreationFieldState();
 }
 
-// Estado asociado al widget PasswordCreationField
-class _PasswordCreationFieldState extends State<PasswordCreationField>
-    with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-  bool _isObscured = true; // Estado para controlar si la contraseña está oculta
-  double _strength = 0; // Estado para almacenar la fuerza de la contraseña
-  bool _isValid = false; // Estado para almacenar la validez de la contraseña
+class _PasswordCreationFieldState extends State<PasswordCreationField> {
+  bool _isObscured = true;
+
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 500),
-    );
-    controller.addListener(() {
-      setState(() {});
-    });
-    widget.controller.addListener(
-        _updatePasswordCriteria); // Agrega listener para actualizar la fuerza y validez
-  }
-
-  // Método para alternar la visibilidad de la contraseña
-  void _toggleObscured() {
-    setState(() {
-      _isObscured = !_isObscured;
-    });
-  }
-
-  // Método para actualizar la fuerza y validez de la contraseña
-  void _updatePasswordCriteria() {
-    setState(() {
-      _strength = widget.getStrength(widget.controller.text);
-      _isValid = widget.isValid(widget.controller.text);
-      controller.animateTo(
-        _strength,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.decelerate,
-      );
-      //print("Password: ${widget.controller.text}"); // Mostrar la contraseña en la consola
-    });
+    widget.controller.addListener(_refresh);
   }
 
   @override
   void dispose() {
-    controller.dispose();
-    widget.controller.removeListener(_updatePasswordCriteria);
+    widget.controller.removeListener(_refresh);
     super.dispose();
   }
 
+  void _refresh() => setState(() {});
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: widget.width, // Ancho del campo de texto
-          child: TextField(
+    final password = widget.controller.text;
+    final strength = widget.getStrength(password);
+    final valid = widget.isValid(password);
+
+    final (String level, Color color) = !valid
+        ? ('Débil', AppColors.error)
+        : strength < 0.85
+            ? ('Aceptable', AppColors.warning)
+            : ('Fuerte', AppColors.success);
+
+    return SizedBox(
+      width: widget.width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
             controller: widget.controller,
-            obscureText: _isObscured, // Controla la visibilidad del texto
-            style: const TextStyle(color: Colors.white), // Estilo del texto
+            obscureText: _isObscured,
+            autofillHints: const [AutofillHints.newPassword],
             decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.grey[900], // Color de fondo del campo de texto
               labelText: widget.labelText,
-              labelStyle: Theme.of(context)
-                  .textTheme
-                  .labelMedium, // Estilo del texto de sugerencia
+              hintText: widget.hintText.isEmpty ? null : widget.hintText,
+              prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
+                tooltip: _isObscured ? 'Mostrar contraseña' : 'Ocultar contraseña',
                 icon: Icon(
-                  _isObscured ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.white54, // Color del icono
-                ),
-                onPressed:
-                    _toggleObscured, // Alterna la visibilidad al presionar el icono
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                    30.0), // Define el radio de las esquinas del campo de texto
-                borderSide: BorderSide.none,
+                    _isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                onPressed: () => setState(() => _isObscured = !_isObscured),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: widget.width, // Ancho de la barra de progreso
-          child: LinearProgressIndicator(
-              value: controller.value, // Valor de la fuerza de la contraseña
-              backgroundColor: Colors.white,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                (_isValid ? Colors.greenAccent : Colors.orangeAccent),
-              )),
-        ),
-        const SizedBox(height: 5),
-        const SizedBox(height: 5),
-        Text(
-          _isValid ? "Contraseña válida" : "Contraseña Inválida",
-          style: TextStyle(
-            color: _isValid ? Colors.greenAccent : Colors.white,
+          if (password.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(end: valid ? strength.clamp(0.4, 1.0) : strength.clamp(0.05, 0.35)),
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOut,
+                      builder: (context, value, _) => LinearProgressIndicator(
+                        value: value,
+                        minHeight: 6,
+                        color: color,
+                        backgroundColor: AppColors.surfaceHighest,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  level,
+                  style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          Semantics(
+            liveRegion: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final rule in PasswordCreationField.rules)
+                  _RuleRow(label: rule.label, met: rule.test(password)),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RuleRow extends StatelessWidget {
+  final String label;
+  final bool met;
+
+  const _RuleRow({required this.label, required this.met});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Icon(
+              met ? Icons.check_circle : Icons.radio_button_unchecked,
+              key: ValueKey(met),
+              size: 18,
+              color: met ? AppColors.success : AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              label,
+              semanticsLabel: '$label: ${met ? 'cumplido' : 'pendiente'}',
+              style: TextStyle(
+                fontSize: 13,
+                color: met ? AppColors.textPrimary : AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

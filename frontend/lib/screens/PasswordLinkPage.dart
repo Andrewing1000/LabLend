@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/PasswordLink.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/themes/AppTheme.dart';
 
+import '../widgets/auth_card.dart';
 import '../widgets/password_creation_field.dart';
 import '../widgets/password_field.dart';
 
@@ -13,8 +15,7 @@ class PasswordLinkScreen extends StatefulWidget {
   final String token;
   final Function() onDone;
 
-  const PasswordLinkScreen(
-      {super.key, required this.token, required this.onDone});
+  const PasswordLinkScreen({super.key, required this.token, required this.onDone});
 
   @override
   State<PasswordLinkScreen> createState() => _PasswordLinkScreenState();
@@ -30,8 +31,12 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
   @override
   void initState() {
     super.initState();
+    passwordController.addListener(_refresh);
+    confirmController.addListener(_refresh);
     _check();
   }
+
+  void _refresh() => setState(() {});
 
   @override
   void dispose() {
@@ -41,14 +46,18 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
   }
 
   Future<void> _check() async {
-    final result =
-        await SessionManager.userManager.checkPasswordLink(widget.token);
+    final result = await SessionManager.userManager.checkPasswordLink(widget.token);
     if (!mounted) return;
     setState(() {
       link = result;
       loading = false;
     });
   }
+
+  String? get _mismatch => confirmController.text.isNotEmpty &&
+          confirmController.text != passwordController.text
+      ? 'Las contraseñas no coinciden'
+      : null;
 
   Future<void> _save() async {
     if (passwordController.text.isEmpty) {
@@ -60,8 +69,8 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
       return;
     }
     setState(() => saving = true);
-    final saved = await SessionManager.userManager
-        .usePasswordLink(widget.token, passwordController.text);
+    final saved =
+        await SessionManager.userManager.usePasswordLink(widget.token, passwordController.text);
     if (!mounted) return;
     setState(() => saving = false);
     if (saved) {
@@ -77,59 +86,90 @@ class _PasswordLinkScreenState extends State<PasswordLinkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 360,
-        padding: const EdgeInsets.all(20.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(20),
+    if (loading) {
+      return const AuthCard(
+        icon: Icons.link,
+        title: 'Revisando el enlace',
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: CircularProgressIndicator(),
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              isActivation ? 'Activar su cuenta' : 'Elegir una contraseña nueva',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      );
+    }
+
+    if (link == null) {
+      return AuthCard(
+        icon: Icons.link_off,
+        accent: AppColors.error,
+        title: 'El enlace no sirve',
+        subtitle: 'No es válido, ya se usó o venció. Pida uno nuevo al '
+            'administrador de seguridad.',
+        child: AuthPrimaryButton(
+          label: 'Ir al inicio de sesión',
+          onPressed: widget.onDone,
+        ),
+      );
+    }
+
+    return AuthCard(
+      icon: isActivation ? Icons.verified_user_outlined : Icons.key_outlined,
+      title: isActivation ? 'Activar su cuenta' : 'Elegir una contraseña nueva',
+      subtitle: isActivation
+          ? 'Elija la contraseña con la que va a iniciar sesión.'
+          : 'Elija una contraseña nueva para su cuenta.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceHighest,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            const SizedBox(height: 16),
-            if (loading)
-              const CircularProgressIndicator()
-            else if (link == null) ...[
-              const Text(
-                'El enlace no es válido o venció. Pida uno nuevo al '
-                'administrador de seguridad.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: widget.onDone,
-                child: const Text('Ir al inicio de sesión'),
-              ),
-            ] else ...[
-              Text('Código de usuario: ${link!.username}'),
-              const SizedBox(height: 20),
-              PasswordCreationField(
-                controller: passwordController,
-                hintText: 'Contraseña nueva',
-                labelText: 'Contraseña nueva',
-                width: 300,
-              ),
-              const SizedBox(height: 20),
-              PasswordField(
-                controller: confirmController,
-                hintText: 'Repita la contraseña',
-                labelText: 'Repita la contraseña',
-                width: 300,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: saving ? null : _save,
-                child: const Text('Guardar contraseña'),
-              ),
-            ],
-          ],
-        ),
+            child: Row(
+              children: [
+                const Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+                const SizedBox(width: AppSpacing.md),
+                const Text('Código de usuario',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                const Spacer(),
+                Flexible(
+                  child: Text(
+                    link!.username,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PasswordCreationField(
+            controller: passwordController,
+            hintText: '',
+            labelText: 'Contraseña nueva',
+            width: double.infinity,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PasswordField(
+            controller: confirmController,
+            hintText: '',
+            labelText: 'Repita la contraseña',
+            width: double.infinity,
+            errorText: _mismatch,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          AuthPrimaryButton(
+            label: isActivation ? 'Activar cuenta' : 'Guardar contraseña',
+            loading: saving,
+            onPressed: _save,
+          ),
+        ],
       ),
     );
   }

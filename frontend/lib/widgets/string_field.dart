@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Campo de texto con validación de obligatorio. Toma colores y bordes del
+/// tema (InputDecorationTheme).
 class StringField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
@@ -9,6 +11,11 @@ class StringField extends StatefulWidget {
   final bool enabled;
   final bool required;
   final bool digitsOnly;
+  final bool autofocus;
+  final IconData? prefixIcon;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
+  final Iterable<String>? autofillHints;
 
   const StringField({
     super.key,
@@ -17,25 +24,26 @@ class StringField extends StatefulWidget {
     required this.labelText,
     required this.width,
     this.enabled = true,
-    this.required= true,
+    this.required = true,
     this.digitsOnly = false,
+    this.autofocus = false,
+    this.prefixIcon,
+    this.textInputAction,
+    this.onSubmitted,
+    this.autofillHints,
   });
 
   @override
-  _StringFieldState createState() => _StringFieldState();
+  State<StringField> createState() => _StringFieldState();
 }
 
 class _StringFieldState extends State<StringField> {
   String? _errorMessage;
 
   void _validate() {
-    if(!widget.required) return;
+    if (!widget.required) return;
     setState(() {
-      if (widget.controller.text.isEmpty) {
-        _errorMessage = 'Este campo es obligatorio';
-      } else {
-        _errorMessage = null;
-      }
+      _errorMessage = widget.controller.text.isEmpty ? 'Este campo es obligatorio' : null;
     });
   }
 
@@ -46,28 +54,21 @@ class _StringFieldState extends State<StringField> {
       child: TextField(
         controller: widget.controller,
         enabled: widget.enabled,
+        autofocus: widget.autofocus,
+        textInputAction: widget.textInputAction,
+        onSubmitted: widget.onSubmitted,
+        autofillHints: widget.autofillHints,
         inputFormatters: [
-          if(widget.digitsOnly) FilteringTextInputFormatter.digitsOnly,
-        ],// Controla si el campo está habilitado o no
-        style: const TextStyle(color: Colors.white), // Estilo del texto
+          if (widget.digitsOnly) FilteringTextInputFormatter.digitsOnly,
+        ],
         decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.grey[900],
           labelText: widget.labelText,
-          labelStyle: Theme.of(context).textTheme.labelMedium,// Color de fondo del campo de texto
-          hintText: widget.hintText, // Estilo del texto de sugerencia
+          hintText: widget.hintText,
           errorText: _errorMessage,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-                30.0), // Define el radio de las esquinas del campo de texto
-            borderSide: BorderSide.none,
-          ),
+          prefixIcon: widget.prefixIcon == null ? null : Icon(widget.prefixIcon),
         ),
-        onChanged: (text) {
-          _validate();
-        },
+        onChanged: (_) => _validate(),
       ),
     );
   }
 }
-

@@ -1,3 +1,5 @@
+import 'package:frontend/themes/AppTheme.dart';
+import 'package:frontend/widgets/state_message.dart';
 import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
@@ -12,7 +14,7 @@ class SearchLoanPage extends BrowsablePage {
   DateFilter fromDateFilter = DateFilter(attributeName: "Desde");
   DateFilter toDateFilter = DateFilter(attributeName: "Hasta");
 
-  SearchLoanPage({super.key}) {
+  SearchLoanPage({super.key}) : super(searchHint: 'Buscar por correo del usuario') {
     filterSet.add(returnedFilter);
     filterSet.add(fromDateFilter);
     filterSet.add(toDateFilter);
@@ -62,22 +64,25 @@ class SearchLoanPage extends BrowsablePage {
       future: _fetchItems(pattern),
       builder: (BuildContext context, AsyncSnapshot<List<Loan>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white,));
+          return const LoadingState();
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return StateMessage.error(onAction: () => searchField.value = searchField.value);
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No se encontraron items',
-            style: TextStyle(color: Colors.white),));
+          return StateMessage.emptyOrOffline(
+            title: 'No se encontraron préstamos',
+            icon: Icons.swap_horiz,
+            onRetry: () => searchField.value = searchField.value,
+          );
         } else {
           List<Loan> items = snapshot.data!;
           return Column(
             children: [
               Container(
                 decoration: const BoxDecoration(
-                    color: Colors.black,
+                    color: AppColors.background,
                     border: Border.symmetric(
                       horizontal: BorderSide(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         width: 1,
                       ),
                     )
@@ -94,7 +99,7 @@ class SearchLoanPage extends BrowsablePage {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           overflow: TextOverflow.ellipsis,
                         ),
                         textAlign: TextAlign.left,
@@ -109,7 +114,7 @@ class SearchLoanPage extends BrowsablePage {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           overflow: TextOverflow.ellipsis,
                         ),
                         textAlign: TextAlign.left,
@@ -124,7 +129,7 @@ class SearchLoanPage extends BrowsablePage {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           overflow: TextOverflow.ellipsis,
                         ),
                         textAlign: TextAlign.left,
@@ -139,7 +144,7 @@ class SearchLoanPage extends BrowsablePage {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           overflow: TextOverflow.ellipsis,
                         ),
                         textAlign: TextAlign.center,
@@ -176,7 +181,7 @@ class SearchLoanPage extends BrowsablePage {
 
   void _showLoanDetail(BuildContext context, Loan loan){
     showModalBottomSheet(context: context,
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       builder: (context){
         return Reviewloan(loan: loan);
       }

@@ -1,54 +1,44 @@
 import 'package:flutter/material.dart';
 
+/// Campo de contraseña con botón para mostrarla u ocultarla. Toma colores y
+/// bordes del tema (InputDecorationTheme).
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
   final String labelText;
   final double width;
+  final bool autofocus;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
+  final Iterable<String>? autofillHints;
+
+  /// Error a mostrar desde fuera (por ejemplo, "Las contraseñas no coinciden").
+  final String? errorText;
 
   const PasswordField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.width,
-    this.labelText = 'contraseña',
+    this.labelText = 'Contraseña',
+    this.autofocus = false,
+    this.textInputAction,
+    this.onSubmitted,
+    this.autofillHints,
+    this.errorText,
   });
 
   @override
-  _PasswordFieldState createState() => _PasswordFieldState();
+  State<PasswordField> createState() => _PasswordFieldState();
 }
 
 class _PasswordFieldState extends State<PasswordField> {
-  bool _isObscured = true; // Estado para controlar si la contraseña está oculta
+  bool _isObscured = true;
   String? _errorMessage;
-
 
   void _validate() {
     setState(() {
-      if (widget.controller.text.isEmpty) {
-        _errorMessage = 'Este campo es obligatorio';
-      } else {
-        _errorMessage = null;
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_validate);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_validate);
-    super.dispose();
-  }
-
-  // Método para alternar la visibilidad de la contraseña
-  void _toggleObscured() {
-    setState(() {
-      _isObscured = !_isObscured;
+      _errorMessage = widget.controller.text.isEmpty ? 'Este campo es obligatorio' : null;
     });
   }
 
@@ -58,29 +48,23 @@ class _PasswordFieldState extends State<PasswordField> {
       width: widget.width,
       child: TextField(
         controller: widget.controller,
-        obscureText: _isObscured, // Controla la visibilidad del texto
-        style: const TextStyle(color: Colors.white), // Estilo del texto
+        obscureText: _isObscured,
+        autofocus: widget.autofocus,
+        textInputAction: widget.textInputAction,
+        onSubmitted: widget.onSubmitted,
+        autofillHints: widget.autofillHints,
         decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.grey[900], // Color de fondo del campo de texto
-          labelStyle: Theme.of(context).textTheme.labelMedium,
           labelText: widget.labelText,
+          hintText: widget.hintText.isEmpty ? null : widget.hintText,
+          errorText: widget.errorText ?? _errorMessage,
+          prefixIcon: const Icon(Icons.lock_outline),
           suffixIcon: IconButton(
-            icon: Icon(
-              _isObscured ? Icons.visibility_off : Icons.visibility,
-              color: Colors.white54, // Color del icono
-            ),
-            onPressed: _toggleObscured, // Alterna la visibilidad al presionar el icono
-          ),
-          errorText: _errorMessage,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.0), // Define el radio de las esquinas del campo de texto
-            borderSide: BorderSide.none,
+            tooltip: _isObscured ? 'Mostrar contraseña' : 'Ocultar contraseña',
+            icon: Icon(_isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+            onPressed: () => setState(() => _isObscured = !_isObscured),
           ),
         ),
-        onChanged: (text) {
-          _validate();
-        },
+        onChanged: (_) => _validate(),
       ),
     );
   }

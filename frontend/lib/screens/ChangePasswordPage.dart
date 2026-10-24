@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/themes/AppTheme.dart';
 
+import '../widgets/auth_card.dart';
 import '../widgets/password_creation_field.dart';
 import '../widgets/password_field.dart';
 
@@ -31,6 +33,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool saving = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Para avisar en vivo si la confirmación no coincide.
+    passwordController.addListener(_refresh);
+    confirmController.addListener(_refresh);
+  }
+
+  void _refresh() => setState(() {});
+
+  @override
   void dispose() {
     currentController.dispose();
     passwordController.dispose();
@@ -38,10 +50,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
+  String? get _mismatch => confirmController.text.isNotEmpty &&
+          confirmController.text != passwordController.text
+      ? 'Las contraseñas no coinciden'
+      : null;
+
   Future<void> _save() async {
     if (currentController.text.isEmpty || passwordController.text.isEmpty) {
-      SessionManager().errorNotification(
-          error: 'Escriba la contraseña actual y la nueva');
+      SessionManager().errorNotification(error: 'Escriba la contraseña actual y la nueva');
       return;
     }
     if (passwordController.text != confirmController.text) {
@@ -49,8 +65,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
     setState(() => saving = true);
-    final changed = await SessionManager()
-        .changeOwnPassword(currentController.text, passwordController.text);
+    final changed =
+        await SessionManager().changeOwnPassword(currentController.text, passwordController.text);
     if (!mounted) return;
     setState(() => saving = false);
     if (changed) widget.onDone();
@@ -58,69 +74,62 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 360,
-        padding: const EdgeInsets.all(20.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              widget.forced ? 'Su contraseña venció' : 'Cambiar contraseña',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            if (widget.forced) ...[
-              const SizedBox(height: 12),
-              const Text(
-                'Las contraseñas vencen a los 90 días. Elija una nueva para '
-                'seguir usando el sistema.',
-                textAlign: TextAlign.center,
-              ),
-            ],
-            const SizedBox(height: 20),
-            PasswordField(
-              controller: currentController,
-              hintText: 'Contraseña actual',
-              labelText: 'Contraseña actual',
-              width: 300,
-            ),
-            const SizedBox(height: 20),
-            PasswordCreationField(
-              controller: passwordController,
-              hintText: 'Contraseña nueva',
-              labelText: 'Contraseña nueva',
-              width: 300,
-            ),
-            const SizedBox(height: 20),
-            PasswordField(
-              controller: confirmController,
-              hintText: 'Repita la contraseña nueva',
-              labelText: 'Repita la contraseña nueva',
-              width: 300,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: saving
-                      ? null
-                      : (widget.forced ? widget.onLogout : widget.onDone),
-                  child: Text(widget.forced ? 'Cerrar sesión' : 'Cancelar'),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: saving ? null : _save,
-                  child: const Text('Guardar contraseña'),
-                ),
-              ],
-            ),
-          ],
-        ),
+    return AuthCard(
+      icon: widget.forced ? Icons.lock_clock_outlined : Icons.key_outlined,
+      accent: widget.forced ? AppColors.warning : AppColors.primary,
+      title: widget.forced ? 'Su contraseña venció' : 'Cambiar contraseña',
+      subtitle: widget.forced
+          ? 'Las contraseñas vencen a los 90 días. Elija una nueva para seguir '
+              'usando el sistema.'
+          : 'Por seguridad, primero confirme su contraseña actual.',
+      // Si está vencida no se puede cerrar: hay que cambiarla o salir.
+      onClose: widget.forced || saving ? null : widget.onDone,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PasswordField(
+            controller: currentController,
+            hintText: '',
+            labelText: 'Contraseña actual',
+            width: double.infinity,
+            autofocus: true,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.password],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PasswordCreationField(
+            controller: passwordController,
+            hintText: '',
+            labelText: 'Contraseña nueva',
+            width: double.infinity,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PasswordField(
+            controller: confirmController,
+            hintText: '',
+            labelText: 'Repita la contraseña nueva',
+            width: double.infinity,
+            errorText: _mismatch,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const Text(
+            'Tampoco puede ser una contraseña común ni una de las últimas 5 que usó.',
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          AuthPrimaryButton(
+            label: 'Guardar contraseña',
+            loading: saving,
+            onPressed: _save,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextButton(
+            onPressed: saving ? null : (widget.forced ? widget.onLogout : widget.onDone),
+            child: Text(widget.forced ? 'Cerrar sesión' : 'Cancelar'),
+          ),
+        ],
       ),
     );
   }

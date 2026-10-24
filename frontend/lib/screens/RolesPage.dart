@@ -1,3 +1,5 @@
+import 'package:frontend/themes/AppTheme.dart';
+import 'package:frontend/widgets/state_message.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Permissions.dart';
 import 'package:frontend/models/Role.dart';
@@ -44,7 +46,7 @@ class RolesPage extends BrowsablePage {
           Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: SegmentedButton<bool>(
@@ -61,9 +63,12 @@ class RolesPage extends BrowsablePage {
                     selected: {matrix},
                     showSelectedIcon: false,
                     style: SegmentedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      selectedForegroundColor: Colors.black,
-                      selectedBackgroundColor: Colors.orange,
+                      foregroundColor: AppColors.textSecondary,
+                      selectedForegroundColor: AppColors.onPrimary,
+                      selectedBackgroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.border),
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     ),
                     onSelectionChanged: (value) =>
                         showMatrix.value = value.first,
@@ -89,7 +94,7 @@ class RolesPage extends BrowsablePage {
                     borderRadius: BorderRadius.circular(200),
                   ),
                   onPressed: () => manager?.setPage(RoleEditScreen()),
-                  child: const Icon(Icons.add, color: Colors.black),
+                  child: const Icon(Icons.add, color: AppColors.background),
                 ),
               ),
             ),
@@ -98,14 +103,16 @@ class RolesPage extends BrowsablePage {
     );
   }
 
-  static const _loading = Center(
-    child: CircularProgressIndicator(color: Colors.white),
-  );
+  static const _loading = LoadingState();
 
-  static const _empty = Center(
-    child: Text('No se encontraron roles',
-        style: TextStyle(color: Colors.white)),
-  );
+  Widget get _empty => StateMessage.emptyOrOffline(
+        title: 'No se encontraron roles',
+        icon: Icons.badge_outlined,
+        onRetry: () => searchField.value = searchField.value,
+      );
+
+  // Antes un error se mostraba como "sin roles"; ahora se distingue.
+  Widget get _error => StateMessage.error(onAction: () => searchField.value = searchField.value);
 
   Widget _listView(String pattern) {
     return FutureBuilder<List<Role>>(
@@ -114,6 +121,7 @@ class RolesPage extends BrowsablePage {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _loading;
         }
+        if (snapshot.hasError) return _error;
         final roles = snapshot.data ?? [];
         if (roles.isEmpty) return _empty;
         return Column(
@@ -143,6 +151,7 @@ class RolesPage extends BrowsablePage {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _loading;
         }
+        if (snapshot.hasError) return _error;
         final (roles, permissions) = snapshot.data ?? (<Role>[], <PermissionInfo>[]);
         if (roles.isEmpty) return _empty;
         return AccessMatrix(roles: roles, permissions: permissions);
@@ -163,12 +172,12 @@ class _RolesHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const style = TextStyle(
-        fontSize: 18, fontWeight: FontWeight.w100, color: Colors.white);
+        fontSize: 18, fontWeight: FontWeight.w100, color: AppColors.textPrimary);
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.black,
+        color: AppColors.background,
         border: Border.symmetric(
-          horizontal: BorderSide(color: Colors.white, width: 1),
+          horizontal: BorderSide(color: AppColors.textPrimary, width: 1),
         ),
       ),
       padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
@@ -199,7 +208,7 @@ class _RoleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.black,
+      color: AppColors.background,
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: InkWell(
         onTap: onTap,
@@ -221,7 +230,7 @@ class _RoleCard extends StatelessWidget {
                               style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                                  color: AppColors.textPrimary)),
                         ),
                         if (role.protected) ...[
                           const SizedBox(width: 8),
@@ -229,7 +238,7 @@ class _RoleCard extends StatelessWidget {
                             message: 'Rol protegido: no se modifica ni se '
                                 'elimina',
                             child: Icon(Icons.lock,
-                                size: 16, color: Colors.orange),
+                                size: 16, color: AppColors.primary),
                           ),
                         ],
                       ],
@@ -238,26 +247,26 @@ class _RoleCard extends StatelessWidget {
                       Text(role.description,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              fontSize: 13, color: Colors.grey)),
+                              fontSize: 13, color: AppColors.textMuted)),
                   ],
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(areaNames[role.area] ?? 'Sin permisos',
-                    style: const TextStyle(color: Colors.grey)),
+                    style: const TextStyle(color: AppColors.textMuted)),
               ),
               Expanded(
                 flex: 2,
                 child: Text('${role.permissions.length}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white)),
+                    style: const TextStyle(color: AppColors.textPrimary)),
               ),
               Expanded(
                 flex: 2,
                 child: Text('${role.userCount}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white)),
+                    style: const TextStyle(color: AppColors.textPrimary)),
               ),
             ],
           ),
