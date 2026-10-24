@@ -4,6 +4,7 @@ import '../models/Session.dart';
 import '../models/Item.dart';
 import '../services/SelectedItemContext.dart';
 import '../themes/AppTheme.dart';
+import '../themes/theme_controller.dart';
 import '../widgets/equipment_card.dart';
 import '../widgets/footer_widget.dart';
 import '../widgets/typewriter_text.dart';
@@ -163,6 +164,18 @@ class _HeroState extends State<_Hero> {
 
   void _search() => widget.onSearch?.call(controller.text.trim());
 
+  static const _nightPhoto = 'assets/images/background.jpg';
+  static const _dayPhoto = 'assets/images/portada_dia.jpg';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Las dos fotos quedan en memoria: al cambiar de modo, la portada cambia
+    // sin esperar a que se cargue la otra.
+    precacheImage(const AssetImage(_nightPhoto), context);
+    precacheImage(const AssetImage(_dayPhoto), context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final compact = widget.compact;
@@ -173,13 +186,35 @@ class _HeroState extends State<_Hero> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/background.jpg',
-            fit: BoxFit.cover,
-            semanticLabel:
-                'Edificio del laboratorio de la Universidad Católica Boliviana al anochecer',
+          // De noche, el edificio al anochecer; de día, el mismo de día. El
+          // fundido lo hace ThemeTransitionHost para toda la pantalla.
+          AnimatedSwitcher(
+            duration: Duration.zero,
+            child: ThemeController.instance.isNight
+                ? Image.asset(
+                    _nightPhoto,
+                    key: const ValueKey(_nightPhoto),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    semanticLabel:
+                        'Edificio del laboratorio de la Universidad Católica Boliviana al anochecer',
+                  )
+                : Image.asset(
+                    _dayPhoto,
+                    key: const ValueKey(_dayPhoto),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    semanticLabel:
+                        'Edificio del laboratorio de la Universidad Católica Boliviana de día',
+                  ),
           ),
-          Container(color: Colors.black.withOpacity(0.5)),
+          // Velo para que el texto blanco se lea sobre cualquiera de las fotos.
+          Container(
+            color: Colors.black
+                .withOpacity(ThemeController.instance.isNight ? 0.5 : 0.42),
+          ),
           // En pantallas angostas el menú inferior ocupa este lugar.
           if (AppBreakpoints.isWide(context))
             Positioned(
@@ -195,7 +230,7 @@ class _HeroState extends State<_Hero> {
                         curve: Curves.easeInOut,
                       ),
                   icon: const Icon(Icons.keyboard_arrow_down, size: 32),
-                  color: AppColors.textPrimary,
+                  color: AppColors.onImage,
                 ),
               ),
             ),
@@ -234,7 +269,7 @@ class _HeroState extends State<_Hero> {
                       height: 1.0,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -titleSize * 0.03,
-                      color: AppColors.textPrimary,
+                      color: AppColors.onImage,
                     ),
                   ),
                 ),
@@ -245,7 +280,7 @@ class _HeroState extends State<_Hero> {
                     height: compact ? 52 : 64,
                     padding: EdgeInsets.only(left: AppSpacing.lg + 2, right: compact ? AppSpacing.lg : 8),
                     decoration: BoxDecoration(
-                      color: AppColors.textPrimary,
+                      color: AppColors.onImage,
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
                     child: Row(
@@ -259,7 +294,7 @@ class _HeroState extends State<_Hero> {
                             textInputAction: TextInputAction.search,
                             cursorColor: AppColors.primary,
                             style: TextStyle(
-                                color: AppColors.background, fontSize: compact ? 15 : 17),
+                                color: const Color(0xFF1D1C1A), fontSize: compact ? 15 : 17),
                             decoration: InputDecoration(
                               hintText: '¿Qué equipo necesitas?',
                               hintStyle: TextStyle(

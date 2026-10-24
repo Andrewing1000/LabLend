@@ -4,13 +4,19 @@ import 'package:frontend/themes/AppTheme.dart';
 
 /// Disponibilidad de un equipo según las unidades que quedan sin prestar.
 enum Availability {
-  available('Disponible', AppColors.success),
-  low('Pocas unidades', AppColors.warning),
-  onLoan('Prestado', AppColors.textMuted);
+  available('Disponible'),
+  low('Pocas unidades'),
+  onLoan('Prestado');
 
   final String label;
-  final Color color;
-  const Availability(this.label, this.color);
+  const Availability(this.label);
+
+  /// Color del modo actual (noche o día).
+  Color get color => switch (this) {
+        available => AppColors.success,
+        low => AppColors.warning,
+        onLoan => AppColors.textMuted,
+      };
 
   static Availability of(Item item) {
     final free = item.quantity - item.quantityOnLoan;
@@ -87,7 +93,7 @@ class _EquipmentCardState extends State<EquipmentCard> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                     child: Container(
-                      color: AppColors.textPrimary,
+                      color: const Color(0xFFFFFFFF), // las fotos de equipos tienen fondo blanco
                       child: AnimatedScale(
                         scale: hovered ? 1.05 : 1,
                         duration: const Duration(milliseconds: 250),
@@ -102,7 +108,7 @@ class _EquipmentCardState extends State<EquipmentCard> {
                   item.nombre,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -119,7 +125,7 @@ class _EquipmentCardState extends State<EquipmentCard> {
                   ]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -175,7 +181,7 @@ class _CategoryTileState extends State<CategoryTile> {
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: AppColors.textPrimary,
+                    color: const Color(0xFFFFFFFF),
                     child: AnimatedScale(
                       scale: hovered ? 1.05 : 1,
                       duration: const Duration(milliseconds: 300),
@@ -200,7 +206,7 @@ class _CategoryTileState extends State<CategoryTile> {
                           widget.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w700,
                             fontSize: 15,

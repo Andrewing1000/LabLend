@@ -8,6 +8,7 @@ import 'package:frontend/widgets/app_nav.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/PageManager.dart';
 import 'package:frontend/themes/AppTheme.dart';
+import 'package:frontend/themes/theme_controller.dart';
 
 import '../models/Session.dart';
 import 'DropdownDateFilter.dart';
@@ -72,6 +73,8 @@ class ToolBarState extends State<ToolBar> {
           final compact = AppBreakpoints.isCompact(context);
           final user = sessionManager.session.user;
           final showSearch = page is BrowsablePage && page.searchEnabled;
+          // Sobre la foto de la portada los textos e íconos van siempre claros.
+          final onImage = widget.transparent;
 
           if (page is BrowsablePage &&
               searchBarController.text != page.searchField.value) {
@@ -100,16 +103,19 @@ class ToolBarState extends State<ToolBar> {
                             icon: Icons.arrow_back,
                             tooltip: 'Atrás',
                             onPressed: manager.toLast,
+                            onImage: onImage,
                           ),
                           const SizedBox(width: AppSpacing.md),
                         ],
                         Semantics(
                           label: 'Universidad Católica Boliviana',
                           image: true,
-                          // El logo es oscuro: se pinta en blanco sobre el fondo negro.
+                          // El logo se pinta del color del texto: claro de noche
+                          // y sobre la foto, oscuro de día.
                           child: ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                                AppColors.textPrimary, BlendMode.srcIn),
+                            colorFilter: ColorFilter.mode(
+                                onImage ? AppColors.onImage : AppColors.textPrimary,
+                                BlendMode.srcIn),
                             child: Image.asset(
                               'assets/images/ucb_logo.png',
                               height: compact ? 30 : 40,
@@ -118,7 +124,7 @@ class ToolBarState extends State<ToolBar> {
                         ),
                         const SizedBox(width: AppSpacing.xl),
                         if (wide)
-                          Expanded(child: _NavLinks(items: widget.navItems, manager: manager))
+                          Expanded(child: _NavLinks(items: widget.navItems, manager: manager, onImage: onImage))
                         else
                           const Spacer(),
                         if (user.can(AppPermission.registrarPrestamos)) ...[
@@ -126,12 +132,16 @@ class ToolBarState extends State<ToolBar> {
                             count: cart.items.length,
                             expanded: !compact,
                             onPressed: () => widget.onCartLookup(),
+                            onImage: onImage,
                           ),
                           const SizedBox(width: AppSpacing.sm),
                         ],
+                        ThemeToggleButton(onImage: onImage),
+                        const SizedBox(width: AppSpacing.sm),
                         _AccountButton(
                           user: user,
                           compact: compact,
+                          onImage: onImage,
                           onLogin: () => widget.onLogin(),
                           onLogout: () => widget.onLogout(),
                           onChangePassword: widget.onChangePassword == null
@@ -172,7 +182,7 @@ class ToolBarState extends State<ToolBar> {
                 Container(
                   color: AppColors.surfaceHigh,
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
-                  child: const Text(
+                  child: Text(
                     'Sin conexión con el servidor',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
@@ -190,8 +200,9 @@ class ToolBarState extends State<ToolBar> {
 class _NavLinks extends StatelessWidget {
   final List<AppNavItem> items;
   final PageManager manager;
+  final bool onImage;
 
-  const _NavLinks({required this.items, required this.manager});
+  const _NavLinks({required this.items, required this.manager, required this.onImage});
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +213,7 @@ class _NavLinks extends StatelessWidget {
         children: [
           for (final item in visible)
             _NavLink(
+              onImage: onImage,
               label: item.label,
               selected: manager.currentPage == item.page,
               onTap: () => manager.setPage(item.page),
@@ -215,9 +227,15 @@ class _NavLinks extends StatelessWidget {
 class _NavLink extends StatefulWidget {
   final String label;
   final bool selected;
+  final bool onImage;
   final VoidCallback onTap;
 
-  const _NavLink({required this.label, required this.selected, required this.onTap});
+  const _NavLink({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.onImage,
+  });
 
   @override
   State<_NavLink> createState() => _NavLinkState();
@@ -229,6 +247,8 @@ class _NavLinkState extends State<_NavLink> {
   @override
   Widget build(BuildContext context) {
     final active = widget.selected || hovered;
+    final strong = widget.onImage ? AppColors.onImage : AppColors.textPrimary;
+    final soft = widget.onImage ? AppColors.onImage.withOpacity(0.78) : AppColors.textSecondary;
     return Semantics(
       button: true,
       selected: widget.selected,
@@ -245,8 +265,8 @@ class _NavLinkState extends State<_NavLink> {
                 widget.label,
                 style: TextStyle(
                   fontSize: 15,
-                  fontWeight: widget.selected ? FontWeight.w700 : FontWeight.w500,
-                  color: active ? AppColors.textPrimary : const Color(0xFFE0E0E0),
+                  fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500,
+                  color: active ? strong : soft,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -254,7 +274,7 @@ class _NavLinkState extends State<_NavLink> {
                 duration: const Duration(milliseconds: 200),
                 height: 2,
                 width: widget.selected ? 24 : (hovered ? 12 : 0),
-                color: AppColors.textPrimary,
+                color: strong,
               ),
             ],
           ),
@@ -277,14 +297,14 @@ class _SearchField extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
-      style: const TextStyle(color: AppColors.background, fontSize: 15),
+      style: const TextStyle(color: Color(0xFF1D1C1A), fontSize: 15),
       cursorColor: AppColors.primary,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF666666), fontSize: 15),
         prefixIcon: const Icon(Icons.search, color: Color(0xFF555555)),
         filled: true,
-        fillColor: AppColors.textPrimary,
+        fillColor: const Color(0xFFFFFFFF),
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -292,11 +312,11 @@ class _SearchField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.pill),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.pill),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );
@@ -307,8 +327,14 @@ class _RoundIconButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
+  final bool onImage;
 
-  const _RoundIconButton({required this.icon, required this.tooltip, required this.onPressed});
+  const _RoundIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    required this.onImage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -317,9 +343,9 @@ class _RoundIconButton extends StatelessWidget {
       tooltip: tooltip,
       icon: Icon(icon),
       style: IconButton.styleFrom(
-        foregroundColor: AppColors.textPrimary,
-        backgroundColor: Colors.black.withOpacity(0.35),
-        side: BorderSide(color: AppColors.textPrimary.withOpacity(0.6)),
+        foregroundColor: onImage ? AppColors.onImage : AppColors.textPrimary,
+        backgroundColor: onImage ? Colors.black.withOpacity(0.3) : Colors.transparent,
+        side: BorderSide(color: onImage ? AppColors.onImage.withOpacity(0.5) : AppColors.border),
         fixedSize: const Size(44, 44),
       ),
     );
@@ -330,8 +356,14 @@ class _CartButton extends StatelessWidget {
   final int count;
   final bool expanded;
   final VoidCallback onPressed;
+  final bool onImage;
 
-  const _CartButton({required this.count, required this.expanded, required this.onPressed});
+  const _CartButton({
+    required this.count,
+    required this.expanded,
+    required this.onPressed,
+    required this.onImage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -344,6 +376,7 @@ class _CartButton extends StatelessWidget {
           icon: Icons.shopping_cart_outlined,
           tooltip: 'Mi préstamo ($count)',
           onPressed: onPressed,
+          onImage: onImage,
         ),
       );
     }
@@ -352,9 +385,9 @@ class _CartButton extends StatelessWidget {
       icon: const Icon(Icons.shopping_cart_outlined, size: 18),
       label: Text('Mi préstamo · $count'),
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textPrimary,
-        backgroundColor: Colors.black.withOpacity(0.35),
-        side: BorderSide(color: AppColors.textPrimary.withOpacity(0.6)),
+        foregroundColor: onImage ? AppColors.onImage : AppColors.textPrimary,
+        backgroundColor: onImage ? Colors.black.withOpacity(0.3) : Colors.transparent,
+        side: BorderSide(color: onImage ? AppColors.onImage.withOpacity(0.5) : AppColors.border),
         shape: const StadiumBorder(),
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg + 2),
@@ -366,6 +399,7 @@ class _CartButton extends StatelessWidget {
 class _AccountButton extends StatelessWidget {
   final User user;
   final bool compact;
+  final bool onImage;
   final VoidCallback onLogin;
   final VoidCallback onLogout;
   final VoidCallback? onChangePassword;
@@ -374,6 +408,7 @@ class _AccountButton extends StatelessWidget {
   const _AccountButton({
     required this.user,
     required this.compact,
+    required this.onImage,
     required this.onLogin,
     required this.onLogout,
     this.onChangePassword,
@@ -382,6 +417,9 @@ class _AccountButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Botón invertido: claro sobre la foto y de noche, oscuro de día.
+    final fill = onImage ? AppColors.onImage : AppColors.textPrimary;
+    final ink = onImage ? const Color(0xFF111111) : AppColors.surfaceHigh;
     if (user is VisitorUser) {
       if (compact) {
         return IconButton(
@@ -389,8 +427,8 @@ class _AccountButton extends StatelessWidget {
           tooltip: 'Iniciar sesión',
           icon: const Icon(Icons.person_outline),
           style: IconButton.styleFrom(
-            backgroundColor: AppColors.textPrimary,
-            foregroundColor: AppColors.background,
+            backgroundColor: fill,
+            foregroundColor: ink,
             fixedSize: const Size(44, 44),
           ),
         );
@@ -398,8 +436,8 @@ class _AccountButton extends StatelessWidget {
       return FilledButton(
         onPressed: onLogin,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.textPrimary,
-          foregroundColor: AppColors.background,
+          backgroundColor: fill,
+          foregroundColor: ink,
           shape: const StadiumBorder(),
           minimumSize: const Size(0, 44),
         ),
@@ -422,10 +460,10 @@ class _AccountButton extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(user.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
               Text(user.roles.join(', '),
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
             ],
           ),
         ),
@@ -461,14 +499,14 @@ class _AccountButton extends StatelessWidget {
         width: 44,
         height: 44,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: AppColors.textPrimary,
+        decoration: BoxDecoration(
+          color: fill,
           shape: BoxShape.circle,
         ),
         child: Text(
           userInitials(user),
-          style: const TextStyle(
-            color: AppColors.background,
+          style: TextStyle(
+            color: ink,
             fontWeight: FontWeight.w600,
             fontSize: 15,
           ),
