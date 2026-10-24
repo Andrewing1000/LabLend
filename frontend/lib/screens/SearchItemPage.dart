@@ -1,3 +1,5 @@
+import 'package:frontend/themes/AppTheme.dart';
+import 'package:frontend/widgets/state_message.dart';
 import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
@@ -40,9 +42,9 @@ class SearchItemPage extends BrowsablePage {
       builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
         List<Item> items = [];
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white,));
+          return const LoadingState();
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return StateMessage.error(onAction: () => searchField.value = searchField.value);
         } else {
         if (snapshot.hasData && !snapshot.data!.isEmpty) {
           items = snapshot.data!;
@@ -57,8 +59,7 @@ class SearchItemPage extends BrowsablePage {
                 return Stack(
                   children: [
                     if(items.isEmpty)
-                    const Center(child: Text('No se encontraron items',
-                      style: TextStyle(color: Colors.white),)),
+                    StateMessage.emptyOrOffline(title: 'No se encontraron equipos', onRetry: () => searchField.value = searchField.value),
                     if(items.isNotEmpty) CustomScrollView(
                       slivers: <Widget>[
                         StatefulBuilder(
@@ -117,7 +118,7 @@ class SearchItemPage extends BrowsablePage {
                                   manager?.setPage(CreateItemScreen());
                                 }
                             },
-                            child: const Icon(Icons.add, color: Colors.black,)),
+                            child: const Icon(Icons.add, color: AppColors.background,)),
                         ),
                       ),
                   ],

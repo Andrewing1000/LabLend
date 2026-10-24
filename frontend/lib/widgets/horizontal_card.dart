@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalCard extends StatefulWidget {
@@ -78,7 +79,7 @@ class HorizontalCardState extends State<HorizontalCard> {
                               maxLines: 2,
                               style: TextStyle(
                                 fontSize: height / 4,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           );

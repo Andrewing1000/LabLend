@@ -52,7 +52,7 @@ class RequestHandler {
         handler.next(options);
       },
       onError: (error, handler) async {
-        print("Error: ${error.message}");
+        if (kDebugMode) debugPrint("Error: ${error.message}");
         handler.next(error);
       },
       onResponse: (response, handler) async {
@@ -86,7 +86,7 @@ class RequestHandler {
         cookieJar.saveFromResponse(Uri.parse(serverURL_phone), cookies);
       }
     } catch (e) {
-      print("Error loading cookies from secure storage: $e");
+      if (kDebugMode) debugPrint("Error loading cookies from secure storage: $e");
     }
   }
 
@@ -94,7 +94,7 @@ class RequestHandler {
     try {
       _csrfToken = await _cookieCsrfHandler.loadCsrfToken() ?? '';
     } catch (e) {
-      print("Error loading CSRF token from secure storage: $e");
+      if (kDebugMode) debugPrint("Error loading CSRF token from secure storage: $e");
     }
   }
 
@@ -104,7 +104,7 @@ class RequestHandler {
       List<String> cookiesString = cookies.map((cookie) => cookie.toString()).toList();
       await _cookieCsrfHandler.saveCsrfToken(json.encode(cookiesString));
     } catch (e) {
-      print("Error saving cookies to secure storage: $e");
+      if (kDebugMode) debugPrint("Error saving cookies to secure storage: $e");
     }
   }
 
@@ -187,10 +187,9 @@ class RequestHandler {
   Future<bool> connectionCheck() async {
     try {
       final response = await _dio.get('/health_check');
-      print("Server is up and responded with status code: ${response.statusCode}");
       return true;
     } catch (e) {
-      print("Error during connection check: $e");
+      if (kDebugMode) debugPrint("Error during connection check: $e");
       return false;
     }
   }

@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 
 class CustomIconButton extends StatefulWidget {
@@ -8,6 +9,9 @@ class CustomIconButton extends StatefulWidget {
   List<Function> listeners = [];
   final bool isSelected;
 
+  /// Texto que se muestra al pasar el mouse y que lee el lector de pantalla.
+  final String? tooltip;
+
   CustomIconButton({
     super.key,
     required this.iconNormal,
@@ -15,6 +19,7 @@ class CustomIconButton extends StatefulWidget {
     required this.isSelected,
     required this.size,
     this.onPressed,
+    this.tooltip,
   });
 
 
@@ -81,7 +86,7 @@ class IconButtonState extends State<CustomIconButton> {
             widget.isSelected && widget.iconSelected != null
                 ? widget.iconSelected
                 : widget.iconNormal,
-            color: widget.isSelected? const Color.fromRGBO(255, 255, 255, 1) :Color.fromRGBO(255, 255, 255, value),
+            color: widget.isSelected? AppColors.textPrimary :Color.fromRGBO(255, 255, 255, value),
 
             size: (0.05*value+0.975)*widget.size,
           );
@@ -96,6 +101,7 @@ class IconButtonState extends State<CustomIconButton> {
                     splashColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     iconSize: widget.size,
+                    tooltip: widget.tooltip,
                     onPressed: _onPressed,
                   ),
                 ),

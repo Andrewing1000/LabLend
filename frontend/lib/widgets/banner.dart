@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 
 
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class BannerWidget extends StatefulWidget {
 }
 
 class _BannerWidgetState extends State<BannerWidget> {
-  Color dominantColor = Colors.black;
+  Color dominantColor = AppColors.background;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _BannerWidgetState extends State<BannerWidget> {
 
   Future<void> _updatePalette() async {
     if(widget.imageUrl == null){
-      dominantColor = Colors.black;
+      dominantColor = AppColors.background;
       return;
     }
 
@@ -41,7 +42,7 @@ class _BannerWidgetState extends State<BannerWidget> {
       MemoryImage(widget.imageUrl!),
     );
     setState(() {
-      dominantColor = generator.dominantColor?.color ?? Colors.black;
+      dominantColor = generator.dominantColor?.color ?? AppColors.background;
     });
   }
 
@@ -67,13 +68,13 @@ class _BannerWidgetState extends State<BannerWidget> {
                 Text(
                   widget.title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
                         blurRadius: 5.0,
-                        color: Colors.black,
+                        color: AppColors.background,
                         offset: Offset(2.0, 2.0),
                       ),
                     ],

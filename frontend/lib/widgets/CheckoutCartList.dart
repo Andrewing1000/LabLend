@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ class CheckoutCartList extends StatelessWidget {
               child: Text(
                 "El carrito está vacío",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 16,
                 ),
               ),
@@ -33,7 +34,7 @@ class CheckoutCartList extends StatelessWidget {
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: Colors.black,
+              color: AppColors.background,
             ),
             child: Column(
               children: [
@@ -57,7 +58,7 @@ class CheckoutCartList extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(5),
-                    color: Colors.white.withAlpha(30),
+                    color: AppColors.textPrimary.withAlpha(30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -74,10 +75,10 @@ class CheckoutCartList extends StatelessWidget {
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
                             ),
-                            backgroundColor: Colors.indigo,
-                            icon: const Icon(Icons.check, size: 20, color: Colors.white,),
+                            backgroundColor: AppColors.primary,
+                            icon: const Icon(Icons.check, size: 20, color: AppColors.textPrimary,),
                             label: const Text("Prestar", style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                             ),)
                         ),
 
@@ -89,10 +90,10 @@ class CheckoutCartList extends StatelessWidget {
                             shape: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(200),
                             ),
-                            backgroundColor: Colors.white,
-                            icon: const Icon(Icons.clear, size: 20, color: Colors.black),
+                            backgroundColor: AppColors.textPrimary,
+                            icon: const Icon(Icons.clear, size: 20, color: AppColors.background),
                             label: const Text("Cancelar", style: TextStyle(
-                              color: Colors.black,
+                              color: AppColors.background,
                               )
                             )
                         ),

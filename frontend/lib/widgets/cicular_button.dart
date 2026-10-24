@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 
 
@@ -13,6 +14,9 @@ class CircularButton extends StatefulWidget{
   final Color iconColor;
   final Color backgroundColor;
 
+  /// Texto que se muestra al pasar el mouse y que lee el lector de pantalla.
+  final String? tooltip;
+
   const CircularButton.animated({super.key,
     required this.normalIcon,
     this.selectedIcon,
@@ -21,8 +25,9 @@ class CircularButton extends StatefulWidget{
     this.isAvailable = true,
     required this.onPressed,
     this.isAnimated = true,
-    this.iconColor = Colors.white,
-    this.backgroundColor = Colors.black,
+    this.iconColor = AppColors.textPrimary,
+    this.backgroundColor = AppColors.background,
+    this.tooltip,
   });
 
   const CircularButton.static({super.key,
@@ -33,8 +38,9 @@ class CircularButton extends StatefulWidget{
     this.isAvailable = true,
     required this.onPressed,
     this.isAnimated = false,
-    this.iconColor = Colors.white,
-    this.backgroundColor = Colors.black,
+    this.iconColor = AppColors.textPrimary,
+    this.backgroundColor = AppColors.background,
+    this.tooltip,
   });
 
   @override
@@ -73,6 +79,16 @@ class CircularButtonState extends State<CircularButton>{
 
   @override
   Widget build(BuildContext context){
+    final button = _build(context);
+    final tooltip = widget.tooltip;
+    if (tooltip == null) return button;
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(button: true, label: tooltip, child: button),
+    );
+  }
+
+  Widget _build(BuildContext context){
     return MouseRegion(
       onEnter: _onEnter,
       onExit: _onExit,
@@ -106,7 +122,7 @@ class CircularButtonState extends State<CircularButton>{
                   color: Colors.transparent,
                   child: InkWell(
                     radius: 0.6*widget.size,
-                    splashColor: widget.isAvailable? Colors.white.withAlpha(100) : Colors.transparent,
+                    splashColor: widget.isAvailable? AppColors.textPrimary.withAlpha(100) : Colors.transparent,
                     highlightColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     onTap: (){

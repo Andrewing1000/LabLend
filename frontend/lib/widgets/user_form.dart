@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Permissions.dart';
 import 'package:frontend/models/Role.dart';
@@ -151,7 +152,7 @@ class _UserFormState extends State<UserForm> {
             widget.user!.roles.isEmpty
                 ? 'Sin roles'
                 : 'Roles: ${widget.user!.roles.join(', ')}',
-            style: const TextStyle(color: Colors.white70),
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
         const SizedBox(height: 20),
         if(activeSwitch)
@@ -164,12 +165,12 @@ class _UserFormState extends State<UserForm> {
                   isActive = value!;
                 });
               },
-              checkColor: Colors.white,
-              activeColor: Colors.orange,
+              checkColor: AppColors.textPrimary,
+              activeColor: AppColors.primary,
             ),
             const Text(
               'Activo',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.textPrimary),
             ),
           ],
         ),
@@ -178,7 +179,7 @@ class _UserFormState extends State<UserForm> {
           const Text(
             'Las cuentas con roles de seguridad no se modifican desde '
             'aquí: cada uno cambia sus datos desde su perfil.',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: AppColors.textSecondary),
           )
         else
         BotonAgregar(

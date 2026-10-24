@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:frontend/models/Permissions.dart';
 
 import 'package:flutter/material.dart';
@@ -67,7 +68,7 @@ class CustomCardState extends State<CustomCard> {
                     },
 
                     child: Card(
-                      color: isHovered? Colors.white.withAlpha(20) : const Color.fromRGBO(21, 21, 21, 1.0),
+                      color: isHovered? AppColors.textPrimary.withAlpha(20) : AppColors.surface,
                       clipBehavior: Clip.hardEdge,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -115,7 +116,7 @@ class CustomCardState extends State<CustomCard> {
                                         maxLines: 1,
                                         textAlign: TextAlign.start,
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: AppColors.textPrimary,
                                           fontSize: 14,
                                           fontFamily: "/assets/fonts/Metropolis-Black.ttf",
                                         ),
@@ -126,7 +127,7 @@ class CustomCardState extends State<CustomCard> {
                                         maxLines: 2,
                                         textAlign: TextAlign.start,
                                         style: const TextStyle(
-                                          color: Color.fromRGBO(255, 255, 255, 0.7),
+                                          color: AppColors.textSecondary,
                                           fontFamily: "/assets/fonts/Metropolis-Black.ttf",
                                           fontSize: 13,
                                         ),
@@ -142,6 +143,7 @@ class CustomCardState extends State<CustomCard> {
                                     flex: 2,
                                     fit: FlexFit.tight,
                                     child: CustomIconButton(
+                                      tooltip: 'Editar equipo',
                                       iconNormal: Icons.edit,
                                       size: 30,
                                       isSelected: false,
@@ -160,6 +162,7 @@ class CustomCardState extends State<CustomCard> {
                                       flex: 2,
                                       fit: FlexFit.tight,
                                       child: CustomIconButton(
+                                        tooltip: 'Eliminar equipo',
                                         iconNormal: Icons.delete,
                                         size: 30,
                                         isSelected: false,

@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Role.dart';
 
@@ -44,7 +45,7 @@ class RoleSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Roles',
-            style: TextStyle(color: Colors.white70, fontSize: 14)),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -56,14 +57,14 @@ class RoleSelector extends StatelessWidget {
                 tooltip: role.description.isEmpty ? null : role.description,
                 selected: selected.contains(role.name),
                 showCheckmark: true,
-                checkmarkColor: Colors.black,
-                selectedColor: Colors.orange,
-                backgroundColor: Colors.grey[850],
-                disabledColor: Colors.grey[900],
+                checkmarkColor: AppColors.background,
+                selectedColor: AppColors.primary,
+                backgroundColor: AppColors.surfaceHigh,
+                disabledColor: AppColors.surfaceHigh,
                 labelStyle: TextStyle(
                   color: selected.contains(role.name)
-                      ? Colors.black
-                      : (_selectable(role) ? Colors.white : Colors.white38),
+                      ? AppColors.background
+                      : (_selectable(role) ? AppColors.textPrimary : AppColors.textMuted),
                 ),
                 onSelected: _selectable(role)
                     ? (value) {
@@ -83,7 +84,7 @@ class RoleSelector extends StatelessWidget {
               : 'Una cuenta no combina roles de seguridad y de laboratorio. '
                   'Con un rol de seguridad, el código de usuario empieza '
                   'con adm.',
-          style: const TextStyle(color: Colors.white38, fontSize: 12),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
         ),
       ],
     );

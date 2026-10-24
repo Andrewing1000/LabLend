@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/Loan.dart';
@@ -41,7 +42,7 @@ class _LoanCardState extends State<LoanCard> {
           child: Consumer<Loan>(
             builder: (context, loan, child) {
               return Card(
-                color: isHovered ? Colors.grey[850] : Colors.black,
+                color: isHovered ? AppColors.surfaceHigh : AppColors.background,
                 elevation: 5,
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Padding(
@@ -57,7 +58,7 @@ class _LoanCardState extends State<LoanCard> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppColors.textPrimary,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -71,7 +72,7 @@ class _LoanCardState extends State<LoanCard> {
                           loan.fechaPrestamo.toIso8601String().split("T").join(" "),
                           style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.grey,
+                            color: AppColors.textMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -85,7 +86,7 @@ class _LoanCardState extends State<LoanCard> {
                           loan.fechaDevolucion.toIso8601String().split("T").join(" "),
                           style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.grey,
+                            color: AppColors.textMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -97,7 +98,7 @@ class _LoanCardState extends State<LoanCard> {
                         fit: FlexFit.tight,
                         child: Icon(
                           loan.devuelto ? Icons.check_circle : Icons.cancel,
-                          color: loan.devuelto ? Colors.orange : Colors.white,
+                          color: loan.devuelto ? AppColors.success : AppColors.textMuted,
                         ),
                       ),
                     ],

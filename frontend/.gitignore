@@ -41,3 +41,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# CocoaPods: Flutter genera estos Podfile al compilar si la app tiene
+# plugins; cada uno los regenera en su máquina.
+/ios/Podfile
+/macos/Podfile

@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Item.dart';
 import 'package:frontend/models/Session.dart';
@@ -123,29 +124,29 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                       controller: _categoryNameController,
                       decoration: InputDecoration(
                         labelText: 'Nombre de la Categoría',
-                        labelStyle: const TextStyle(color: Colors.white70),
+                        labelStyle: const TextStyle(color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.grey[800],
+                        fillColor: AppColors.surfaceHighest,
                         border: const OutlineInputBorder(),
                       ),
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: _categoryDescriptionController,
                       decoration: InputDecoration(
                         labelText: 'Descripción',
-                        labelStyle: const TextStyle(color: Colors.white70),
+                        labelStyle: const TextStyle(color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.grey[800],
+                        fillColor: AppColors.surfaceHighest,
                         border: const OutlineInputBorder(),
                       ),
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: _createCategory,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary),
                       child: const Text('Crear Categoría'),
                     ),
 
@@ -164,7 +165,7 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                       value: _selectedCategory,
                       hint: Text('Seleccionar Categoría',
                         style: Theme.of(context).textTheme.labelMedium,),
-                      dropdownColor: const Color(0xFF2E2E2E),
+                      dropdownColor: AppColors.surfaceHighest,
                       onChanged: (Category? newValue) {
                         setState(() {
                           _selectedCategory = newValue;
@@ -179,7 +180,7 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                     ),
                     ElevatedButton(
                       onPressed: _deleteCategory,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary),
                       child: const Text('Eliminar Categoría'),
 
                     ),
@@ -191,7 +192,7 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
 
           const SizedBox(height: 30,),
           const Divider(
-            color: Colors.white, // Custom color
+            color: AppColors.textPrimary, // Custom color
             height: 10, // Space around the divider
             thickness: 1, // Thickness of the line
             indent: 0, // Start margin
@@ -212,17 +213,17 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                       controller: _brandNameController,
                       decoration: InputDecoration(
                         labelText: 'Nombre de la Marca',
-                        labelStyle: const TextStyle(color: Colors.white70),
+                        labelStyle: const TextStyle(color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.grey[800],
+                        fillColor: AppColors.surfaceHighest,
                         border: const OutlineInputBorder(),
                       ),
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: _createBrand,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary),
                       child: const Text('Crear Marca'),
                     ),
                   ],
@@ -241,7 +242,7 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                       hint: Text('Seleccionar Marca',
                           style: Theme.of(context).textTheme.labelMedium
                       ),
-                      dropdownColor: const Color(0xFF2E2E2E),
+                      dropdownColor: AppColors.surfaceHighest,
                       onChanged: (Brand? newValue) {
                         setState(() {
                           _selectedBrand = newValue;
@@ -257,7 +258,7 @@ class _CategoryBrandFormState extends State<CategoryBrandForm> {
                     ),
                     ElevatedButton(
                       onPressed: _deleteBrand,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary),
                       child: const Text('Eliminar Marca'),
                     ),
                   ],

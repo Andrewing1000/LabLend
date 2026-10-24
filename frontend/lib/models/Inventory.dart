@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'dart:typed_data';
 import 'Permissions.dart';
 import 'Item.dart';
@@ -201,7 +202,7 @@ class Inventory {
         return false;
       }
     } on DioException catch (e) {
-      print(e.stackTrace);
+      if (kDebugMode) debugPrint(e.stackTrace.toString());
       manager.errorNotification(error: "No se pudo agregar la imagen", details: e.response?.data);
       return false;
     }

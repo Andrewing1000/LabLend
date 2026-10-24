@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/models/Session.dart';
@@ -135,7 +136,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: Colors.white));
+              child: CircularProgressIndicator(color: AppColors.textPrimary));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
@@ -188,6 +189,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 CustomIconButton(
+                                  tooltip: imageBytes != null ? 'Quitar imagen' : 'Subir imagen',
                                   iconNormal: Icons.upload,
                                   iconSelected: Icons.clear,
                                   isSelected: imageBytes != null,
@@ -251,7 +253,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: Colors.white));
+              child: CircularProgressIndicator(color: AppColors.textPrimary));
         } else
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
           return Container();
@@ -270,9 +272,9 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
             return DropdownButton<Brand>(
               value: selectedBrand,
               hint: const Text(
-                  "Selecciona una Marca", style: TextStyle(color: Colors.white)),
-              dropdownColor: Colors.grey[900],
-              style: const TextStyle(color: Colors.white),
+                  "Selecciona una Marca", style: TextStyle(color: AppColors.textPrimary)),
+              dropdownColor: AppColors.surfaceHigh,
+              style: const TextStyle(color: AppColors.textPrimary),
               items: brands.map((Brand brand) {
                 return DropdownMenuItem<Brand>(
                   value: brand,
@@ -299,7 +301,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
       future: _fetchCategories(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white));
+          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary));
         } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
           return Container();
         }
@@ -314,9 +316,9 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
             return Column(
               children: [
                 DropdownButton<Category>(
-                  hint: const Text("Selecciona Categorías", style: TextStyle(color: Colors.white)),
-                  dropdownColor: Colors.grey[900],
-                  style: const TextStyle(color: Colors.white),
+                  hint: const Text("Selecciona Categorías", style: TextStyle(color: AppColors.textPrimary)),
+                  dropdownColor: AppColors.surfaceHigh,
+                  style: const TextStyle(color: AppColors.textPrimary),
                   items: categories.map((Category category) {
                     return DropdownMenuItem<Category>(
                       value: category,
@@ -338,7 +340,7 @@ class _UpdateItemFormState extends State<UpdateItemForm> {
                   children: selectedCategories.map((category) {
                     return Chip(
                       label: Text(category.nombre),
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.textPrimary,
                       onDeleted: () {
                         setState(() {
                           selectedCategories.remove(category);

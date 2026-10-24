@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 
 class BotonAgregar extends StatelessWidget {
@@ -22,14 +23,14 @@ class BotonAgregar extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: Colors.grey,
+              color: AppColors.textMuted,
               width: 2,
             ),
           ),
           child: Center(
             child: Icon(
               icon,
-              color: Colors.grey,
+              color: AppColors.textMuted,
               size: 24,
             ),
           ),

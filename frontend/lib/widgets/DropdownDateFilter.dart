@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/PageBase.dart';
@@ -62,9 +63,9 @@ class CustomDatePickerState extends State<DropdownDateFilter> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         decoration: BoxDecoration(
-          color: Colors.grey[850],
+          color: AppColors.surfaceHigh,
           borderRadius: BorderRadius.circular(200.0),
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: AppColors.textMuted),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -76,19 +77,20 @@ class CustomDatePickerState extends State<DropdownDateFilter> {
                 //crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.white.withAlpha(150)),
+                  Icon(Icons.calendar_today, color: AppColors.textPrimary.withAlpha(150)),
                   Container(width: 20,),
                   if(_selectedDate != null) Text(
                     "${_selectedDate?.toLocal()}".split(' ')[0],
-                    style: TextStyle(color: Colors.white.withAlpha(150)),
+                    style: TextStyle(color: AppColors.textPrimary.withAlpha(150)),
                   ),
                   Container(width: 20,),
                   if(_selectedDate != null) CircularButton.static(
+                    tooltip: 'Quitar fecha',
                     isSelected: true,
                     normalIcon: Icons.close,
                     size: 20,
-                    iconColor: Colors.white.withAlpha(150),
-                    backgroundColor: Colors.grey[850]!,
+                    iconColor: AppColors.textPrimary.withAlpha(150),
+                    backgroundColor: AppColors.surfaceHigh,
                     onPressed: (){
                       setState(() {
                         _selectedDate = null;

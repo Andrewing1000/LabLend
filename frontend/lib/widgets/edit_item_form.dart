@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Item.dart';
 import 'package:frontend/widgets/string_field.dart';
@@ -84,9 +85,9 @@ class _EditItemFormState extends State<EditItemForm> {
         DropdownButton<Brand>(
           value: selectedBrand,
           hint: const Text("Selecciona una Marca",
-              style: TextStyle(color: Colors.white)),
-          dropdownColor: Colors.grey[900],
-          style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.textPrimary)),
+          dropdownColor: AppColors.surfaceHigh,
+          style: const TextStyle(color: AppColors.textPrimary),
           items: [
             Brand(id: 1, marca: 'Example Brand A'),
             Brand(id: 2, marca: 'Example Brand B'),
@@ -107,9 +108,9 @@ class _EditItemFormState extends State<EditItemForm> {
         const SizedBox(height: 20),
         DropdownButton<Category>(
           hint: const Text("Selecciona Categorías",
-              style: TextStyle(color: Colors.white)),
-          dropdownColor: Colors.grey[900],
-          style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.textPrimary)),
+          dropdownColor: AppColors.surfaceHigh,
+          style: const TextStyle(color: AppColors.textPrimary),
           items: [
             Category(
                 id: 1,

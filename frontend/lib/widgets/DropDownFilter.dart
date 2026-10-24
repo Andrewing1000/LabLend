@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/PageBase.dart';
@@ -25,12 +26,10 @@ class DropDownFilterState extends State<DropDownFilter> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           );
         } else if (snapshot.hasError) {
-          print(snapshot.error.toString());
-          print("Se errory");
           return Container();
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Container();
@@ -46,12 +45,12 @@ class DropDownFilterState extends State<DropDownFilter> {
                   label: Text(
                     filter.attributeName,
                     style: TextStyle(
-                      color: Colors.white.withAlpha(150),
+                      color: AppColors.textPrimary.withAlpha(150),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   textStyle: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                   ),
                   requestFocusOnTap: true,
                   enableFilter: true,
@@ -59,20 +58,20 @@ class DropDownFilterState extends State<DropDownFilter> {
                   inputDecorationTheme: InputDecorationTheme(
                     filled: true,
                     isDense: true,
-                    fillColor: Colors.grey[850],
+                    fillColor: AppColors.surfaceHigh,
                     border: InputBorder.none,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(200),
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: AppColors.textMuted),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(200),
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: AppColors.textMuted),
                     ),
                   ),
                   menuStyle: MenuStyle(
                     backgroundColor: WidgetStateProperty.all(
-                      Colors.grey[850],
+                      AppColors.surfaceHigh,
                     ), // Set background color to black
                   ),
                   dropdownMenuEntries: filter.items.map((item) {
@@ -130,13 +129,13 @@ class DropdownMenuItem extends StatelessWidget{
               }
               filter.select(item);
             },
-            backgroundColor: Colors.grey[900]!,
+            backgroundColor: AppColors.surfaceHigh,
           ),
 
           Text(
             filter.getRepresentation(item),
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               overflow: TextOverflow.ellipsis,
             ),
           ),

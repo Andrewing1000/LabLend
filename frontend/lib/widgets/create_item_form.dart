@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,7 +53,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
       future: _loadImageBytes(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white,));
+          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary,));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
@@ -106,7 +107,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       future: SessionManager.inventory.getBrands(),
                       builder: (context, AsyncSnapshot<List<Brand>> snapshot) {
                         if(snapshot.connectionState == ConnectionState.waiting){
-                          return const Center(child: CircularProgressIndicator(color: Colors.white,),);
+                          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary,),);
                         }
                         else if(!snapshot.hasData || snapshot.data!.isEmpty){
                           return Container();
@@ -123,9 +124,9 @@ class _CreateItemFormState extends State<CreateItemForm> {
                             return DropdownButton<Brand>(
                               value: selectedBrand,
                               hint: const Text("Selecciona una Marca",
-                                  style: TextStyle(color: Colors.white)),
-                              dropdownColor: Colors.grey[900],
-                              style: const TextStyle(color: Colors.white),
+                                  style: TextStyle(color: AppColors.textPrimary)),
+                              dropdownColor: AppColors.surfaceHigh,
+                              style: const TextStyle(color: AppColors.textPrimary),
                               items: brands.map((Brand brand) {
                                 return DropdownMenuItem<Brand>(
                                   value: brand,
@@ -148,7 +149,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                       future: SessionManager.inventory.getCategories(),
                       builder: (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
                         if(snapshot.connectionState == ConnectionState.waiting){
-                          return const Center(child: CircularProgressIndicator(color: Colors.white,),);
+                          return const Center(child: CircularProgressIndicator(color: AppColors.textPrimary,),);
                         }
                         else if(!snapshot.hasData || snapshot.data!.isEmpty){
                           return Container();
@@ -163,9 +164,9 @@ class _CreateItemFormState extends State<CreateItemForm> {
                               children: [
                                 DropdownButton<Category>(
                                   hint: const Text("Selecciona Categorías",
-                                      style: TextStyle(color: Colors.white)),
-                                  dropdownColor: Colors.grey[900],
-                                  style: const TextStyle(color: Colors.white),
+                                      style: TextStyle(color: AppColors.textPrimary)),
+                                  dropdownColor: AppColors.surfaceHigh,
+                                  style: const TextStyle(color: AppColors.textPrimary),
                                   items: categories.map((Category category) {
                                     return DropdownMenuItem<Category>(
                                       value: category,
@@ -187,7 +188,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                   children: selectedCategories.map((category) {
                                     return Chip(
                                       label: Text(category.nombre),
-                                      backgroundColor: Colors.white,
+                                      backgroundColor: AppColors.textPrimary,
                                       onDeleted: () {
                                         setState(() {
                                           selectedCategories.remove(category);
@@ -246,6 +247,7 @@ class _CreateItemFormState extends State<CreateItemForm> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   CustomIconButton(
+                                      tooltip: imageBytes != null ? 'Quitar imagen' : 'Subir imagen',
                                       iconNormal: Icons.upload,
                                       iconSelected: Icons.clear,
                                       isSelected: imageBytes != null,

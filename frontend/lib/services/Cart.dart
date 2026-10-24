@@ -28,9 +28,6 @@ class CheckoutCart with ChangeNotifier {
 
   void removeItem(int itemId) {
     _items.removeWhere((item) => item.itemId == itemId);
-    for(PrestamoItem item in _items){
-      print(item.itemId);
-    }
     notifyListeners();
   }
 

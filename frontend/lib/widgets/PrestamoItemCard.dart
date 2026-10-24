@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/Loan.dart';
@@ -98,7 +99,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                       margin: const EdgeInsets.fromLTRB(0, 0, 0, 15),
                       decoration: BoxDecoration(
                         color: isHovered
-                            ? Colors.grey[850]
+                            ? AppColors.surfaceHigh
                             : const Color.fromRGBO(255, 255, 255, 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -131,7 +132,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                 Text(
                                   item!.nombre,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -140,7 +141,7 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                 Text(
                                   item!.serialNumber ?? 'Sin número de serie',
                                   style: const TextStyle(
-                                    color: Colors.white54,
+                                    color: AppColors.textSecondary,
                                     fontSize: 12,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -165,8 +166,8 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                     : null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: isInCart
-                                      ? Colors.orange
-                                      : Colors.white,
+                                      ? AppColors.primary
+                                      : AppColors.textPrimary,
                                   shape: const CircleBorder(),
                                   padding: const EdgeInsets.all(5),
                                 ),
@@ -174,13 +175,13 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                   size: 14,
                                   Icons.remove,
                                   color: isInCart
-                                      ? Colors.white
-                                      : Colors.black),
+                                      ? AppColors.textPrimary
+                                      : AppColors.background),
                               ),
                               Text(
                                 selectedQuantity.toString(),
                                 style: const TextStyle(
-                                    color: Colors.white, fontSize: 14),
+                                    color: AppColors.textPrimary, fontSize: 14),
                               ),
                               ElevatedButton(
                                 onPressed: selectedQuantity <
@@ -199,16 +200,16 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                                     : null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: isInCart
-                                      ? Colors.orange
-                                      : Colors.white,
+                                      ? AppColors.primary
+                                      : AppColors.textPrimary,
                                   shape: const CircleBorder(),
                                   padding: const EdgeInsets.all(5),
                                 ),
                                 child: Icon(Icons.add,
                                     size: 14,
                                     color: isInCart
-                                        ? Colors.white
-                                        : Colors.black),
+                                        ? AppColors.textPrimary
+                                        : AppColors.background),
                               ),
                             ],
                           ),
@@ -216,12 +217,12 @@ class _PrestamoItemCardState extends State<PrestamoItemCard> {
                             Text(
                               'Cantidad: ${selectedQuantity.toString()}',
                               style: const TextStyle(
-                                  color: Colors.white, fontSize: 14),
+                                  color: AppColors.textPrimary, fontSize: 14),
                             ),
                           const SizedBox(width: 16),
                           if(widget.editable) IconButton(
                             onPressed: _removeItem,
-                            icon: const Icon(Icons.delete, color: Colors.white),
+                            icon: const Icon(Icons.delete, color: AppColors.textPrimary),
                           ),
                         ],
                       ),

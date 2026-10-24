@@ -1,3 +1,4 @@
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/password_link_dialog.dart';
@@ -132,7 +133,7 @@ class EditUserScreenState extends State<EditUserScreen> {
                             'desbloquea cuando la persona elige una '
                             'contraseña nueva con un enlace de '
                             'restablecimiento.',
-                    style: const TextStyle(color: Colors.orangeAccent),
+                    style: const TextStyle(color: AppColors.warning),
                   ),
                 ),
               // El servidor no genera enlaces para cuentas de administrador
