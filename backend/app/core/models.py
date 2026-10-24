@@ -257,6 +257,15 @@ class User(AbstractBaseUser):
         self.locked_at = None
 
     @property
+    def password_expires_at(self):
+        """When the password expires (D21), so the app can warn before it
+        does. None while the account is pending activation."""
+        if self.password_changed_at is None:
+            return None
+        return self.password_changed_at + timedelta(
+            days=settings.PASSWORD_MAX_AGE_DAYS)
+
+    @property
     def password_expired(self):
         """The password was chosen more than PASSWORD_MAX_AGE_DAYS ago
         (D21). An account pending activation has no password to expire."""

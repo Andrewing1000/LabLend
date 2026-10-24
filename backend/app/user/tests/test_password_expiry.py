@@ -46,6 +46,29 @@ class PasswordAgeTests(TestCase):
         age_password(user, 91)
         self.assertTrue(user.password_expired)
 
+    def test_expiry_date_is_90_days_after_change(self):
+        """Test the expiry date the app shows is the change date plus 90
+        days, and that the login returns it."""
+        user = Users.create_lab_assistant(
+            email='fecha@example.com', password=PASSWORD,
+            nombres='Eva', apellido_paterno='Rojas')
+        age_password(user, 80)
+
+        self.assertEqual(user.password_expires_at,
+                         user.password_changed_at + timedelta(days=90))
+        res = APIClient().post(TOKEN_URL, {
+            'username': user.username, 'password': PASSWORD})
+        self.assertIn('password_expires_at', res.data)
+        self.assertIsNotNone(res.data['password_expires_at'])
+
+    def test_pending_activation_has_no_expiry_date(self):
+        """Test an account without a password has no expiry date."""
+        user = Users.create_lab_assistant(
+            email='sinfecha@example.com', nombres='Raúl',
+            apellido_paterno='Mena')
+
+        self.assertIsNone(user.password_expires_at)
+
     def test_pending_activation_not_expired(self):
         """Test an account without a password yet has nothing to expire."""
         user = Users.create_lab_assistant(

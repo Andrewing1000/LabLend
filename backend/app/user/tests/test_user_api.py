@@ -339,6 +339,9 @@ class PrivateUserAPITests(TestCase):
         res = self.client.get(ME_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # La fecha de vencimiento (D21) depende de cuándo se creó la cuenta.
+        expires_at = res.data.pop('password_expires_at')
+        self.assertIsNotNone(expires_at)
         self.assertEqual(res.data, {
                 'username' : 'usr.tname',
                 'email' : self.user.email,

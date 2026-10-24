@@ -57,13 +57,15 @@ class UserSerializer(serializers.ModelSerializer):
     activation_pending = serializers.BooleanField(read_only=True)
     is_locked = serializers.BooleanField(read_only=True)
     password_expired = serializers.BooleanField(read_only=True)
+    password_expires_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = ['username', 'email', 'password', 'nombres',
                   'apellido_paterno', 'apellido_materno', 'name',
                   'is_active', 'roles', 'permissions', 'security_account',
-                  'activation_pending', 'is_locked', 'password_expired']
+                  'activation_pending', 'is_locked', 'password_expired',
+                  'password_expires_at']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 12},
             'email': {'required':False},
