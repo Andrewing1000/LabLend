@@ -1,173 +1,39 @@
-import 'package:frontend/themes/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Item.dart';
-import 'package:frontend/widgets/string_field.dart';
+import 'package:frontend/widgets/item_details_form.dart';
 
-class EditItemForm extends StatefulWidget {
+/// Formulario de edición que entrega el equipo ya armado, sin la imagen.
+/// Antes mostraba marcas y categorías de ejemplo; ahora usa las del
+/// servidor a través de ItemForm. La pantalla de edición usa
+/// UpdateItemForm, que además entrega la imagen nueva.
+class EditItemForm extends StatelessWidget {
   final Item item;
   final Function(Item) onFormSubmit;
+  final VoidCallback? onCancel;
 
   const EditItemForm({
     super.key,
     required this.item,
     required this.onFormSubmit,
+    this.onCancel,
   });
 
   @override
-  _EditItemFormState createState() => _EditItemFormState();
-}
-
-class _EditItemFormState extends State<EditItemForm> {
-  late TextEditingController nameController;
-  late TextEditingController descriptionController;
-  late TextEditingController linkController;
-  late TextEditingController serialNumberController;
-  late TextEditingController quantityController;
-
-  late Brand selectedBrand;
-  late List<Category> selectedCategories;
-
-  @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController(text: widget.item.nombre);
-    descriptionController =
-        TextEditingController(text: widget.item.description);
-    linkController = TextEditingController(text: widget.item.link);
-    serialNumberController =
-        TextEditingController(text: widget.item.serialNumber);
-    quantityController =
-        TextEditingController(text: widget.item.quantity.toString());
-
-    selectedBrand = widget.item.marca;
-    selectedCategories = widget.item.categories;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        StringField(
-          controller: nameController,
-          hintText: 'Nombre del Item',
-          labelText: 'Nombre del Item',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        const SizedBox(height: 20),
-        StringField(
-          controller: descriptionController,
-          hintText: 'Descripción',
-          labelText: 'Descripción',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        const SizedBox(height: 20),
-        StringField(
-          controller: linkController,
-          hintText: 'Enlace',
-          labelText: 'Enlace',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        const SizedBox(height: 20),
-        StringField(
-          controller: serialNumberController,
-          hintText: 'Código de Serie',
-          labelText: 'Código de Serie',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        const SizedBox(height: 20),
-        StringField(
-          controller: quantityController,
-          hintText: 'Cantidad',
-          labelText: 'Cantidad',
-          width: MediaQuery.of(context).size.width * 0.8,
-        ),
-        const SizedBox(height: 20),
-        DropdownButton<Brand>(
-          value: selectedBrand,
-          hint: Text("Selecciona una Marca",
-              style: TextStyle(color: AppColors.textPrimary)),
-          dropdownColor: AppColors.surfaceHigh,
-          style: TextStyle(color: AppColors.textPrimary),
-          items: [
-            Brand(id: 1, marca: 'Example Brand A'),
-            Brand(id: 2, marca: 'Example Brand B'),
-          ].map((Brand brand) {
-            return DropdownMenuItem<Brand>(
-              value: brand,
-              child: Text(brand.marca),
-            );
-          }).toList(),
-          onChanged: (Brand? newBrand) {
-            setState(() {
-              if (newBrand != null) {
-                selectedBrand = newBrand;
-              }
-            });
-          },
-        ),
-        const SizedBox(height: 20),
-        DropdownButton<Category>(
-          hint: Text("Selecciona Categorías",
-              style: TextStyle(color: AppColors.textPrimary)),
-          dropdownColor: AppColors.surfaceHigh,
-          style: TextStyle(color: AppColors.textPrimary),
-          items: [
-            Category(
-                id: 1,
-                nombre: 'Category A',
-                description: 'Description for Category A'),
-            Category(
-                id: 2,
-                nombre: 'Category B',
-                description: 'Description for Category B'),
-          ].map((Category category) {
-            return DropdownMenuItem<Category>(
-              value: category,
-              child: Text(category.nombre),
-            );
-          }).toList(),
-          onChanged: (Category? newCategory) {
-            setState(() {
-              if (newCategory != null &&
-                  !selectedCategories.contains(newCategory)) {
-                selectedCategories.add(newCategory);
-              }
-            });
-          },
-        ),
-        const SizedBox(height: 20),
-        Wrap(
-          spacing: 10,
-          children: selectedCategories.map((category) {
-            return Chip(
-              label: Text(category.nombre),
-              onDeleted: () {
-                setState(() {
-                  selectedCategories.remove(category);
-                });
-              },
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            Item newItem = Item(
-              id: widget.item.id,
-              nombre: nameController.text,
-              description: descriptionController.text,
-              link: linkController.text,
-              serialNumber: serialNumberController.text,
-              quantity: int.parse(quantityController.text),
-              quantityOnLoan: 2,
-              marca: selectedBrand,
-              categories: selectedCategories,
-            );
-            widget.onFormSubmit(newItem);
-          },
-          child: const Text('Actualizar Item'),
-        ),
-      ],
+    return ItemForm(
+      item: item,
+      onCancel: onCancel,
+      onFormSubmit: (data) async {
+        final edited = item.clone()
+          ..nombre = data.name.trim()
+          ..description = data.description.trim()
+          ..link = data.link.trim()
+          ..serialNumber = data.serialNumber.trim()
+          ..quantity = int.tryParse(data.quantity.trim()) ?? item.quantity
+          ..marca = data.brand ?? item.marca
+          ..categories = data.categories;
+        await onFormSubmit(edited);
+      },
     );
   }
 }

@@ -1,18 +1,17 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:frontend/models/Session.dart';
 import 'package:frontend/models/Item.dart';
+import 'package:frontend/models/Session.dart';
+import 'package:frontend/screens/create_user.dart' show PageHeader;
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:frontend/widgets/create_item_form.dart';
-import 'package:frontend/widgets/banner.dart';
 
 import 'PageBase.dart';
 
-class CreateItemScreen extends PageBase{
+class CreateItemScreen extends PageBase {
   CreateItemScreen({super.key});
 
   @override
-  _CreateItemScreenState createState() => _CreateItemScreenState();
+  State<CreateItemScreen> createState() => _CreateItemScreenState();
 
   @override
   Future<PageBase> onDispose() async {
@@ -26,94 +25,94 @@ class CreateItemScreen extends PageBase{
 }
 
 class _CreateItemScreenState extends State<CreateItemScreen> {
-  final bool _showNotification = false;
-  final String _notificationMessage = '';
+  Future<void> _createItem(ItemFormData data) async {
+    final name = data.name.trim();
+    final description = data.description.trim();
+    final serialNumber = data.serialNumber.trim();
+    final quantity = data.quantity.trim();
 
-  Future<void> _createItem(
-      {
-      required String name,
-      required String description,
-      required String link,
-      required String serialNumber,
-      required String quantity,
-      Brand? brand,
-      required List<Category> categories,
-      Uint8List? imageBytes,
-      }) async {
-
-    if(name.isEmpty){
-      SessionManager().errorNotification(error: "Se requiere el nombre del Item");
+    if (name.isEmpty) {
+      SessionManager().errorNotification(error: "Se requiere el nombre del equipo");
       return;
     }
-    if(description.isEmpty){
-      SessionManager().errorNotification(error: "Se requiere una descripción del Item");
+    if (description.isEmpty) {
+      SessionManager().errorNotification(error: "Se requiere una descripción del equipo");
       return;
     }
-    if(serialNumber.isEmpty){
-      SessionManager().errorNotification(error: "Se requiere el código serial del Item");
+    if (serialNumber.isEmpty) {
+      SessionManager().errorNotification(error: "Se requiere el código de serie del equipo");
       return;
     }
-    if(quantity.isEmpty){
-      SessionManager().errorNotification(error: "Se requiere la cantidad del Item");
+    if (quantity.isEmpty) {
+      SessionManager().errorNotification(error: "Se requiere la cantidad del equipo");
       return;
     }
-    if(brand == null){
+    final brand = data.brand;
+    if (brand == null) {
       SessionManager().errorNotification(error: "Se requiere especificar la marca");
       return;
     }
 
-    int quantityInt = 0;
-    try{
-      quantityInt = int.parse(quantity);
-    }catch(e){
-      SessionManager().errorNotification(error: "La cantidad debe ser un entero");
+    final quantityInt = int.tryParse(quantity);
+    if (quantityInt == null) {
+      SessionManager().errorNotification(error: "La cantidad debe ser un número entero");
+      return;
+    }
+    if (quantityInt < 1) {
+      SessionManager().errorNotification(error: "La cantidad debe ser al menos 1");
       return;
     }
 
-    Item item = Item(
+    final item = Item(
       nombre: name,
       description: description,
-      link: link,
+      link: data.link.trim(),
       quantity: quantityInt,
       marca: brand,
-      categories: categories,
+      categories: data.categories,
       quantityOnLoan: 0,
       serialNumber: serialNumber,
     );
 
+    final pass = await SessionManager().confirmNotification(
+        message: 'Se registrará el equipo "$name" con $quantityInt '
+            '${quantityInt == 1 ? 'unidad' : 'unidades'}.');
+    if (!pass) return;
 
-    final pass = await SessionManager().confirmNotification(message: "Confirmar la creación de item");
-    var res = await item.create();
-    if(imageBytes != null){
-      await SessionManager.inventory.uploadImage(item, imageBytes, 'png');
+    final res = await item.create();
+    // Sin equipo creado no hay a qué subirle la imagen.
+    if (res == null) return;
+    if (data.imageBytes != null) {
+      await SessionManager.inventory
+          .uploadImage(item, data.imageBytes!, data.imageExtension ?? 'png');
     }
-    if (res != null) {
-      widget.manager?.removePage();
-    }
+    widget.manager?.removePage();
   }
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-          slivers: [
-            SliverList.list(
-              children: [
-                const BannerWidget(
-                  imageUrl: null,
-                  title: "Registrar item",
-                  subtitle: "",
-                  description: "",
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: CreateItemForm(
-                    onFormSubmit: _createItem,
-                  ),
-                ),
-              ],
-            ),
-          ]
-        );
-
+    final compact = AppBreakpoints.isCompact(context);
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(compact ? AppSpacing.lg : AppSpacing.xxl),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const PageHeader(
+                icon: Icons.add,
+                title: 'Nuevo equipo',
+                subtitle: 'Registre un equipo del laboratorio para que se pueda prestar.',
+              ),
+              CreateItemForm(
+                onFormSubmit: _createItem,
+                onCancel: () => widget.manager?.removePage(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

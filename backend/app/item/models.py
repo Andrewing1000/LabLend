@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 def item_image_file_path(instance, filename):
     """Generate file path for new image"""
     ext = os.path.splitext(filename)[1]
-    filename = f'{uuid.uuid4}{ext}'
+    filename = f'{uuid.uuid4()}{ext}'
 
     return os.path.join('uploads', 'item', filename)
 
