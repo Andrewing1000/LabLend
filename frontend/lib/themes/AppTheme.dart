@@ -1,31 +1,106 @@
 import 'package:flutter/material.dart';
 
-/// Paleta única de la aplicación. Los widgets deben tomar sus colores de aquí
-/// (o de Theme.of(context)) en lugar de escribir Colors.xxx a mano.
+/// Colores de un modo (noche o día). Los dos modos usan los mismos nombres,
+/// así cada pantalla se adapta sola al cambiar de modo.
+class AppPalette {
+  final Brightness brightness;
+  final Color background;
+  final Color surface;
+  final Color surfaceHigh;
+  final Color surfaceHighest;
+  final Color border;
+  final Color primary;
+  final Color onPrimary;
+  final Color primaryMuted;
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+
+  const AppPalette({
+    required this.brightness,
+    required this.background,
+    required this.surface,
+    required this.surfaceHigh,
+    required this.surfaceHighest,
+    required this.border,
+    required this.primary,
+    required this.onPrimary,
+    required this.primaryMuted,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+  });
+
+  /// Noche: neutros cálidos casi negros; las diferencias entre fondos son
+  /// pequeñas a propósito, la jerarquía la dan el texto y el espacio.
+  static const night = AppPalette(
+    brightness: Brightness.dark,
+    background: Color(0xFF0B0B0B),
+    surface: Color(0xFF141414),
+    surfaceHigh: Color(0xFF1B1B1B),
+    surfaceHighest: Color(0xFF242424),
+    border: Color(0xFF2C2C2C),
+    primary: Color(0xFF7FA6D9),
+    onPrimary: Color(0xFF0E1116),
+    primaryMuted: Color(0xFF34465E),
+    success: Color(0xFF8FB59A),
+    warning: Color(0xFFCFAE79),
+    error: Color(0xFFD08B85),
+    textPrimary: Color(0xFFECECEC),
+    textSecondary: Color(0xFFA6A6A6),
+    textMuted: Color(0xFF808080),
+  );
+
+  /// Día: papel cálido en lugar de blanco puro, tinta casi negra y los
+  /// mismos acentos un poco más oscuros para que se lean sobre fondo claro.
+  static const day = AppPalette(
+    brightness: Brightness.light,
+    background: Color(0xFFF2F0EB),
+    surface: Color(0xFFF8F7F3),
+    surfaceHigh: Color(0xFFFFFFFF),
+    surfaceHighest: Color(0xFFEAE7E0),
+    border: Color(0xFFDDD9D1),
+    primary: Color(0xFF3C679E),
+    onPrimary: Color(0xFFFFFFFF),
+    primaryMuted: Color(0xFFD6E0EC),
+    success: Color(0xFF4F7E5C),
+    warning: Color(0xFF9A7334),
+    error: Color(0xFFA9554F),
+    textPrimary: Color(0xFF1D1C1A),
+    textSecondary: Color(0xFF5C5953),
+    textMuted: Color(0xFF85817A),
+  );
+}
+
+/// Colores del modo actual. Los widgets los toman de aquí (o de
+/// Theme.of(context)) en lugar de escribir Colors.xxx a mano.
 class AppColors {
-  // Neutros cálidos, del más profundo al más elevado. Las diferencias son
-  // pequeñas a propósito: la jerarquía la dan el texto y el espacio.
-  static const Color background = Color(0xFF0B0B0B);
-  static const Color surface = Color(0xFF141414);
-  static const Color surfaceHigh = Color(0xFF1B1B1B);
-  static const Color surfaceHighest = Color(0xFF242424);
-  static const Color border = Color(0xFF2C2C2C);
+  static AppPalette current = AppPalette.night;
 
-  // Acento: un azul apagado que se usa poco (acción principal, selección).
-  static const Color primary = Color(0xFF7FA6D9);
-  static const Color onPrimary = Color(0xFF0E1116);
-  // Azul más oscuro para superficies grandes, donde el acento cansa
-  static const Color primaryMuted = Color(0xFF34465E);
+  static Color get background => current.background;
+  static Color get surface => current.surface;
+  static Color get surfaceHigh => current.surfaceHigh;
+  static Color get surfaceHighest => current.surfaceHighest;
+  static Color get border => current.border;
+  static Color get primary => current.primary;
+  static Color get onPrimary => current.onPrimary;
+  static Color get primaryMuted => current.primaryMuted;
+  static Color get success => current.success;
+  static Color get warning => current.warning;
+  static Color get error => current.error;
+  static Color get textPrimary => current.textPrimary;
+  static Color get textSecondary => current.textSecondary;
+  static Color get textMuted => current.textMuted;
 
-  // Estados, desaturados: informan sin llamar la atención.
-  static const Color success = Color(0xFF8FB59A);
-  static const Color warning = Color(0xFFCFAE79);
-  static const Color error = Color(0xFFD08B85);
-
-  // Texto: blanco roto en lugar de blanco puro.
-  static const Color textPrimary = Color(0xFFECECEC);
-  static const Color textSecondary = Color(0xFFA6A6A6);
-  static const Color textMuted = Color(0xFF808080);
+  /// Texto e íconos sobre fotos (la portada): siempre claros, en los dos
+  /// modos, porque la foto lleva un velo oscuro.
+  static const Color onImage = Color(0xFFF4F4F2);
 }
 
 /// Escala de espaciado (múltiplos de 4).
@@ -65,160 +140,169 @@ class AppBreakpoints {
 class AppTheme {
   static const String _font = 'Metropolis';
 
-  static final ColorScheme _colorScheme = ColorScheme.fromSeed(
-    seedColor: AppColors.primary,
-    brightness: Brightness.dark,
-  ).copyWith(
-    primary: AppColors.primary,
-    onPrimary: AppColors.onPrimary,
-    secondary: AppColors.primary,
-    onSecondary: AppColors.onPrimary,
-    error: AppColors.error,
-    onError: AppColors.textPrimary,
-    surface: AppColors.surface,
-    onSurface: AppColors.textPrimary,
-    onSurfaceVariant: AppColors.textSecondary,
-    surfaceContainerLowest: AppColors.background,
-    surfaceContainerLow: AppColors.surface,
-    surfaceContainer: AppColors.surfaceHigh,
-    surfaceContainerHigh: AppColors.surfaceHigh,
-    surfaceContainerHighest: AppColors.surfaceHighest,
-    outline: AppColors.border,
-    outlineVariant: AppColors.border,
-  );
+  /// Tema del modo actual (se vuelve a construir al cambiar de modo).
+  static ThemeData get darkTheme => build();
 
-  // Con la fuente puesta en cada estilo: los botones y campos los usan
-  // directamente y, sin ella, caían en Roboto.
-  static final TextTheme _textTheme = const TextTheme(
-    headlineLarge: TextStyle(fontWeight: FontWeight.w900, fontSize: 40, color: AppColors.textPrimary),
-    titleLarge: TextStyle(fontWeight: FontWeight.w700, fontSize: 32, color: AppColors.textPrimary),
-    titleMedium: TextStyle(fontWeight: FontWeight.w700, fontSize: 25, color: AppColors.textPrimary),
-    titleSmall: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: AppColors.textPrimary),
+  static ThemeData build() {
+    final p = AppColors.current;
 
-    bodyLarge: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: AppColors.textPrimary),
-    bodyMedium: TextStyle(fontWeight: FontWeight.w300, fontSize: 14, color: AppColors.textPrimary),
-    bodySmall: TextStyle(fontWeight: FontWeight.w300, fontSize: 12, color: AppColors.textSecondary),
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: p.primary,
+      brightness: p.brightness,
+    ).copyWith(
+      primary: p.primary,
+      onPrimary: p.onPrimary,
+      secondary: p.primary,
+      onSecondary: p.onPrimary,
+      error: p.error,
+      onError: p.surfaceHigh,
+      surface: p.surface,
+      onSurface: p.textPrimary,
+      onSurfaceVariant: p.textSecondary,
+      surfaceContainerLowest: p.background,
+      surfaceContainerLow: p.surface,
+      surfaceContainer: p.surfaceHigh,
+      surfaceContainerHigh: p.surfaceHigh,
+      surfaceContainerHighest: p.surfaceHighest,
+      outline: p.border,
+      outlineVariant: p.border,
+    );
 
-    labelLarge: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary),
-    labelMedium: TextStyle(fontWeight: FontWeight.w300, fontSize: 14, color: AppColors.textMuted),
-    labelSmall: TextStyle(fontWeight: FontWeight.w500, fontSize: 12, color: AppColors.textMuted),
-  ).apply(fontFamily: _font);
+    // Con la fuente puesta en cada estilo: los botones y campos los usan
+    // directamente y, sin ella, caían en Roboto.
+    final textTheme = TextTheme(
+      headlineLarge: TextStyle(fontWeight: FontWeight.w900, fontSize: 40, color: p.textPrimary),
+      titleLarge: TextStyle(fontWeight: FontWeight.w700, fontSize: 32, color: p.textPrimary),
+      titleMedium: TextStyle(fontWeight: FontWeight.w700, fontSize: 25, color: p.textPrimary),
+      titleSmall: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: p.textPrimary),
+      bodyLarge: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: p.textPrimary),
+      bodyMedium: TextStyle(fontWeight: FontWeight.w300, fontSize: 14, color: p.textPrimary),
+      bodySmall: TextStyle(fontWeight: FontWeight.w300, fontSize: 12, color: p.textSecondary),
+      labelLarge: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: p.textPrimary),
+      labelMedium: TextStyle(fontWeight: FontWeight.w300, fontSize: 14, color: p.textMuted),
+      labelSmall: TextStyle(fontWeight: FontWeight.w500, fontSize: 12, color: p.textMuted),
+    ).apply(fontFamily: _font);
 
-  static final RoundedRectangleBorder _buttonShape =
-      RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md));
+    final buttonShape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md));
+    const buttonPadding =
+        EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md);
 
-  static const EdgeInsets _buttonPadding =
-      EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md);
+    OutlineInputBorder inputBorder(Color color, [double width = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderSide: BorderSide(color: color, width: width),
+        );
 
-  static OutlineInputBorder _inputBorder(Color color, [double width = 1]) =>
-      OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        borderSide: BorderSide(color: color, width: width),
-      );
-
-  static final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: _colorScheme,
-    primaryColor: AppColors.primary,
-    scaffoldBackgroundColor: AppColors.background,
-    canvasColor: AppColors.surface,
-    fontFamily: _font,
-    textTheme: _textTheme,
-
-    iconTheme: const IconThemeData(color: AppColors.textPrimary),
-    dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
-    progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: AppColors.primary,
-      linearTrackColor: AppColors.surfaceHighest,
-    ),
-
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        disabledBackgroundColor: AppColors.surfaceHighest,
-        disabledForegroundColor: AppColors.textMuted,
+    return ThemeData(
+      useMaterial3: true,
+      brightness: p.brightness,
+      colorScheme: colorScheme,
+      primaryColor: p.primary,
+      scaffoldBackgroundColor: p.background,
+      canvasColor: p.surface,
+      fontFamily: _font,
+      textTheme: textTheme,
+      iconTheme: IconThemeData(color: p.textPrimary),
+      dividerTheme: DividerThemeData(color: p.border, thickness: 1, space: 1),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: p.primary,
+        linearTrackColor: p.surfaceHighest,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: p.primary,
+          foregroundColor: p.onPrimary,
+          disabledBackgroundColor: p.surfaceHighest,
+          disabledForegroundColor: p.textMuted,
+          elevation: 0,
+          padding: buttonPadding,
+          shape: buttonShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: p.primary,
+          foregroundColor: p.onPrimary,
+          padding: buttonPadding,
+          shape: buttonShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: p.textPrimary,
+          side: BorderSide(color: p.border),
+          padding: buttonPadding,
+          shape: buttonShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: p.primary,
+          shape: buttonShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: p.surfaceHighest,
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        hintStyle: textTheme.labelMedium,
+        labelStyle: textTheme.labelMedium,
+        floatingLabelStyle: TextStyle(color: p.primary),
+        errorStyle: TextStyle(color: p.error, fontSize: 12),
+        border: inputBorder(p.border),
+        enabledBorder: inputBorder(p.border),
+        focusedBorder: inputBorder(p.primary, 1.5),
+        errorBorder: inputBorder(p.error),
+        focusedErrorBorder: inputBorder(p.error, 1.5),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: p.surfaceHigh,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md + 2)),
+        titleTextStyle: textTheme.titleSmall,
+        contentTextStyle: textTheme.bodyLarge,
+      ),
+      cardTheme: CardThemeData(
+        color: p.surfaceHigh,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        padding: _buttonPadding,
-        shape: _buttonShape,
-        textStyle: _textTheme.labelLarge,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
       ),
-    ),
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        padding: _buttonPadding,
-        shape: _buttonShape,
-        textStyle: _textTheme.labelLarge,
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: p.surfaceHighest,
+        contentTextStyle: textTheme.bodyLarge,
+        actionTextColor: p.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
       ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textPrimary,
-        side: const BorderSide(color: AppColors.border),
-        padding: _buttonPadding,
-        shape: _buttonShape,
-        textStyle: _textTheme.labelLarge,
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: p.textPrimary,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        textStyle: TextStyle(fontFamily: _font, fontSize: 12, color: p.surfaceHigh),
+        waitDuration: const Duration(milliseconds: 400),
       ),
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        shape: _buttonShape,
-        textStyle: _textTheme.labelLarge,
+      popupMenuTheme: PopupMenuThemeData(
+        color: p.surfaceHigh,
+        surfaceTintColor: Colors.transparent,
+        textStyle: textTheme.bodyMedium,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
       ),
-    ),
-
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: AppColors.surfaceHighest,
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-      hintStyle: _textTheme.labelMedium,
-      labelStyle: _textTheme.labelMedium,
-      floatingLabelStyle: const TextStyle(color: AppColors.primary),
-      errorStyle: const TextStyle(color: AppColors.error, fontSize: 12),
-      border: _inputBorder(AppColors.border),
-      enabledBorder: _inputBorder(AppColors.border),
-      focusedBorder: _inputBorder(AppColors.primary, 2),
-      errorBorder: _inputBorder(AppColors.error),
-      focusedErrorBorder: _inputBorder(AppColors.error, 2),
-    ),
-
-    dialogTheme: DialogThemeData(
-      backgroundColor: AppColors.surfaceHigh,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-      titleTextStyle: _textTheme.titleSmall,
-      contentTextStyle: _textTheme.bodyLarge,
-    ),
-    cardTheme: CardThemeData(
-      color: AppColors.surfaceHigh,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-    ),
-    snackBarTheme: SnackBarThemeData(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.surfaceHighest,
-      contentTextStyle: _textTheme.bodyLarge,
-      actionTextColor: AppColors.primary,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-    ),
-    tooltipTheme: TooltipThemeData(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceHighest,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: p.surfaceHigh,
+        surfaceTintColor: Colors.transparent,
       ),
-      textStyle: const TextStyle(fontFamily: _font, fontSize: 12, color: AppColors.textPrimary),
-      waitDuration: const Duration(milliseconds: 400),
-    ),
-    popupMenuTheme: PopupMenuThemeData(
-      color: AppColors.surfaceHigh,
-      surfaceTintColor: Colors.transparent,
-      textStyle: _textTheme.bodyMedium,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-    ),
-  );
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected) ? p.onPrimary : p.textMuted),
+        trackColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected) ? p.primary : p.surfaceHighest),
+      ),
+    );
+  }
 }
