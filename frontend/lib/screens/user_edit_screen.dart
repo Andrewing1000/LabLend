@@ -3,10 +3,11 @@ import 'package:frontend/models/Permissions.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/password_link_dialog.dart';
 import 'package:frontend/screens/PageBase.dart';
-import 'package:frontend/widgets/banner.dart';
+import 'package:frontend/widgets/UserCard.dart';
+import 'package:frontend/widgets/app_nav.dart';
 import 'package:frontend/models/User.dart';
-//import 'package:frontend/models/User.dart';
 import 'package:frontend/models/Session.dart';
+import 'package:frontend/services/ContextMessageService.dart';
 
 import '../widgets/user_form.dart';
 
@@ -68,7 +69,7 @@ class EditUserScreenState extends State<EditUserScreen> {
     }
 
     if(noEdits){
-      SessionManager().errorNotification(error: "No se registraron cambios");
+      SessionManager().notification(notification: "No hay cambios para guardar", kind: NotificationKind.info);
       return;
     }
 
@@ -103,60 +104,132 @@ class EditUserScreenState extends State<EditUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SingleChildScrollView(
+    final user = widget.user;
+    final compact = AppBreakpoints.isCompact(context);
+    // El servidor no genera enlaces para cuentas de administrador de
+    // seguridad (D27) ni para cuentas desactivadas, y solo a quien tiene el
+    // permiso de generarlos (D17).
+    final canGenerateLink =
+        SessionManager().session.user.can(AppPermission.generarEnlaces) &&
+            !user.securityAccount &&
+            user.isActive;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(compact ? AppSpacing.lg : AppSpacing.xxl),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const BannerWidget(
-                  imageUrl: null,
-                  title: "Edición de usuarios",
-                  subtitle: "",
-                  description: ""),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: UserForm(
-                  user: widget.user,
-                  onFormSubmit: _updateUser,
-                ),
+              _EditHeader(user: user),
+              UserForm(
+                user: user,
+                onFormSubmit: _updateUser,
+                onCancel: () => widget.manager?.removePage(),
               ),
-              // Cuenta bloqueada por intentos fallidos (D23): se desbloquea
-              // cuando su dueño elige una contraseña nueva.
-              if (widget.user.isLocked)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                  child: Text(
-                    widget.user.securityAccount
-                        ? 'Cuenta bloqueada por intentos fallidos. Se '
-                            'desbloquea en el servidor con changepassword.'
-                        : 'Cuenta bloqueada por intentos fallidos. Se '
-                            'desbloquea cuando la persona elige una '
-                            'contraseña nueva con un enlace de '
-                            'restablecimiento.',
-                    style: const TextStyle(color: AppColors.warning),
+              FormSection(
+                icon: Icons.key_outlined,
+                title: 'Acceso y contraseña',
+                children: [
+                  // Cuenta bloqueada por intentos fallidos (D23): se
+                  // desbloquea cuando su dueño elige una contraseña nueva.
+                  if (user.isLocked) ...[
+                    Text(
+                      user.securityAccount
+                          ? 'Cuenta bloqueada por intentos fallidos. Se '
+                              'desbloquea en el servidor con changepassword.'
+                          : 'Cuenta bloqueada por intentos fallidos. Se '
+                              'desbloquea cuando la persona elige una '
+                              'contraseña nueva con un enlace de '
+                              'restablecimiento.',
+                      style: const TextStyle(fontSize: 13, height: 1.6, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  Text(
+                    user.activationPending
+                        ? 'La persona todavía no eligió su contraseña. Si perdió el enlace '
+                            'de activación, genere uno nuevo: el anterior deja de servir.'
+                        : 'El administrador nunca ve ni escribe contraseñas. Si la persona '
+                            'la olvidó, genere un enlace de restablecimiento: vence en 24 horas '
+                            'y sirve una sola vez.',
+                    style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.textSecondary),
                   ),
-                ),
-              // El servidor no genera enlaces para cuentas de administrador
-              // de seguridad (D27) ni para cuentas desactivadas, y solo a
-              // quien tiene el permiso de generarlos (D17).
-              if (SessionManager().session.user
-                      .can(AppPermission.generarEnlaces) &&
-                  !widget.user.securityAccount &&
-                  widget.user.isActive)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.link),
-                    label: Text(widget.user.activationPending
-                        ? 'Generar enlace de activación'
-                        : 'Generar enlace de restablecimiento'),
-                    onPressed: _createPasswordLink,
-                  ),
-                ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (canGenerateLink)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.link, size: 18),
+                        label: Text(user.activationPending
+                            ? 'Generar enlace de activación'
+                            : 'Generar enlace de restablecimiento'),
+                        onPressed: _createPasswordLink,
+                      ),
+                    )
+                  else
+                    Text(
+                      user.securityAccount
+                          ? 'Las cuentas de administrador de seguridad no reciben enlaces desde aquí.'
+                          : !user.isActive
+                              ? 'Reactive la cuenta para poder generarle un enlace.'
+                              : 'No tiene permiso para generar enlaces.',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+/// Encabezado de la edición: la persona, su código y el estado de la cuenta.
+class _EditHeader extends StatelessWidget {
+  final User user;
+  const _EditHeader({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      child: Wrap(
+        spacing: AppSpacing.lg,
+        runSpacing: AppSpacing.md,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(color: AppColors.surfaceHighest, shape: BoxShape.circle),
+                child: Text(userInitials(user),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(user.name,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                  Text(user.username,
+                      style: const TextStyle(
+                          fontFamily: 'monospace', fontSize: 13, color: AppColors.textSecondary)),
+                ],
+              ),
+            ],
+          ),
+          AccountStatusBadge(status: AccountStatus.of(user)),
+        ],
+      ),
     );
   }
 }

@@ -39,54 +39,144 @@ class RoleSelector extends StatelessWidget {
         || selected.contains(role.name);
   }
 
+  /// Por qué no se puede elegir un rol, para mostrarlo en la tarjeta.
+  String? _blockedReason(Role role) {
+    if (!enabled || _selectable(role)) return null;
+    if (existingAccount && role.isSecurity) {
+      return 'Solo se asigna al crear la cuenta';
+    }
+    return 'No se combina con roles de ${areaNames[_selectedArea] ?? 'otra área'}';
+  }
+
+  static String _readable(String name) =>
+      name.replaceAllMapped(RegExp(r'(?<=[a-záéíóúñ])(?=[A-ZÁÉÍÓÚÑ])'), (_) => ' ');
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Roles',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final role in roles)
-              FilterChip(
-                label: Text(role.name),
-                tooltip: role.description.isEmpty ? null : role.description,
-                selected: selected.contains(role.name),
-                showCheckmark: true,
-                checkmarkColor: AppColors.background,
-                selectedColor: AppColors.primary,
-                backgroundColor: AppColors.surfaceHigh,
-                disabledColor: AppColors.surfaceHigh,
-                labelStyle: TextStyle(
-                  color: selected.contains(role.name)
-                      ? AppColors.background
-                      : (_selectable(role) ? AppColors.textPrimary : AppColors.textMuted),
+    return LayoutBuilder(builder: (context, constraints) {
+      final columns = constraints.maxWidth > 560 ? 2 : 1;
+      final width = (constraints.maxWidth - AppSpacing.md * (columns - 1)) / columns;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            children: [
+              for (final role in roles)
+                SizedBox(
+                  width: width,
+                  child: _RoleOption(
+                    name: _readable(role.name),
+                    description: role.description,
+                    area: role.area,
+                    selected: selected.contains(role.name),
+                    selectable: _selectable(role),
+                    blockedReason: _blockedReason(role),
+                    onTap: () {
+                      final next = Set.of(selected);
+                      selected.contains(role.name) ? next.remove(role.name) : next.add(role.name);
+                      onChanged(next);
+                    },
+                  ),
                 ),
-                onSelected: _selectable(role)
-                    ? (value) {
-                        final next = Set.of(selected);
-                        value ? next.add(role.name) : next.remove(role.name);
-                        onChanged(next);
-                      }
-                    : null,
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  existingAccount
+                      ? 'Una cuenta no combina roles de seguridad y de laboratorio. '
+                          'Los roles de seguridad solo se asignan al crear la cuenta.'
+                      : 'Una cuenta no combina roles de seguridad y de laboratorio '
+                          '(segregación de funciones).',
+                  style: const TextStyle(fontSize: 12, height: 1.5, color: AppColors.textMuted),
+                ),
               ),
-          ],
+            ],
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _RoleOption extends StatelessWidget {
+  final String name;
+  final String description;
+  /// Área del rol, o null si todavía no tiene permisos.
+  final String? area;
+  final bool selected;
+  final bool selectable;
+  final String? blockedReason;
+  final VoidCallback onTap;
+
+  const _RoleOption({
+    required this.name,
+    required this.description,
+    required this.area,
+    required this.selected,
+    required this.selectable,
+    required this.blockedReason,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final areaLabel = areaNames[area] ?? 'Sin permisos';
+
+    return Semantics(
+      checked: selected,
+      enabled: selectable,
+      label: name,
+      child: Opacity(
+        opacity: selectable ? 1 : 0.45,
+        child: InkWell(
+          onTap: selectable ? onTap : null,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              border: Border.all(
+                color: selected ? AppColors.textSecondary : AppColors.border,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: Icon(
+                    selected ? Icons.check_box : Icons.check_box_outline_blank,
+                    size: 18,
+                    color: selected ? AppColors.textPrimary : AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name,
+                          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+                      const SizedBox(height: 2),
+                      Text(
+                        blockedReason ?? (description.isNotEmpty ? '$areaLabel · $description' : areaLabel),
+                        style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          existingAccount
-              ? 'Una cuenta no combina roles de seguridad y de laboratorio. '
-                  'Los roles de seguridad solo se asignan al crear la cuenta.'
-              : 'Una cuenta no combina roles de seguridad y de laboratorio. '
-                  'Con un rol de seguridad, el código de usuario empieza '
-                  'con adm.',
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-        ),
-      ],
+      ),
     );
   }
 }

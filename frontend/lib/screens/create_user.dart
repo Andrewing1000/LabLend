@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/Session.dart';
 import 'package:frontend/screens/PageBase.dart';
-// import 'package:frontend/models/Session.dart'; // Comentado para ver solo la vista
-import 'package:frontend/widgets/banner.dart';
+import 'package:frontend/themes/AppTheme.dart';
 import 'package:frontend/widgets/user_form.dart';
 import 'package:frontend/widgets/password_link_dialog.dart';
 
 import '../models/User.dart';
-// import 'package:frontend/models/user.dart'; // Comentado para ver solo la vista
 
 class CreateUserScreen extends PageBase{
   CreateUserScreen({super.key});
@@ -65,26 +63,70 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    final compact = AppBreakpoints.isCompact(context);
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(compact ? AppSpacing.lg : AppSpacing.xxl),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const PageHeader(
+                icon: Icons.person_add_alt_1,
+                title: 'Nuevo usuario',
+                subtitle: 'Registre a una persona del laboratorio y elija sus roles.',
+              ),
+              UserForm(
+                onFormSubmit: _createUser,
+                onCancel: () => widget.manager?.removePage(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Encabezado de las pantallas de formulario: ícono, título y una línea de
+/// ayuda.
+class PageHeader extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
+
+  const PageHeader({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      child: Row(
         children: [
-          SingleChildScrollView(
+          Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const BannerWidget(
-                    imageUrl: null,
-                    title: "Registro de usuarios",
-                    subtitle: "",
-                    description: ""),
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: UserForm(
-                    onFormSubmit: _createUser,
-                  ),
-                ),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                const SizedBox(height: AppSpacing.xs),
+                Text(subtitle,
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
               ],
             ),
           ),
+          if (trailing != null) trailing!,
         ],
+      ),
     );
   }
 }
