@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/Session.dart';
@@ -73,9 +74,11 @@ class HomePageState extends State<HomePage> {
                 _Hero(
                   compact: compact,
                   width: constraints.maxWidth,
-                  // La portada ocupa toda la pantalla al entrar.
+                  // La portada ocupa toda la pantalla al entrar. En ventanas
+                  // bajas (celular acostado) no pasa de la pantalla: si no, el
+                  // buscador quedaba debajo del menú inferior.
                   height: constraints.maxHeight.isFinite
-                      ? constraints.maxHeight.clamp(compact ? 430.0 : 560.0, double.infinity)
+                      ? constraints.maxHeight.clamp(380.0, double.infinity)
                       : (compact ? 430.0 : 560.0),
                   gutter: gutter,
                   onSearch: widget.onSearch,
@@ -179,7 +182,13 @@ class _HeroState extends State<_Hero> {
   @override
   Widget build(BuildContext context) {
     final compact = widget.compact;
-    final titleSize = compact ? 52.0 : (widget.width * 0.075).clamp(64.0, 104.0);
+    // En ventanas bajas el título (dos líneas) se achica para que el texto y
+    // el buscador entren entre la barra superior y el menú inferior.
+    final reserved = 80 + (AppBreakpoints.isWide(context) ? 80 : 120) + (compact ? 120 : 150);
+    final titleSize = math.max(
+        28.0,
+        math.min(compact ? 52.0 : (widget.width * 0.075).clamp(64.0, 104.0),
+            (widget.height - reserved) / 2));
 
     return SizedBox(
       height: widget.height,
@@ -241,7 +250,7 @@ class _HeroState extends State<_Hero> {
                 // (escritorio) o el menú inferior (celular).
                 80,
                 widget.gutter,
-                AppBreakpoints.isWide(context) ? 80 : 112),
+                AppBreakpoints.isWide(context) ? 80 : 120),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,

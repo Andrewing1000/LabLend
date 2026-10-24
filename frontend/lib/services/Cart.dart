@@ -52,6 +52,7 @@ class CheckoutCart with ChangeNotifier {
 
     final created = await SessionManager.loanService.createLoan(newLoan);
     if (created == null) return false;
+    SessionManager.inventory.markStockChanged();
     clearCart();
     return true;
   }

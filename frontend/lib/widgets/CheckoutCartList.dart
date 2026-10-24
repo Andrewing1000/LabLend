@@ -38,7 +38,9 @@ class _CheckoutCartListState extends State<CheckoutCartList> {
 
   Future<void> _confirm(CheckoutCart cart) async {
     setState(() => saving = true);
-    final ok = await cart.confirmLoan(SessionManager().session.user, DateTime.now(), returnDate);
+    // Se devuelve hasta el final del día elegido.
+    final until = DateTime(returnDate.year, returnDate.month, returnDate.day, 23, 59, 59);
+    final ok = await cart.confirmLoan(SessionManager().session.user, DateTime.now(), until);
     if (!mounted) return;
     setState(() => saving = false);
     // Solo se cierra si el servidor registró el préstamo; si no, el aviso

@@ -30,6 +30,7 @@ class _ReviewloanState extends State<Reviewloan> {
     // Solo se cierra si el servidor lo registró.
     if (updated != null) {
       PrestamoItemCard.clearCache();
+      SessionManager.inventory.markStockChanged();
       Navigator.of(context).pop();
     }
   }

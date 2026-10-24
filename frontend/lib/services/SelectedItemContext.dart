@@ -12,9 +12,9 @@ class SelectedItemContext extends ChangeNotifier{
   void setItem(Item item){
     unsetItem();
     _item = item;
-    item.addListener((){
-      notifyListeners();
-    });
+    // El mismo callback que quita unsetItem; con una función anónima el
+    // equipo anterior seguía avisando.
+    item.addListener(notifyListeners);
     notifyListeners();
   }
   void unsetItem(){

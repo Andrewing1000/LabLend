@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint, ValueNotifier;
 import 'dart:typed_data';
 import 'Permissions.dart';
 import 'Item.dart';
@@ -11,6 +11,18 @@ class Inventory {
   var requestHandler = SessionManager.httpHandler;
 
   Map<int, Item> _cacheItems = {};
+
+  /// Equipos en memoria cuyas unidades disponibles pueden haber cambiado.
+  final Set<int> _stale = {};
+
+  /// Cambia después de prestar o devolver: las listas de equipos lo escuchan
+  /// para volver a pedir las unidades disponibles.
+  static final ValueNotifier<int> stockChanged = ValueNotifier(0);
+
+  void markStockChanged() {
+    _stale.addAll(_cacheItems.keys);
+    stockChanged.value++;
+  }
 
   Future<List<Brand>> getBrands() async {
     if (!await isReady()) {
@@ -81,22 +93,22 @@ class Inventory {
     }
 
 
-    Map<int, Item> newDict = {};
+    // Cada equipo es siempre el mismo objeto: al actualizarlo, el panel de
+    // detalle y el carrito que lo muestran se redibujan solos.
+    final List<Item> result = [];
     for (var itemData in response.data) {
       int itemId = itemData['id'];
 
       if(_cacheItems.containsKey(itemId)){
         _cacheItems[itemId]!.updateItem(Item.fromJson(itemData));
-        newDict[itemId] = _cacheItems[itemId]!;
       }
       else{
-        newDict[itemId] = Item.fromJson(itemData);
+        _cacheItems[itemId] = Item.fromJson(itemData);
       }
-
-
+      _stale.remove(itemId);
+      result.add(_cacheItems[itemId]!);
     }
-    _cacheItems = newDict;
-    return _cacheItems.values.toList();
+    return result;
   }
 
   Future<Brand?> createBrand(Brand brand) async {
@@ -330,13 +342,18 @@ class Inventory {
       return null;
     }
 
-    if(_cacheItems.containsKey(id)){
+    if(_cacheItems.containsKey(id) && !_stale.contains(id)){
       return _cacheItems[id];
     }
 
     try {
       var response = await requestHandler.getRequest('/item/list/items/$id/');
       var item = Item.fromJson(response.data);
+      _stale.remove(id);
+      if (_cacheItems.containsKey(id)) {
+        _cacheItems[id]!.updateItem(item);
+        return _cacheItems[id];
+      }
       _cacheItems[id] = item;
       return item;
     } on DioException catch (e) {

@@ -35,8 +35,10 @@ class Loan with ChangeNotifier {
     return {
       'id': id,
       'usuario': usuario,
-      'fecha_prestamo': fechaPrestamo.toIso8601String(),
-      'fecha_devolucion': fechaDevolucion.toIso8601String(),
+      // En UTC: sin zona horaria el servidor la tomaba como UTC y la fecha
+      // se corría 4 horas (la devolución aparecía un día antes).
+      'fecha_prestamo': fechaPrestamo.toUtc().toIso8601String(),
+      'fecha_devolucion': fechaDevolucion.toUtc().toIso8601String(),
       'devuelto': devuelto,
       'items': items.map((i) => i.toJson()).toList(),
     };
